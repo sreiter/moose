@@ -36,6 +36,10 @@ void JSONArchive::parse_file (const char* filename)
 
 void JSONArchive::begin_read (const char* name)
 {
+	if(m_iterators.empty())
+		throw runtime_error (string("End of file reached. Couldn't read field '")
+		                     .append(name).append("'"));
+
 	m_actMember = *m_iterators.top().first;
 	mem_t& m = m_actMember;
 	++m_iterators.top().first;

@@ -5,6 +5,8 @@
 #ifndef __H__moose_archive
 #define __H__moose_archive
 
+#include <iostream>
+
 #include <map>
 #include <memory>
 #include <string>
@@ -46,12 +48,14 @@ protected:
 	template <class T>
 	void read (const char* name, T& value)
 	{
+	///todo: check for POD types and raise an error (->unsupported POD type)
 		Serialize (*this, value);
 	}
 
 	template <class T>
 	void read (const char* name, std::shared_ptr<T>& sp)
 	{
+		std::cout << "Creating instance of type " << get_type_name() << std::endl;
 		if(!sp){
 			sp = std::shared_ptr<T>(ObjectFactory::create<T>(get_type_name()));
 		}
@@ -83,8 +87,11 @@ protected:
 	virtual void read (const char* name, char& val);
 	virtual void read (const char* name, unsigned char& val);
 	virtual void read (const char* name, int& val);
+	virtual void read (const char* name, long int& val);
+	virtual void read (const char* name, long long int& val);
 	virtual void read (const char* name, unsigned int& val);
-	virtual void read (const char* name, std::size_t& val);
+	virtual void read (const char* name, unsigned long int& val);
+	virtual void read (const char* name, unsigned long long int& val);
 	virtual void read (const char* name, float& val);
 	virtual void read (const char* name, double& val) = 0;
 /** \} */

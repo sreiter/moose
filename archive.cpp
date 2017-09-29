@@ -23,10 +23,19 @@ void IArchive::read (const char* name, unsigned char& val)
 void IArchive::read (const char* name, int& val)
 {read_double (name, val);}
 
+void IArchive::read (const char* name, long int& val)
+{read_double (name, val);}
+
+void IArchive::read (const char* name, long long int& val)
+{read_double (name, val);}
+
 void IArchive::read (const char* name, unsigned int& val)
 {read_double (name, val);}
 
-void IArchive::read (const char* name, std::size_t& val)
+void IArchive::read (const char* name, unsigned long int& val)
+{read_double (name, val);}
+
+void IArchive::read (const char* name, unsigned long long int& val)
 {read_double (name, val);}
 
 void IArchive::read (const char* name, float& val)

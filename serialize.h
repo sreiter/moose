@@ -5,6 +5,10 @@
 #ifndef __H__moose_serialize
 #define __H__moose_serialize
 
+#include <string>
+#include <stdexcept>
+#include <typeinfo>
+
 namespace moose{
 
 class IArchive;
@@ -48,6 +52,10 @@ template <class T>
 typename std::enable_if<!has_serialize<T, void(IArchive&)>::value >::type
 Serialize(IArchive& ar, T& val)
 {
+//todo: Make this a compile-time error.
+    using namespace std;
+    throw runtime_error(string("No serialization method exists for '")
+                        .append(typeid(T).name()).append("'"));
 }
 
 }//	end of namespace moose
