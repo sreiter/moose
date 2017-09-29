@@ -23,14 +23,7 @@ public:
 	template <class T>
 	void operator () (T& value)
 	{
-		if(m_reading){
-			begin_read ("__noname");
-			read ("__noname", value);
-			end_read ("__noname");
-		}
-		else{
-			// write (name, value);
-		}
+		(*this)("__noname", value);
 	}
 
 	template <class T>
@@ -62,16 +55,16 @@ protected:
 		if(!sp){
 			sp = std::shared_ptr<T>(ObjectFactory::create<T>(get_type_name()));
 		}
-		Serialize (*this, *sp);
+		ObjectFactory::call_serialize (get_type_name(), *this, sp.get());
 	}
 
-		template <class T>
+	template <class T>
 	void read (const char* name, std::unique_ptr<T>& up)
 	{
 		if(!up){
 			up = std::unique_ptr<T>(ObjectFactory::create<T>(get_type_name()));
 		}
-		Serialize (*this, *up);
+		ObjectFactory::call_serialize (get_type_name(), *this, up.get());
 	}
 
 	template <class T>
@@ -79,7 +72,7 @@ protected:
 	{
 		if(!p)
 			p = ObjectFactory::create<T>(get_type_name());
-		Serialize (*this, *p);
+		ObjectFactory::call_serialize (get_type_name(), *this, p);
 	}
 
 	virtual std::string get_type_name () = 0;
@@ -105,13 +98,6 @@ private:
 
 	bool m_reading;
 };
-
-
-template <class T>
-void Serialize(IArchive& ar, T& val)
-{
-	val.serialize (ar);
-}
 
 }//	end of namespace moose
 
