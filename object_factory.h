@@ -14,7 +14,7 @@
 
 namespace moose{
 
-class IArchive;
+class Archive;
 
 
 class ObjectFactory {
@@ -68,7 +68,7 @@ public:
 	}
 
 	template <class TBase> static
-	void call_serialize (const std::string& name, IArchive& ar, TBase* b)
+	void call_serialize (const std::string& name, Archive& ar, TBase* b)
 	{
 		using namespace std;
 		entry_map_t::iterator i = entry_map().find(name);
@@ -84,7 +84,7 @@ public:
 
 private:
 	typedef void* (*create_fnc_t)();
-	typedef void (*serialize_fnc_t)(IArchive&, void*);
+	typedef void (*serialize_fnc_t)(Archive&, void*);
 
 	struct Entry {
 		create_fnc_t				createFnc;
@@ -97,7 +97,7 @@ private:
 	typedef std::map<std::size_t, std::string>	typename_map_t;
 
 	template <class T> static void* CreateFunc ()	{return new T;}
-	template <class T> static void CallSerialize (IArchive& ar, void* val)
+	template <class T> static void CallSerialize (Archive& ar, void* val)
 	{
 		Serialize (ar, *reinterpret_cast<T*>(val));
 	}

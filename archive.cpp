@@ -7,38 +7,38 @@
 namespace moose{
 
 template <class T>
-void IArchive::read_double(const char* name, T& val)
+void Archive::read_double(const char* name, T& val)
 {
 	double d;
 	read (name, d);
 	val = (T)d;
 }
 
-void IArchive::read (const char* name, char& val)
+void Archive::read (const char* name, char& val)
 {read_double (name, val);}
 
-void IArchive::read (const char* name, unsigned char& val)
+void Archive::read (const char* name, unsigned char& val)
 {read_double (name, val);}
 
-void IArchive::read (const char* name, int& val)
+void Archive::read (const char* name, int& val)
 {read_double (name, val);}
 
-void IArchive::read (const char* name, long int& val)
+void Archive::read (const char* name, long int& val)
 {read_double (name, val);}
 
-void IArchive::read (const char* name, long long int& val)
+void Archive::read (const char* name, long long int& val)
 {read_double (name, val);}
 
-void IArchive::read (const char* name, unsigned int& val)
+void Archive::read (const char* name, unsigned int& val)
 {read_double (name, val);}
 
-void IArchive::read (const char* name, unsigned long int& val)
+void Archive::read (const char* name, unsigned long int& val)
 {read_double (name, val);}
 
-void IArchive::read (const char* name, unsigned long long int& val)
+void Archive::read (const char* name, unsigned long long int& val)
 {read_double (name, val);}
 
-void IArchive::read (const char* name, float& val)
+void Archive::read (const char* name, float& val)
 {read_double (name, val);}
 
 

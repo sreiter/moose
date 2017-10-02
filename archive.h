@@ -14,13 +14,13 @@
 
 namespace moose{
 
-class IArchive {
+class Archive {
 public:
-	IArchive (bool reading) :
+	Archive (bool reading) :
 		m_reading (reading)
 	{}
 
-	virtual ~IArchive ()	{}
+	virtual ~Archive ()	{}
 
 	template <class T>
 	void operator () (T& value)

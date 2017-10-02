@@ -11,7 +11,7 @@
 using namespace std;
 
 namespace moose{
-JSONArchive::JSONArchive () : IArchive (true)
+JSONArchive::JSONArchive () : Archive (true)
 {}
 
 JSONArchive::doc_t& JSONArchive::new_document ()

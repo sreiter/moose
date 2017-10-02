@@ -11,7 +11,7 @@
 
 namespace moose{
 
-class IArchive;
+class Archive;
 
 template<typename, typename T>
 struct has_serialize {
@@ -41,16 +41,16 @@ public:
 };
 
 template <class T>
-typename std::enable_if<has_serialize<T, void(IArchive&)>::value >::type
-Serialize(IArchive& ar, T& val)
+typename std::enable_if<has_serialize<T, void(Archive&)>::value >::type
+Serialize(Archive& ar, T& val)
 {
 	val.serialize (ar);
 }
 
 
 template <class T>
-typename std::enable_if<!has_serialize<T, void(IArchive&)>::value >::type
-Serialize(IArchive& ar, T& val)
+typename std::enable_if<!has_serialize<T, void(Archive&)>::value >::type
+Serialize(Archive& ar, T& val)
 {
 //todo: Make this a compile-time error.
     using namespace std;

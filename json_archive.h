@@ -13,7 +13,7 @@
 
 namespace moose{
 
-class JSONArchive : public IArchive {
+class JSONArchive : public Archive {
 public:
 	JSONArchive ();
 	virtual ~JSONArchive ()	{}
