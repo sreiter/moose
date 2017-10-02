@@ -178,16 +178,10 @@ private:
 
 
 
-template <class T>
+template <class... T>
 void RegisterType (std::string name)
 {
-	ObjectFactory::register_type<T>(name);
-}
-
-template <class T, class TBase1, class... TBaseOthers>
-void RegisterType (std::string name)
-{
-	ObjectFactory::register_type<T, TBase1, TBaseOthers...>(name);
+	ObjectFactory::register_type<T...>(name);
 }
 
 
