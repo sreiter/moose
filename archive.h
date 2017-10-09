@@ -45,6 +45,10 @@ protected:
 	virtual void begin_read (const char* name) {};
 	virtual void end_read (const char* name) {};
 
+	virtual void begin_array_read (const char* name) {};
+	virtual bool array_has_next (const char* name) = 0;
+	virtual void end_array_read (const char* name) {};
+
 	template <class T>
 	void read (const char* name, T& value)
 	{
@@ -77,6 +81,19 @@ protected:
 		if(!p)
 			p = ObjectFactory::create<T>(get_type_name());
 		ObjectFactory::call_serialize (get_type_name(), *this, p);
+	}
+
+
+	template <class T>
+	void read (const char* name, std::vector<T>& value)
+	{
+		begin_array_read (name);
+		while(array_has_next (name)) {
+			T tmpVal;
+			(*this) (tmpVal);
+			value.push_back(tmpVal);
+		}
+		end_array_read (name);
 	}
 
 	virtual std::string get_type_name () = 0;

@@ -24,6 +24,10 @@ protected:
 	virtual void begin_read (const char* name);
 	virtual void end_read (const char* name);
 
+	virtual void begin_array_read (const char* name);
+	virtual bool array_has_next (const char* name);
+	virtual void end_array_read (const char* name);
+
 	virtual std::string get_type_name ();
 	
 	virtual void read (const char* name, double& val);
@@ -40,7 +44,7 @@ private:
 	doc_t& new_document ();
 
 	std::unique_ptr<doc_t> 	m_doc;
-	mem_t					m_actMember;
+	std::stack<iter_t>		m_members;
 	std::stack<iter_pair_t>	m_iterators;
 };
 

@@ -40,32 +40,62 @@ void JSONArchive::begin_read (const char* name)
 		throw runtime_error (string("End of file reached. Couldn't read field '")
 		                     .append(name).append("'"));
 
-	m_actMember = *m_iterators.top().first;
-	mem_t& m = m_actMember;
-	++m_iterators.top().first;
+	m_members.push(m_iterators.top().first);
+	mem_t& m = *m_members.top();
 	
 	iter_pair_t iters;
-	if(m.value.IsObject()){
+	if(m.value.IsObject() || m.value.IsArray()){
 		m_iterators.push(iter_pair_t(m.value.MemberBegin(), m.value.MemberEnd()));
 	}
-
-	while(!m_iterators.empty() && m_iterators.top().first == m_iterators.top().second)
-		m_iterators.pop();
 }
+
+void JSONArchive::begin_array_read (const char* name)
+{
+}
+
+bool JSONArchive::array_has_next (const char* name)
+{
+	return m_iterators.top().first != m_iterators.top().second;
+}
+
+void JSONArchive::end_array_read (const char* name)
+{
+}
+
 
 
 void JSONArchive::end_read (const char* name)
 {
+	if(m_iterators.empty() || m_members.empty())
+		throw runtime_error (string("JSONArchive::end_read called on empty stack ")
+		                     .append("for entry '").append(name).append("'"));
+
+	mem_t& m = *m_members.top();
+
+	if(m.value.IsObject() || m.value.IsArray()){
+		m_iterators.pop();
+	}
+	
+	m_members.pop();
+
+	if(!m_iterators.empty())
+		++m_iterators.top().first;
 }
 
 std::string JSONArchive::get_type_name ()
 {
-	return m_actMember.name.GetString();
+	if(m_members.empty())
+		throw runtime_error (string("JSONArchive::read: member stack empty!"));
+
+	return m_members.top()->name.GetString();
 }
 
 void JSONArchive::read (const char* name, double& val)
 {
-	mem_t& m = m_actMember;
+	if(m_members.empty())
+		throw runtime_error (string("JSONArchive::read: member stack empty!"));
+
+	mem_t& m = *m_members.top();
 	cout << "<dbg> reading field '" << m.name.GetString() << "' as double" << endl;
 	val = m.value.GetDouble();
 }
@@ -73,7 +103,10 @@ void JSONArchive::read (const char* name, double& val)
 
 void JSONArchive::read (const char* name, std::string& val)
 {
-	mem_t& m = m_actMember;
+	if(m_members.empty())
+		throw runtime_error (string("JSONArchive::read: member stack empty!"));
+
+	mem_t& m = *m_members.top();
 	cout << "<dbg> reading field '" << m.name.GetString() << "' as string" << endl;
 	val = m.value.GetString();
 }
