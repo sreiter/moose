@@ -33,8 +33,9 @@ protected:
 	virtual void read (const char* name, double& val);
 	virtual void read (const char* name, std::string& val);
 
-
 private:
+	void eat_keywords ();
+	
 	typedef rapidjson::Value val_t;
 	typedef val_t::Member mem_t;
 	typedef rapidjson::Document	doc_t;

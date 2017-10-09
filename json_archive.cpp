@@ -32,6 +32,7 @@ void JSONArchive::parse_file (const char* filename)
 		throw runtime_error (string("JSON Parse error in file: ").append(filename));
 
 	m_iterators.push (make_pair(d.MemberBegin(), d.MemberEnd()));
+	eat_keywords ();
 }
 
 void JSONArchive::begin_read (const char* name)
@@ -46,6 +47,7 @@ void JSONArchive::begin_read (const char* name)
 	iter_pair_t iters;
 	if(m.value.IsObject() || m.value.IsArray()){
 		m_iterators.push(iter_pair_t(m.value.MemberBegin(), m.value.MemberEnd()));
+		eat_keywords ();
 	}
 }
 
@@ -75,11 +77,23 @@ void JSONArchive::end_read (const char* name)
 	if(m.value.IsObject() || m.value.IsArray()){
 		m_iterators.pop();
 	}
-	
+
 	m_members.pop();
 
-	if(!m_iterators.empty())
+	if(!m_iterators.empty()){
 		++m_iterators.top().first;
+		eat_keywords ();
+	}
+}
+
+void JSONArchive::eat_keywords ()
+{
+	while(m_iterators.top().first != m_iterators.top().second){
+		if(strcmp("_type_", m_iterators.top().first->name.GetString()) == 0)
+			++m_iterators.top().first;
+		else
+			break;
+	}
 }
 
 std::string JSONArchive::get_type_name ()
@@ -87,7 +101,12 @@ std::string JSONArchive::get_type_name ()
 	if(m_members.empty())
 		throw runtime_error (string("JSONArchive::read: member stack empty!"));
 
-	return m_members.top()->name.GetString();
+	if(m_members.top()->value.HasMember("_type_")){
+		cout << "<dbg> returning Typename: " << m_members.top()->value["_type_"].GetString() << endl;
+		return m_members.top()->value["_type_"].GetString();
+	}
+	else
+		return "_unknown_";
 }
 
 void JSONArchive::read (const char* name, double& val)
