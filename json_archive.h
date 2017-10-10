@@ -34,8 +34,6 @@ protected:
 	virtual void read (const char* name, std::string& val);
 
 private:
-	void eat_keywords ();
-	
 	typedef rapidjson::Value val_t;
 	typedef val_t::Member mem_t;
 	typedef rapidjson::Document	doc_t;
@@ -44,6 +42,31 @@ private:
 
 	doc_t& new_document ();
 
+	struct Entry {
+		Entry () :
+			val (nullptr),
+			name ("")
+		{}
+
+		Entry (val_t* _val, const char* _name) :
+			val (_val),
+			name (_name)
+		{
+			if(_val->IsObject() || _val->IsArray())
+				icur = _val->MemberEnd();
+		}
+
+		bool iter_valid () const	{return val && (icur != val->MemberEnd());}
+		bool value_valid () const	{return val != nullptr;}
+		val_t& value ()				{return *val;}
+		const val_t& value () const	{return *val;}
+
+		val_t*	val;
+		iter_t	icur;
+		const char* name;
+	};
+
+	std::stack<Entry>		m_entries;
 	std::unique_ptr<doc_t> 	m_doc;
 	std::stack<iter_t>		m_members;
 	std::stack<iter_pair_t>	m_iterators;

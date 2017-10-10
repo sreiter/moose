@@ -25,7 +25,7 @@ public:
 	template <class T>
 	void operator () (T& value)
 	{
-		(*this)("__noname", value);
+		(*this)("", value);
 	}
 
 	template <class T>
@@ -90,7 +90,7 @@ protected:
 		begin_array_read (name);
 		while(array_has_next (name)) {
 			T tmpVal;
-			(*this) (tmpVal);
+			(*this) ("", tmpVal);
 			value.push_back(tmpVal);
 		}
 		end_array_read (name);

@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <fstream>
+#include "error.h"
 #include "json_archive.h"
 #include "rapidjson/istreamwrapper.h"
 
@@ -23,32 +24,44 @@ JSONArchive::doc_t& JSONArchive::new_document ()
 void JSONArchive::parse_file (const char* filename)
 {
 	ifstream in (filename);
-	if(!in)
-		throw runtime_error (string("File not found: ").append(filename));
+	MOOSE_CTHROW (!in, "File not found: " << filename);
 
 	doc_t& d = new_document ();
 	rapidjson::IStreamWrapper inWrapper(in);
 	if(d.ParseStream (inWrapper).HasParseError ())
 		throw runtime_error (string("JSON Parse error in file: ").append(filename));
 
-	m_iterators.push (make_pair(d.MemberBegin(), d.MemberEnd()));
-	eat_keywords ();
+	m_entries.push (Entry (&d, "_root_"));
 }
 
 void JSONArchive::begin_read (const char* name)
 {
-	if(m_iterators.empty())
-		throw runtime_error (string("End of file reached. Couldn't read field '")
-		                     .append(name).append("'"));
+	MOOSE_CTHROW (m_entries.empty(),
+				  "End of file reached. Couldn't read field '" << name << "'");
 
-	m_members.push(m_iterators.top().first);
-	mem_t& m = *m_members.top();
-	
-	iter_pair_t iters;
-	if(m.value.IsObject() || m.value.IsArray()){
-		m_iterators.push(iter_pair_t(m.value.MemberBegin(), m.value.MemberEnd()));
-		eat_keywords ();
+	Entry& e = m_entries.top();
+	if(e.iter_valid()
+	   && (e.icur->value.IsArray()
+	       || (strcmp(name, e.icur->name.GetString()) == 0)))
+	{
 	}
+	else {
+		if(e.value().IsArray()) {
+			MOOSE_CTHROW(strlen(name) > 0, "Array elements can't have a name! ('"
+			             << name << "')");
+			e.icur = e.value().MemberBegin();
+		}
+		else{
+			e.icur = e.value().FindMember (name);
+		}
+	}
+
+	MOOSE_CTHROW (!e.iter_valid(), "No entry with name '" << name
+		          << "' found in current object '" << e.name << "'.");
+
+	cout << "<dbg> pushing entry '" << e.icur->name.GetString() << "'\n";
+	m_entries.push(Entry(&e.icur->value, e.icur->name.GetString()));
+
 }
 
 void JSONArchive::begin_array_read (const char* name)
@@ -57,7 +70,7 @@ void JSONArchive::begin_array_read (const char* name)
 
 bool JSONArchive::array_has_next (const char* name)
 {
-	return m_iterators.top().first != m_iterators.top().second;
+	return m_entries.top().iter_valid();
 }
 
 void JSONArchive::end_array_read (const char* name)
@@ -68,42 +81,27 @@ void JSONArchive::end_array_read (const char* name)
 
 void JSONArchive::end_read (const char* name)
 {
-	if(m_iterators.empty() || m_members.empty())
-		throw runtime_error (string("JSONArchive::end_read called on empty stack ")
-		                     .append("for entry '").append(name).append("'"));
+	MOOSE_CTHROW (m_entries.empty(),
+	              "JSONArchive::end_read called on empty stack for entry '"
+				  << name << "'");
 
-	mem_t& m = *m_members.top();
+	cout << "<dbg> end read of object '" << name << "'" << endl;
 
-	if(m.value.IsObject() || m.value.IsArray()){
-		m_iterators.pop();
-	}
+	m_entries.pop();
 
-	m_members.pop();
-
-	if(!m_iterators.empty()){
-		++m_iterators.top().first;
-		eat_keywords ();
-	}
-}
-
-void JSONArchive::eat_keywords ()
-{
-	while(m_iterators.top().first != m_iterators.top().second){
-		if(strcmp("_type_", m_iterators.top().first->name.GetString()) == 0)
-			++m_iterators.top().first;
-		else
-			break;
+	if(!m_entries.empty()){
+		++m_entries.top().icur;
 	}
 }
 
 std::string JSONArchive::get_type_name ()
 {
-	if(m_members.empty())
-		throw runtime_error (string("JSONArchive::read: member stack empty!"));
+	MOOSE_CTHROW (m_entries.empty(), "JSONArchive::read: entry stack empty!")
 
-	if(m_members.top()->value.HasMember("_type_")){
-		cout << "<dbg> returning Typename: " << m_members.top()->value["_type_"].GetString() << endl;
-		return m_members.top()->value["_type_"].GetString();
+	val_t& value = *m_entries.top().val;
+	if(value.HasMember("_type_")){
+		cout << "<dbg> returning Typename: " << value["_type_"].GetString() << endl;
+		return value["_type_"].GetString();
 	}
 	else
 		return "_unknown_";
@@ -111,23 +109,21 @@ std::string JSONArchive::get_type_name ()
 
 void JSONArchive::read (const char* name, double& val)
 {
-	if(m_members.empty())
-		throw runtime_error (string("JSONArchive::read: member stack empty!"));
+	MOOSE_CTHROW (m_entries.empty(), "JSONArchive::read: entry stack empty!")
 
-	mem_t& m = *m_members.top();
-	cout << "<dbg> reading field '" << m.name.GetString() << "' as double" << endl;
-	val = m.value.GetDouble();
+	Entry& e = m_entries.top();
+	cout << "<dbg> reading field '" << e.name << "' as double" << endl;
+	val = e.val->GetDouble();
 }
 
 
 void JSONArchive::read (const char* name, std::string& val)
 {
-	if(m_members.empty())
-		throw runtime_error (string("JSONArchive::read: member stack empty!"));
+	MOOSE_CTHROW (m_entries.empty(), "JSONArchive::read: entry stack empty!")
 
-	mem_t& m = *m_members.top();
-	cout << "<dbg> reading field '" << m.name.GetString() << "' as string" << endl;
-	val = m.value.GetString();
+	Entry& e = m_entries.top();
+	cout << "<dbg> reading field '" << e.name << "' as string" << endl;
+	val = e.val->GetString();
 }
 
 }//	end of namespace moose
