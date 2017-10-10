@@ -11,7 +11,47 @@
 #include "rapidjson/document.h"
 
 
-namespace moose{
+namespace moose {
+
+namespace impl {
+struct JSONEntry {
+	typedef rapidjson::Value val_t;
+
+	JSONEntry ();
+	JSONEntry (val_t* _val, const char* _name);
+
+	void init_iter (const char* name);
+
+	bool iter_valid () const;
+
+	bool value_valid () const;
+
+	val_t& value ();
+	const char* name ();
+
+	val_t& iter_value ();
+	const char* iter_name ();
+
+	void advance ();
+
+	bool is_object ()	{return m_type == Object;}
+	bool is_array ()	{return m_type == Array;}
+	bool is_value ()	{return m_type == Value;}
+
+private:
+	typedef rapidjson::Value::MemberIterator mem_iter_t;
+	typedef rapidjson::Value::ValueIterator val_iter_t;
+
+	enum Type {Object, Array, Value};
+
+	val_t*		m_val;
+	mem_iter_t	m_icurMem;
+	val_iter_t	m_icurVal;
+	const char* m_name;
+	Type 		m_type;
+};
+}
+
 
 class JSONArchive : public Archive {
 public:
@@ -37,39 +77,14 @@ private:
 	typedef rapidjson::Value val_t;
 	typedef val_t::Member mem_t;
 	typedef rapidjson::Document	doc_t;
-	typedef rapidjson::Value::MemberIterator iter_t;
-	typedef std::pair<iter_t, iter_t> iter_pair_t;
+	typedef rapidjson::Value::MemberIterator mem_iter_t;
+	typedef rapidjson::Value::ValueIterator val_iter_t;
+	typedef impl::JSONEntry entry_t;
 
 	doc_t& new_document ();
 
-	struct Entry {
-		Entry () :
-			val (nullptr),
-			name ("")
-		{}
-
-		Entry (val_t* _val, const char* _name) :
-			val (_val),
-			name (_name)
-		{
-			if(_val->IsObject() || _val->IsArray())
-				icur = _val->MemberEnd();
-		}
-
-		bool iter_valid () const	{return val && (icur != val->MemberEnd());}
-		bool value_valid () const	{return val != nullptr;}
-		val_t& value ()				{return *val;}
-		const val_t& value () const	{return *val;}
-
-		val_t*	val;
-		iter_t	icur;
-		const char* name;
-	};
-
-	std::stack<Entry>		m_entries;
-	std::unique_ptr<doc_t> 	m_doc;
-	std::stack<iter_t>		m_members;
-	std::stack<iter_pair_t>	m_iterators;
+	std::stack<entry_t>	m_entries;
+	std::unique_ptr<doc_t> m_doc;
 };
 
 }//	end of namespace moose
