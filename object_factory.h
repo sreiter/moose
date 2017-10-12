@@ -11,6 +11,7 @@
 #include <type_traits>
 #include <vector>
 #include "serialize.h"
+#include "exception_util.h"
 
 namespace moose{
 
@@ -38,29 +39,22 @@ public:
 	{
 		using namespace std;
 		entry_map_t::iterator i = entry_map().find(name);
-		if(i == entry_map().end()){
-			throw runtime_error(
-					string("Can't create object for unregistered type '")
-						.append(name).append("'"));
-		}
+		MOOSE_FAC_CTHROW(i == entry_map().end(),
+			"Can't create object for unregistered type '" << name<< "'");
 
 		Entry& e = i->second;
-
-		if(!e.createFnc)
-			throw runtime_error(string("Can't create instance of abstract type '")
-					.append(name).append("'"));
+		MOOSE_FAC_CTHROW(!e.createFnc,
+			"Can't create instance of abstract type '" << name << "'");
 
 	//	Make sure that we may convert the type we intend to create to 'TBase*'
 		const std::string& baseName = get_typename<TBase> ();
-		if(baseName.empty())
-			throw runtime_error(string("Can't convert type '").append(name)
-					.append("' to unregistered type '")
-					.append(typeid(TBase).name()).append("'"));
+		MOOSE_FAC_CTHROW(baseName.empty(),
+			"Can't convert type '" << name << "' to unregistered type '"
+			<< typeid(TBase).name() << "'");
 
 
-		if((name != baseName) && !is_base(e, baseName))
-			throw runtime_error(string("Can't convert type '").append(name)
-					.append("' to type '").append(baseName).append("' "));
+		MOOSE_FAC_CTHROW((name != baseName) && !is_base(e, baseName),
+			"Can't convert type '" << name << "' to type '" << baseName << "' ");
 
 	//todo:	this may cause problem in cases of multiple inheritance.
 	//		Think abount storing cast-methods between types and registered base classes.
@@ -72,11 +66,8 @@ public:
 	{
 		using namespace std;
 		entry_map_t::iterator i = entry_map().find(name);
-		if(i == entry_map().end()){
-			throw runtime_error(
-					string("Can't create object for unregistered type '")
-						.append(name).append("'"));
-		}
+		MOOSE_FAC_CTHROW(i == entry_map().end(),
+			"Can't create object for unregistered type '" << name << "'");
 
 		Entry& e = i->second;
 		e.serializeFnc(ar, b);
@@ -151,12 +142,9 @@ private:
 	{
 		using namespace std;
 		const std::string& baseName = get_typename<T>();
-		if(baseName.empty())
-			throw runtime_error(
-					string("Can't associate unregistered base class of type '")
-						.append(typeid(T).name())
-						.append("' with newly registered type '")
-						.append(e.name).append("'"));
+		MOOSE_FAC_CTHROW(baseName.empty(),
+			"Can't associate unregistered base class of type '" << typeid(T).name()
+			<< "' with newly registered type '" << e.name << "'");
 
 		e.baseClasses.push_back(baseName);
 	}

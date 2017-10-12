@@ -23,12 +23,6 @@ public:
 	virtual ~Archive ()	{}
 
 	template <class T>
-	void operator () (T& value)
-	{
-		(*this)("", value);
-	}
-
-	template <class T>
 	void operator () (const char* name, T& value)
 	{
 		if(m_reading){
@@ -39,6 +33,22 @@ public:
 		else{
 			// write (name, value);
 		}
+	}
+
+	/// Read with default value
+	template <class T>
+	void operator () (const char* name, T& value, const T& defVal)
+	{
+		try{begin_read (name);}
+		catch(ArchiveError&){
+			value = defVal;
+			return;
+		}
+
+		try{read (name, value);}
+		catch(ArchiveError&){value = defVal;}
+
+		end_read (name);
 	}
 
 protected:
