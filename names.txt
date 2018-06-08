@@ -1,9 +1,10 @@
 names
 
+MOose Object SErialization
+
 Malleable Object Oriented SErialization
 MOdifiable Object SErialization
 Multi Objective Object SErialization
-MOose Object SErialization
 MOldable Object SErialization
 
 
