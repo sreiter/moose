@@ -59,6 +59,7 @@ public:
 	virtual ~JSONArchive ()	{}
 
 	void parse_file (const char* filename);
+  void parse_string (const char* filename);
 
 protected:
 	virtual void begin_read (const char* name);

@@ -58,6 +58,18 @@ void JSONArchive::parse_file (const char* filename)
 	m_entries.push (entry_t (&d, "_root_"));
 }
 
+void JSONArchive::parse_string (const char* str)
+{
+  doc_t& d = new_document ();
+  rapidjson::ParseResult res = d.Parse (str);
+  if(!res){
+    MOOSE_AR_THROW ("JSON Parse error in string '" << str << "': "
+        << rapidjson::GetParseError_En(res.Code()));
+  }
+
+  m_entries.push (entry_t (&d, "_root_"));
+}
+
 void JSONArchive::begin_read (const char* name)
 {
 	MOOSE_AR_CTHROW (m_entries.empty(),
