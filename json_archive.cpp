@@ -186,6 +186,8 @@ iter_valid () const
 		case Object: return m_val && (m_icurMem != m_val->MemberEnd());
 		case Array: return m_val && (m_icurVal != m_val->End());
 		case Value: return false;
+        default:
+            MOOSE_AR_THROW("Invalid code path");
 	}
 }
 
@@ -214,6 +216,8 @@ iter_value ()
 		case Object: return m_icurMem->value;
 		case Array: return *m_icurVal;
 		case Value: MOOSE_AR_THROW("Values don't have iterators which could be accessed.");
+        default:
+            MOOSE_AR_THROW("Invalid code path");
 	}
 }
 
@@ -224,6 +228,8 @@ iter_name ()
 		case Object: return m_icurMem->name.GetString();
 		case Array: return "";
 		case Value: MOOSE_AR_THROW("Values don't have iterators which could be accessed.");
+        default:
+            MOOSE_AR_THROW("Invalid code path");
 	}
 }
 
