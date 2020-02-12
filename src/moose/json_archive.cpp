@@ -7,29 +7,85 @@
 #include <fstream>
 #include <moose/exception_util.h>
 #include <moose/json_archive.h>
-#include <rapidjson/istreamwrapper.h>
+#include <rapidjson/document.h>
 #include <rapidjson/error/error.h>
 #include <rapidjson/error/en.h>
+#include <rapidjson/istreamwrapper.h>
 
 using namespace std;
+using namespace moose; // currently required for throw macros. Should be removed.
 
-namespace moose {
+namespace
+{
 
-JSONArchive::JSONArchive () : Archive (true)
-{}
+struct JSONEntry
+{
+  typedef rapidjson::Value val_t;
 
-JSONArchive::doc_t& JSONArchive::new_document ()
+  JSONEntry ();
+  JSONEntry (val_t* _val, const char* _name);
+
+  void init_iter (const char* name);
+
+  bool iter_valid () const;
+
+  bool value_valid () const;
+
+  val_t& value ();
+  const char* name ();
+
+  val_t& iter_value ();
+  const char* iter_name ();
+
+  void advance ();
+
+  bool is_object () {return m_type == Object;}
+  bool is_array ()  {return m_type == Array;}
+  bool is_value ()  {return m_type == Value;}
+
+private:
+  enum Type {Object, Array, Value};
+
+  val_t* m_val;
+  rapidjson::Value::MemberIterator m_icurMem;
+  rapidjson::Value::ValueIterator m_icurVal;
+  const char* m_name;
+  Type m_type;
+};
+
+}// end of namespace
+
+namespace moose
+{
+
+struct JSONArchive::ParseData
+{
+  typedef rapidjson::Document doc_t;
+
+  doc_t& new_document ();
+
+  std::stack <JSONEntry> m_entries;
+  std::unique_ptr <doc_t> m_doc;
+};
+
+auto JSONArchive::ParseData::new_document () -> doc_t&
 {
 	m_doc = std::unique_ptr<doc_t>(new doc_t);
 	return *m_doc;
 }
+
+JSONArchive::JSONArchive ()
+  : Archive (true)
+  , m_parseData (std::make_shared <ParseData> ())
+{}
+
 
 void JSONArchive::parse_file (const char* filename)
 {
 	ifstream in (filename);
 	MOOSE_AR_CTHROW (!in, "File not found: " << filename);
 
-	doc_t& d = new_document ();
+	auto& d = m_parseData->new_document ();
 	rapidjson::IStreamWrapper inWrapper(in);
 	rapidjson::ParseResult res = d.ParseStream (inWrapper);
 	if(!res){
@@ -55,27 +111,28 @@ void JSONArchive::parse_file (const char* filename)
 		    << " ('" << buf << "')");
 	}
 
-	m_entries.push (entry_t (&d, "_root_"));
+	m_parseData->m_entries.push (JSONEntry (&d, "_root_"));
 }
 
 void JSONArchive::parse_string (const char* str)
 {
-  doc_t& d = new_document ();
+  auto& d = m_parseData->new_document ();
   rapidjson::ParseResult res = d.Parse (str);
   if(!res){
     MOOSE_AR_THROW ("JSON Parse error in string '" << str << "': "
         << rapidjson::GetParseError_En(res.Code()));
   }
 
-  m_entries.push (entry_t (&d, "_root_"));
+  m_parseData->m_entries.push (JSONEntry (&d, "_root_"));
 }
 
 void JSONArchive::begin_read (const char* name)
 {
-	MOOSE_AR_CTHROW (m_entries.empty(),
+  auto& entries = m_parseData->m_entries;
+	MOOSE_AR_CTHROW (entries.empty(),
 				  "End of file reached. Couldn't read field '" << name << "'");
 
-	entry_t& e = m_entries.top();
+	auto& e = entries.top();
 
 //	if we're currently iterating over elements with the given name, we don't
 //	have to initialize the iterators
@@ -88,9 +145,11 @@ void JSONArchive::begin_read (const char* name)
 		          << "' found in current object '" << e.name() << "'.");
 
 	// cout << "<dbg> pushing entry '" << e.iter_name() << "'\n";
-	m_entries.push(entry_t(&e.iter_value(), e.iter_name()));
-	if(m_entries.top().is_array())
-		m_entries.top().init_iter("");
+	entries.push (JSONEntry (&e.iter_value(), e.iter_name()));
+	if(entries.top().is_array())
+  {
+		entries.top().init_iter("");
+  }
 }
 
 void JSONArchive::begin_array_read (const char* name)
@@ -99,35 +158,35 @@ void JSONArchive::begin_array_read (const char* name)
 
 bool JSONArchive::array_has_next (const char* name)
 {
-	return m_entries.top().iter_valid();
+	return m_parseData->m_entries.top().iter_valid();
 }
 
 void JSONArchive::end_array_read (const char* name)
 {
 }
 
-
-
 void JSONArchive::end_read (const char* name)
 {
-	MOOSE_AR_CTHROW (m_entries.empty(),
+  auto& entries = m_parseData->m_entries;
+	MOOSE_AR_CTHROW (entries.empty(),
 	              "JSONArchive::end_read called on empty stack for entry '"
-				  << name << "'");
+				        << name << "'");
 
 	// cout << "<dbg> end read of object '" << name << "'" << endl;
 
-	m_entries.pop();
+	entries.pop();
 
-	if(!m_entries.empty()){
-		m_entries.top().advance();
+	if(!entries.empty()){
+		entries.top().advance();
 	}
 }
 
 std::string JSONArchive::get_type_name ()
 {
-	MOOSE_AR_CTHROW (m_entries.empty(), "JSONArchive::read: entry stack empty!")
+  auto& entries = m_parseData->m_entries;
+	MOOSE_AR_CTHROW (entries.empty(), "JSONArchive::read: entry stack empty!")
 
-	val_t& value = m_entries.top().value();
+	auto& value = entries.top().value();
 	if(value.HasMember("@type")){
 		// cout << "<dbg> returning Typename: " << value["@type"].GetString() << endl;
 		return value["@type"].GetString();
@@ -138,9 +197,10 @@ std::string JSONArchive::get_type_name ()
 
 void JSONArchive::read (const char* name, double& val)
 {
-	MOOSE_AR_CTHROW (m_entries.empty(), "JSONArchive::read: entry stack empty!")
+  auto& entries = m_parseData->m_entries;
+	MOOSE_AR_CTHROW (entries.empty(), "JSONArchive::read: entry stack empty!")
 
-	entry_t& e = m_entries.top();
+	auto& e = entries.top();
 	cout << "<dbg> reading field '" << e.name() << "' as double" << endl;
 	val = e.value().GetDouble();
 }
@@ -148,24 +208,26 @@ void JSONArchive::read (const char* name, double& val)
 
 void JSONArchive::read (const char* name, std::string& val)
 {
-	MOOSE_AR_CTHROW (m_entries.empty(), "JSONArchive::read: entry stack empty!")
+  auto& entries = m_parseData->m_entries;
+	MOOSE_AR_CTHROW (entries.empty(), "JSONArchive::read: entry stack empty!")
 
-	entry_t& e = m_entries.top();
+	auto& e = entries.top();
 	cout << "<dbg> reading field '" << e.name() << "' as string" << endl;
 	val = e.value().GetString();
 }
 
+}// end of namespace moose
 
-namespace impl {
-JSONEntry::
-JSONEntry () :
+namespace
+{
+
+JSONEntry::JSONEntry () :
 	m_val (nullptr),
 	m_name (""),
 	m_type (Value)
 {}
 
-JSONEntry::
-JSONEntry (val_t* _val, const char* _name) :
+JSONEntry::JSONEntry (val_t* _val, const char* _name) :
 	m_val (_val),
 	m_name (_name)
 {
@@ -181,8 +243,7 @@ JSONEntry (val_t* _val, const char* _name) :
 		m_type = Value;
 }
 
-void JSONEntry::
-init_iter (const char* name)
+void JSONEntry::init_iter (const char* name)
 {
 	switch(m_type) {
 		case Object: m_icurMem = m_val->FindMember (name); break;
@@ -191,8 +252,7 @@ init_iter (const char* name)
 	}
 }
 
-bool JSONEntry::
-iter_valid () const
+bool JSONEntry::iter_valid () const
 {
 	switch(m_type) {
 		case Object: return m_val && (m_icurMem != m_val->MemberEnd());
@@ -203,26 +263,22 @@ iter_valid () const
 	}
 }
 
-bool JSONEntry::
-value_valid () const
+bool JSONEntry::value_valid () const
 {
 	return m_val != nullptr;
 }
 
-JSONEntry::val_t& JSONEntry::
-value ()
+JSONEntry::val_t& JSONEntry::value ()
 {
 	return *m_val;
 }
 
-const char* JSONEntry::
-name ()
+const char* JSONEntry::name ()
 {
 	return m_name;
 }
 
-JSONEntry::val_t& JSONEntry::
-iter_value ()
+JSONEntry::val_t& JSONEntry::iter_value ()
 {
 	switch(m_type) {
 		case Object: return m_icurMem->value;
@@ -233,8 +289,7 @@ iter_value ()
 	}
 }
 
-const char* JSONEntry::
-iter_name ()
+const char* JSONEntry::iter_name ()
 {
 	switch(m_type) {
 		case Object: return m_icurMem->name.GetString();
@@ -245,8 +300,7 @@ iter_name ()
 	}
 }
 
-void JSONEntry::
-advance ()
+void JSONEntry::advance ()
 {
 	switch(m_type) {
 		case Object: ++m_icurMem; break;
@@ -254,5 +308,5 @@ advance ()
 		case Value: break;
 	}
 }
-}//	end of namespace impl
-}//	end of namespace moose
+
+}//	end of namespace

@@ -15,9 +15,9 @@ target_include_directories(moose
     PUBLIC 
         $<INSTALL_INTERFACE:include>    
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        ${CMAKE_CURRENT_SOURCE_DIR}/deps/rapidjson-v1.1.0.s1/include
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src
+        ${CMAKE_CURRENT_SOURCE_DIR}/deps/rapidjson-v1.1.0.s1/include
     )
 
 target_compile_features(moose PUBLIC cxx_std_17)

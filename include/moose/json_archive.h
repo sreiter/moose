@@ -8,50 +8,9 @@
 #include <stack>
 #include <memory>
 #include <moose/archive.h>
-#include <rapidjson/document.h>
 
-
-namespace moose {
-
-namespace impl {
-struct JSONEntry {
-	typedef rapidjson::Value val_t;
-
-	JSONEntry ();
-	JSONEntry (val_t* _val, const char* _name);
-
-	void init_iter (const char* name);
-
-	bool iter_valid () const;
-
-	bool value_valid () const;
-
-	val_t& value ();
-	const char* name ();
-
-	val_t& iter_value ();
-	const char* iter_name ();
-
-	void advance ();
-
-	bool is_object ()	{return m_type == Object;}
-	bool is_array ()	{return m_type == Array;}
-	bool is_value ()	{return m_type == Value;}
-
-private:
-	typedef rapidjson::Value::MemberIterator mem_iter_t;
-	typedef rapidjson::Value::ValueIterator val_iter_t;
-
-	enum Type {Object, Array, Value};
-
-	val_t*		m_val;
-	mem_iter_t	m_icurMem;
-	val_iter_t	m_icurVal;
-	const char* m_name;
-	Type 		m_type;
-};
-}
-
+namespace moose
+{
 
 class JSONArchive : public Archive {
 public:
@@ -75,17 +34,8 @@ protected:
 	virtual void read (const char* name, std::string& val);
 
 private:
-	typedef rapidjson::Value val_t;
-	typedef val_t::Member mem_t;
-	typedef rapidjson::Document	doc_t;
-	typedef rapidjson::Value::MemberIterator mem_iter_t;
-	typedef rapidjson::Value::ValueIterator val_iter_t;
-	typedef impl::JSONEntry entry_t;
-
-	doc_t& new_document ();
-
-	std::stack<entry_t>	m_entries;
-	std::unique_ptr<doc_t> m_doc;
+  struct ParseData;
+  std::shared_ptr <ParseData> m_parseData;
 };
 
 }//	end of namespace moose
