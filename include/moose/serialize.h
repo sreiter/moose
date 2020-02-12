@@ -44,7 +44,7 @@ template <class T>
 typename std::enable_if<has_serialize<T, void(Archive&)>::value >::type
 Serialize(Archive& ar, T& val)
 {
-	val.serialize (ar);
+  val.serialize (ar);
 }
 
 
@@ -58,6 +58,6 @@ Serialize(Archive& ar, T& val)
                         .append(typeid(T).name()).append("'"));
 }
 
-}//	end of namespace moose
+}// end of namespace moose
 
-#endif	//__H__moose_serialize
+#endif  //__H__moose_serialize

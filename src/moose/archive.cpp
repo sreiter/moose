@@ -9,9 +9,9 @@ namespace moose{
 template <class T>
 void Archive::read_double(const char* name, T& val)
 {
-	double d;
-	read (name, d);
-	val = (T)d;
+  double d;
+  read (name, d);
+  val = (T)d;
 }
 
 void Archive::read (const char* name, char& val)
@@ -42,4 +42,4 @@ void Archive::read (const char* name, float& val)
 {read_double (name, val);}
 
 
-}//	end of namespace moose
+}// end of namespace moose

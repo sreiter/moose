@@ -6,8 +6,8 @@ cmake_minimum_required (VERSION 3.1)
 
 project (libmoose)
 
-set (mooseSrc		src/moose/archive.cpp
-     				    src/moose/json_archive.cpp)
+set (mooseSrc   src/moose/archive.cpp
+                src/moose/json_archive.cpp)
 
 add_library(moose STATIC ${mooseSrc})
 

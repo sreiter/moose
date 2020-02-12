@@ -18,36 +18,36 @@ public:
   static JSONArchive fromString (const char* str);
 
 public:
-	JSONArchive ();
+  JSONArchive ();
   JSONArchive (JSONArchive const&) = delete;
   JSONArchive (JSONArchive&& other);
 
-	virtual ~JSONArchive ()	= default;
+  virtual ~JSONArchive () = default;
 
   JSONArchive& operator = (JSONArchive const&) = delete;
   JSONArchive& operator = (JSONArchive&& other);
 
-	void parse_file (const char* filename);
+  void parse_file (const char* filename);
   void parse_string (const char* str);
 
 protected:
-	void begin_read (const char* name) override;
-	void end_read (const char* name) override;
+  void begin_read (const char* name) override;
+  void end_read (const char* name) override;
 
-	void begin_array_read (const char* name) override;
-	bool array_has_next (const char* name) override;
-	void end_array_read (const char* name) override;
+  void begin_array_read (const char* name) override;
+  bool array_has_next (const char* name) override;
+  void end_array_read (const char* name) override;
 
-	std::string get_type_name () override;
-	
-	void read (const char* name, double& val) override;
-	void read (const char* name, std::string& val) override;
+  std::string get_type_name () override;
+  
+  void read (const char* name, double& val) override;
+  void read (const char* name, std::string& val) override;
 
 private:
   struct ParseData;
   std::shared_ptr <ParseData> m_parseData;
 };
 
-}//	end of namespace moose
+}// end of namespace moose
 
-#endif	//__H__moose_json_archive
+#endif  //__H__moose_json_archive

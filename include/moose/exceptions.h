@@ -12,17 +12,17 @@ namespace moose {
 class ArchiveError : public std::runtime_error
 {
 public:
-	explicit ArchiveError (const std::string& what) :
-		std::runtime_error (what) {}
+  explicit ArchiveError (const std::string& what) :
+    std::runtime_error (what) {}
 };
 
 class FactoryError : public std::runtime_error
 {
 public:
-	explicit FactoryError (const std::string& what) :
-		std::runtime_error (what) {}
+  explicit FactoryError (const std::string& what) :
+    std::runtime_error (what) {}
 };
 
-}//	end of namespace moose
+}// end of namespace moose
 
-#endif	//__H__moose_exceptions
+#endif  //__H__moose_exceptions

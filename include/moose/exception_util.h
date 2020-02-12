@@ -8,13 +8,13 @@
 #include <sstream>
 #include <moose/exceptions.h>
 
-#define MOOSE_THROW(msg)			{std::stringstream ss; ss << msg; throw(std::runtime_error(ss.str()));}
-#define MOOSE_CTHROW(cond, msg)		{if(cond){std::stringstream ss; ss << msg; throw(std::runtime_error(ss.str()));}}
+#define MOOSE_THROW(msg)        {std::stringstream ss; ss << msg; throw(std::runtime_error(ss.str()));}
+#define MOOSE_CTHROW(cond, msg) {if(cond){std::stringstream ss; ss << msg; throw(std::runtime_error(ss.str()));}}
 
-#define MOOSE_AR_THROW(msg)			{std::stringstream ss; ss << msg; throw(ArchiveError(ss.str()));}
-#define MOOSE_AR_CTHROW(cond, msg)	{if(cond){std::stringstream ss; ss << msg; throw(ArchiveError(ss.str()));}}
+#define MOOSE_AR_THROW(msg)        {std::stringstream ss; ss << msg; throw(ArchiveError(ss.str()));}
+#define MOOSE_AR_CTHROW(cond, msg) {if(cond){std::stringstream ss; ss << msg; throw(ArchiveError(ss.str()));}}
 
-#define MOOSE_FAC_THROW(msg)		{std::stringstream ss; ss << msg; throw(FactoryError(ss.str()));}
-#define MOOSE_FAC_CTHROW(cond, msg)	{if(cond){std::stringstream ss; ss << msg; throw(FactoryError(ss.str()));}}
+#define MOOSE_FAC_THROW(msg)        {std::stringstream ss; ss << msg; throw(FactoryError(ss.str()));}
+#define MOOSE_FAC_CTHROW(cond, msg) {if(cond){std::stringstream ss; ss << msg; throw(FactoryError(ss.str()));}}
 
-#endif	//__H__moose_exception_util
+#endif  //__H__moose_exception_util
