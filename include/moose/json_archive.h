@@ -22,7 +22,7 @@ public:
   JSONArchive (JSONArchive const&) = delete;
   JSONArchive (JSONArchive&& other);
 
-	virtual ~JSONArchive ()	{}
+	virtual ~JSONArchive ()	= default;
 
   JSONArchive& operator = (JSONArchive const&) = delete;
   JSONArchive& operator = (JSONArchive&& other);
@@ -31,17 +31,17 @@ public:
   void parse_string (const char* str);
 
 protected:
-	virtual void begin_read (const char* name);
-	virtual void end_read (const char* name);
+	void begin_read (const char* name) override;
+	void end_read (const char* name) override;
 
-	virtual void begin_array_read (const char* name);
-	virtual bool array_has_next (const char* name);
-	virtual void end_array_read (const char* name);
+	void begin_array_read (const char* name) override;
+	bool array_has_next (const char* name) override;
+	void end_array_read (const char* name) override;
 
-	virtual std::string get_type_name ();
+	std::string get_type_name () override;
 	
-	virtual void read (const char* name, double& val);
-	virtual void read (const char* name, std::string& val);
+	void read (const char* name, double& val) override;
+	void read (const char* name, std::string& val) override;
 
 private:
   struct ParseData;
