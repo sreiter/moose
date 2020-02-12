@@ -4,17 +4,16 @@
 
 #include <array>
 #include <iostream>
-
 #include <moose/json_archive.h>
 
-auto const jsonInputData = 
-   "{"
-   "  \"sampleArray\": {\"0\": 100, \"1\": 101},"
-   "  \"objects\": ["
-   "      {\"@type\": \"ClassA\", \"value\": \"hello\"},"
-   "      {\"@type\": \"ClassB\", \"data\": {\"0\": 100, \"1\": 101}}"
-   "    ]"
-   "}";
+auto const jsonInputData = R"""(
+  {
+    "sampleArray": {"0": 100, "1": 101},
+    "objects": [
+        {"@type": "ClassA", "value": "hello"},
+        {"@type": "ClassB", "data": {"0": 100, "1": 101}}
+      ]
+  })""";
 
 namespace moose{
   inline void Serialize (Archive& ar, std::array <int, 2>& v)
