@@ -74,6 +74,20 @@ auto JSONArchive::ParseData::new_document () -> doc_t&
 	return *m_doc;
 }
 
+JSONArchive JSONArchive::fromFile (const char* filename)
+{
+  JSONArchive ar;
+  ar.parse_file (filename);
+  return ar;
+}
+
+JSONArchive JSONArchive::fromString (const char* str)
+{
+  JSONArchive ar;
+  ar.parse_string (str);
+  return ar;
+}
+
 JSONArchive::JSONArchive ()
   : Archive (true)
   , m_parseData (std::make_shared <ParseData> ())

@@ -59,14 +59,13 @@ int main (int, char**)
     moose::RegisterType <ClassA, BaseClass> ("ClassA");
     moose::RegisterType <ClassB, BaseClass> ("ClassB");
 
-    moose::JSONArchive ar;
-    ar.parse_string(jsonInputData);
+    auto archive = moose::JSONArchive::fromString (jsonInputData);
 
     std::array <int, 2> iarray2;
-    ar ("sampleArray", iarray2);
+    archive ("sampleArray", iarray2);
 
     std::vector <std::shared_ptr <BaseClass>> objects;
-    ar ("objects", objects);
+    archive ("objects", objects);
   }
 
   catch (std::runtime_error& e)
