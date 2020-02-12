@@ -2,7 +2,7 @@
 //
 // Copyright (C) 2017 Sebastian Reiter, G-CSC Frankfurt <s.b.reiter@gmail.com>
 
-#include "archive.h"
+#include <moose/archive.h>
 
 namespace moose{
 

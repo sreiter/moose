@@ -5,7 +5,7 @@
 #include <array>
 #include <iostream>
 
-#include "../json_archive.h"
+#include <moose/json_archive.h>
 
 auto const jsonInputData = 
    "{"

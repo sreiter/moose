@@ -9,5 +9,7 @@ project (moosesample)
 set (src moosesample.cpp)
 
 add_executable(moosesample ${src})
-set_property(TARGET moose PROPERTY CXX_STANDARD 14)
+
+target_compile_features(moosesample PUBLIC cxx_std_17)
+
 target_link_libraries(moosesample moose)
