@@ -10,7 +10,7 @@
 #include <map>
 #include <memory>
 #include <string>
-#include "object_factory.h"
+#include <moose/object_factory.h>
 
 namespace moose{
 

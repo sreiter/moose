@@ -6,7 +6,7 @@
 #define __H__moose_exception_util
 
 #include <sstream>
-#include "exceptions.h"
+#include <moose/exceptions.h>
 
 #define MOOSE_THROW(msg)			{std::stringstream ss; ss << msg; throw(std::runtime_error(ss.str()));}
 #define MOOSE_CTHROW(cond, msg)		{if(cond){std::stringstream ss; ss << msg; throw(std::runtime_error(ss.str()));}}

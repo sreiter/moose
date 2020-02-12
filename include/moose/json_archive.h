@@ -7,8 +7,8 @@
 
 #include <stack>
 #include <memory>
-#include "archive.h"
-#include "rapidjson/document.h"
+#include <moose/archive.h>
+#include <rapidjson/document.h>
 
 
 namespace moose {
