@@ -22,4 +22,4 @@ target_include_directories(moose
 
 target_compile_features(moose PUBLIC cxx_std_17)
 
-add_subdirectory (src/sample)
+add_subdirectory (sample)
