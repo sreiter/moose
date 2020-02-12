@@ -15,7 +15,13 @@ namespace moose
 class JSONArchive : public Archive {
 public:
 	JSONArchive ();
+  JSONArchive (JSONArchive const&) = delete;
+  JSONArchive (JSONArchive&& other);
+
 	virtual ~JSONArchive ()	{}
+
+  JSONArchive& operator = (JSONArchive const&) = delete;
+  JSONArchive& operator = (JSONArchive&& other);
 
 	void parse_file (const char* filename);
   void parse_string (const char* filename);

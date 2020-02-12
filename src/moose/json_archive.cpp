@@ -79,6 +79,16 @@ JSONArchive::JSONArchive ()
   , m_parseData (std::make_shared <ParseData> ())
 {}
 
+JSONArchive::JSONArchive (JSONArchive&& other)
+  : Archive (true)
+  , m_parseData (std::move (other.m_parseData))
+{}
+
+JSONArchive& JSONArchive::operator = (JSONArchive&& other)
+{
+  m_parseData = std::move (other.m_parseData);
+  return *this;
+}
 
 void JSONArchive::parse_file (const char* filename)
 {
