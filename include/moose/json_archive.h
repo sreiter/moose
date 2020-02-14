@@ -2,8 +2,7 @@
 //
 // Copyright (C) 2017 Sebastian Reiter, G-CSC Frankfurt <s.b.reiter@gmail.com>
 
-#ifndef __H__moose_json_archive
-#define __H__moose_json_archive
+#pragma once
 
 #include <stack>
 #include <memory>
@@ -49,5 +48,3 @@ private:
 };
 
 }// end of namespace moose
-
-#endif  //__H__moose_json_archive

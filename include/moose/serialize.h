@@ -2,8 +2,7 @@
 //
 // Copyright (C) 2017 Sebastian Reiter, G-CSC Frankfurt <s.b.reiter@gmail.com>
 
-#ifndef __H__moose_serialize
-#define __H__moose_serialize
+#pragma once
 
 #include <string>
 #include <stdexcept>
@@ -59,5 +58,3 @@ Serialize(Archive& ar, T& val)
 }
 
 }// end of namespace moose
-
-#endif  //__H__moose_serialize
