@@ -12,35 +12,28 @@ namespace moose{
 
 class Archive;
 
-template<typename, typename T>
+template<typename C>
 struct has_serialize {
-    static_assert(
-        std::integral_constant<T, false>::value,
-        "Second template parameter needs to be of function type.");
-};
-
-template<typename C, typename Ret, typename... Args>
-struct has_serialize<C, Ret(Args...)> {
 private:
     template<typename T>
-    static auto check(T*)
+    static auto check()
     -> typename
         std::is_same<
-            decltype( std::declval<T>().serialize( std::declval<Args>()... ) ),
-            Ret    // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            decltype( std::declval<T>().serialize( std::declval<Archive>()) ),
+            void    // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
         >::type;  // attempt to call it and see if the return type is correct
 
     template<typename>
     static std::false_type check(...);
 
-    typedef decltype(check<C>(0)) type;
+    typedef decltype(check<C>()) type;
 
 public:
     static const bool value = type::value;
 };
 
 template <class T>
-typename std::enable_if<has_serialize<T, void(Archive&)>::value >::type
+typename std::enable_if<has_serialize<T>::value >::type
 Serialize(Archive& ar, T& val)
 {
   val.serialize (ar);
@@ -48,7 +41,7 @@ Serialize(Archive& ar, T& val)
 
 
 template <class T>
-typename std::enable_if<!has_serialize<T, void(Archive&)>::value >::type
+typename std::enable_if<!has_serialize<T>::value >::type
 Serialize(Archive& ar, T& val)
 {
 //todo: Make this a compile-time error.
