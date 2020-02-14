@@ -5,8 +5,6 @@
 #ifndef __H__moose_archive
 #define __H__moose_archive
 
-#include <iostream>
-
 #include <map>
 #include <memory>
 #include <string>
@@ -69,7 +67,6 @@ protected:
   template <class T>
   void read (const char* name, std::shared_ptr<T>& sp)
   {
-    std::cout << "Creating instance of type " << get_type_name() << std::endl;
     if(!sp){
       sp = std::shared_ptr<T>(ObjectFactory::create<T>(get_type_name()));
     }
