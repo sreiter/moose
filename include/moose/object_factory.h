@@ -10,8 +10,8 @@
 #include <typeinfo>
 #include <type_traits>
 #include <vector>
+#include <moose/exceptions.h>
 #include <moose/serialize.h>
-#include <moose/exception_util.h>
 
 namespace moose{
 
@@ -39,22 +39,22 @@ public:
   {
     using namespace std;
     entry_map_t::iterator i = entry_map().find(name);
-    MOOSE_FAC_CTHROW(i == entry_map().end(),
-      "Can't create object for unregistered type '" << name<< "'");
+    if (i == entry_map().end())
+      throw FactoryError () << "Can't create object for unregistered type '" << name<< "'";
 
     Entry& e = i->second;
-    MOOSE_FAC_CTHROW(!e.createFnc,
-      "Can't create instance of abstract type '" << name << "'");
+    if (!e.createFnc)
+      throw FactoryError () << "Can't create instance of abstract type '" << name << "'";
 
   //  Make sure that we may convert the type we intend to create to 'TBase*'
     const std::string& baseName = get_typename<TBase> ();
-    MOOSE_FAC_CTHROW(baseName.empty(),
-      "Can't convert type '" << name << "' to unregistered type '"
-      << typeid(TBase).name() << "'");
+    if (baseName.empty())
+      throw FactoryError () << "Can't convert type '" << name << "' to unregistered type '"
+                            << typeid(TBase).name() << "'";
 
 
-    MOOSE_FAC_CTHROW((name != baseName) && !is_base(e, baseName),
-      "Can't convert type '" << name << "' to type '" << baseName << "' ");
+    if ((name != baseName) && !is_base(e, baseName))
+      throw FactoryError () << "Can't convert type '" << name << "' to type '" << baseName << "' ";
 
   //todo: this may cause problem in cases of multiple inheritance.
   //    Think abount storing cast-methods between types and registered base classes.
@@ -66,8 +66,8 @@ public:
   {
     using namespace std;
     entry_map_t::iterator i = entry_map().find(name);
-    MOOSE_FAC_CTHROW(i == entry_map().end(),
-      "Can't create object for unregistered type '" << name << "'");
+    if (i == entry_map().end())
+      throw FactoryError () << "Can't create object for unregistered type '" << name << "'";
 
     Entry& e = i->second;
     e.serializeFnc(ar, b);
@@ -142,9 +142,9 @@ private:
   {
     using namespace std;
     const std::string& baseName = get_typename<T>();
-    MOOSE_FAC_CTHROW(baseName.empty(),
-      "Can't associate unregistered base class of type '" << typeid(T).name()
-      << "' with newly registered type '" << e.name << "'");
+    if (baseName.empty())
+      throw FactoryError () << "Can't associate unregistered base class of type '"
+                            << typeid(T).name() << "' with newly registered type '" << e.name << "'";
 
     e.baseClasses.push_back(baseName);
   }
@@ -164,17 +164,12 @@ private:
 
 };
 
-
-
 template <class... T>
 void RegisterType (std::string name)
 {
   ObjectFactory::register_type<T...>(name);
 }
 
-
 }// end of namespace moose
-
-
 
 #endif  //__H__moose_object_factory

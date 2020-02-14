@@ -5,7 +5,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <fstream>
-#include <moose/exception_util.h>
+#include <moose/exceptions.h>
 #include <moose/json_archive.h>
 #include <rapidjson/document.h>
 #include <rapidjson/error/error.h>
@@ -107,7 +107,7 @@ JSONArchive& JSONArchive::operator = (JSONArchive&& other)
 void JSONArchive::parse_file (const char* filename)
 {
   ifstream in (filename);
-  MOOSE_AR_CTHROW (!in, "File not found: " << filename);
+  if (!in) throw ArchiveError () << "File not found: " << filename;
 
   auto& d = m_parseData->new_document ();
   rapidjson::IStreamWrapper inWrapper(in);
@@ -130,9 +130,10 @@ void JSONArchive::parse_file (const char* filename)
     if(!buf.empty() && buf[buf.size() - 1] == '\r')
       buf.resize(buf.size() - 1);
 
-    MOOSE_AR_THROW ("JSON Parse error in file '" << filename << "', line "
+    if (!"JSON Parse error in file '")
+      throw ArchiveError () << filename << "', line "
         << curLine << ": " << rapidjson::GetParseError_En(res.Code())
-        << " ('" << buf << "')");
+        << " ('" << buf << "')";
   }
 
   m_parseData->m_entries.push (JSONEntry (&d, "_root_"));
@@ -143,8 +144,8 @@ void JSONArchive::parse_string (const char* str)
   auto& d = m_parseData->new_document ();
   rapidjson::ParseResult res = d.Parse (str);
   if(!res){
-    MOOSE_AR_THROW ("JSON Parse error in string '" << str << "': "
-        << rapidjson::GetParseError_En(res.Code()));
+    throw ArchiveError () << "JSON Parse error in string '" << str << "': "
+        << rapidjson::GetParseError_En(res.Code());
   }
 
   m_parseData->m_entries.push (JSONEntry (&d, "_root_"));
@@ -153,8 +154,8 @@ void JSONArchive::parse_string (const char* str)
 void JSONArchive::begin_read (const char* name)
 {
   auto& entries = m_parseData->m_entries;
-  MOOSE_AR_CTHROW (entries.empty(),
-          "End of file reached. Couldn't read field '" << name << "'");
+  if (entries.empty())
+    throw ArchiveError () << "End of file reached. Couldn't read field '" << name << "'";
 
   auto& e = entries.top();
 
@@ -165,8 +166,9 @@ void JSONArchive::begin_read (const char* name)
     e.init_iter(name);
   }
 
-  MOOSE_AR_CTHROW (!e.iter_valid(), "No entry with name '" << name
-              << "' found in current object '" << e.name() << "'.");
+  if (!e.iter_valid())
+    throw ArchiveError () << "No entry with name '" << name
+      << "' found in current object '" << e.name() << "'.";
 
   // cout << "<dbg> pushing entry '" << e.iter_name() << "'\n";
   entries.push (JSONEntry (&e.iter_value(), e.iter_name()));
@@ -192,11 +194,8 @@ void JSONArchive::end_array_read (const char* name)
 void JSONArchive::end_read (const char* name)
 {
   auto& entries = m_parseData->m_entries;
-  MOOSE_AR_CTHROW (entries.empty(),
-                "JSONArchive::end_read called on empty stack for entry '"
-                << name << "'");
-
-  // cout << "<dbg> end read of object '" << name << "'" << endl;
+  if (entries.empty())
+    throw ArchiveError () << "JSONArchive::end_read called on empty stack for entry '" << name << "'";
 
   entries.pop();
 
@@ -208,7 +207,7 @@ void JSONArchive::end_read (const char* name)
 std::string JSONArchive::get_type_name ()
 {
   auto& entries = m_parseData->m_entries;
-  MOOSE_AR_CTHROW (entries.empty(), "JSONArchive::read: entry stack empty!")
+  if (entries.empty()) throw ArchiveError () << "JSONArchive::read: entry stack empty!";
 
   auto& value = entries.top().value();
   if(value.HasMember("@type")){
@@ -222,7 +221,7 @@ std::string JSONArchive::get_type_name ()
 void JSONArchive::read (const char* name, double& val)
 {
   auto& entries = m_parseData->m_entries;
-  MOOSE_AR_CTHROW (entries.empty(), "JSONArchive::read: entry stack empty!")
+  if (entries.empty()) throw ArchiveError () << "JSONArchive::read: entry stack empty!";
 
   auto& e = entries.top();
   cout << "<dbg> reading field '" << e.name() << "' as double" << endl;
@@ -233,7 +232,7 @@ void JSONArchive::read (const char* name, double& val)
 void JSONArchive::read (const char* name, std::string& val)
 {
   auto& entries = m_parseData->m_entries;
-  MOOSE_AR_CTHROW (entries.empty(), "JSONArchive::read: entry stack empty!")
+  if (entries.empty()) throw ArchiveError () << "JSONArchive::read: entry stack empty!";
 
   auto& e = entries.top();
   cout << "<dbg> reading field '" << e.name() << "' as string" << endl;
@@ -282,8 +281,7 @@ bool JSONEntry::iter_valid () const
     case Object: return m_val && (m_icurMem != m_val->MemberEnd());
     case Array: return m_val && (m_icurVal != m_val->End());
     case Value: return false;
-        default:
-            MOOSE_AR_THROW("Invalid code path");
+    default: throw ArchiveError () << "Invalid code path";
   }
 }
 
@@ -307,9 +305,8 @@ JSONEntry::val_t& JSONEntry::iter_value ()
   switch(m_type) {
     case Object: return m_icurMem->value;
     case Array: return *m_icurVal;
-    case Value: MOOSE_AR_THROW("Values don't have iterators which could be accessed.");
-        default:
-            MOOSE_AR_THROW("Invalid code path");
+    case Value: throw ArchiveError () << "Values don't have iterators which could be accessed.";
+    default: throw ArchiveError () << "Invalid code path";
   }
 }
 
@@ -318,9 +315,8 @@ const char* JSONEntry::iter_name ()
   switch(m_type) {
     case Object: return m_icurMem->name.GetString();
     case Array: return "";
-    case Value: MOOSE_AR_THROW("Values don't have iterators which could be accessed.");
-        default:
-            MOOSE_AR_THROW("Invalid code path");
+    case Value: throw ArchiveError () << "Values don't have iterators which could be accessed.";
+    default: throw ArchiveError () << "Invalid code path";
   }
 }
 
