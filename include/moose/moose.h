@@ -22,4 +22,4 @@ void RegisterType (std::string name)
   detail::ObjectFactory::register_type<T...>(std::move (name));
 }
 
-};
+}// end of namespace
