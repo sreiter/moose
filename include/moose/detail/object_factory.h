@@ -10,12 +10,15 @@
 #include <type_traits>
 #include <vector>
 #include <moose/exceptions.h>
-#include <moose/serialize.h>
+#include <moose/detail/serialize.h>
 
-namespace moose{
+namespace moose
+{
+  class Archive;
+}
 
-class Archive;
-
+namespace moose::detail
+{
 
 class ObjectFactory {
 public:
@@ -89,7 +92,7 @@ private:
   template <class T> static void* CreateFunc () {return new T;}
   template <class T> static void CallSerialize (Archive& ar, void* val)
   {
-    Serialize (ar, *reinterpret_cast<T*>(val));
+    moose::Serialize (ar, *reinterpret_cast<T*>(val));
   }
 
   inline static ObjectFactory& inst ()      {static ObjectFactory of; return of;}
@@ -162,11 +165,5 @@ private:
   typename_map_t  m_typenameMap;
 
 };
-
-template <class... T>
-void RegisterType (std::string name)
-{
-  ObjectFactory::register_type<T...>(name);
-}
 
 }// end of namespace moose

@@ -8,9 +8,13 @@
 #include <stdexcept>
 #include <typeinfo>
 
-namespace moose{
+namespace moose
+{
+  class Archive;
+}
 
-class Archive;
+namespace moose::detail
+{
 
 template<typename C>
 struct has_serialize {
@@ -50,4 +54,4 @@ Serialize(Archive& ar, T& val)
                         .append(typeid(T).name()).append("'"));
 }
 
-}// end of namespace moose
+}// end of namespace
