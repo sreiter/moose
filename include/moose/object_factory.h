@@ -15,13 +15,9 @@
 
 namespace moose
 {
-  class Archive;
-}
 
-namespace moose::detail
+class ObjectFactory
 {
-
-class ObjectFactory {
 public:
   template <class T>
   static void register_type (std::string name)
@@ -205,4 +201,16 @@ private:
   typename_map_t  m_typenameMap;
 };
 
-}// end of namespace moose
+template <class... T>
+void RegisterType (std::string name)
+{
+  ObjectFactory::register_type <T...>(std::move (name));
+}
+
+template <class... T>
+void RegisterEmptyType (std::string name)
+{
+  ObjectFactory::register_empty_type <T...>(std::move (name));
+}
+
+}// end of namespace

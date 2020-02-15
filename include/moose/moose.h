@@ -4,22 +4,6 @@
 
 #pragma once
 
+#include <moose/json_archive.h>
 #include <moose/serialize.h>
-#include <moose/detail/object_factory.h>
-
-namespace moose
-{
-
-template <class... T>
-void RegisterType (std::string name)
-{
-  detail::ObjectFactory::register_type <T...>(std::move (name));
-}
-
-template <class... T>
-void RegisterEmptyType (std::string name)
-{
-  detail::ObjectFactory::register_empty_type <T...>(std::move (name));
-}
-
-}// end of namespace
+#include <moose/object_factory.h>

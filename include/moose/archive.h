@@ -7,7 +7,7 @@
 #include <map>
 #include <memory>
 #include <string>
-#include <moose/detail/object_factory.h>
+#include <moose/object_factory.h>
 
 namespace moose{
 
@@ -67,26 +67,26 @@ protected:
   void read (const char* name, std::shared_ptr<T>& sp)
   {
     if(!sp){
-      sp = std::shared_ptr<T>(detail::ObjectFactory::create<T>(get_type_name()));
+      sp = std::shared_ptr<T>(ObjectFactory::create<T>(get_type_name()));
     }
-    detail::ObjectFactory::call_serialize (get_type_name(), *this, sp.get());
+    ObjectFactory::call_serialize (get_type_name(), *this, sp.get());
   }
 
   template <class T>
   void read (const char* name, std::unique_ptr<T>& up)
   {
     if(!up){
-      up = std::unique_ptr<T>(detail::ObjectFactory::create<T>(get_type_name()));
+      up = std::unique_ptr<T>(ObjectFactory::create<T>(get_type_name()));
     }
-    detail::ObjectFactory::call_serialize (get_type_name(), *this, up.get());
+    ObjectFactory::call_serialize (get_type_name(), *this, up.get());
   }
 
   template <class T>
   void read (const char* name, T*& p)
   {
     if(!p)
-      p = detail::ObjectFactory::create<T>(get_type_name());
-    detail::ObjectFactory::call_serialize (get_type_name(), *this, p);
+      p = ObjectFactory::create<T>(get_type_name());
+    ObjectFactory::call_serialize (get_type_name(), *this, p);
   }
 
 

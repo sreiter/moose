@@ -4,7 +4,6 @@
 
 #include <array>
 #include <iostream>
-#include <moose/json_archive.h>
 #include <moose/moose.h>
 
 auto const jsonInputData = R"""(
