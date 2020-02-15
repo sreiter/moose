@@ -7,15 +7,7 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
-
-/// Declares an exception class. baseClass should derive be moose::Exception or a derived class.
-#define DECLARE_CUSTOM_EXCEPTION(className, baseClass) \
-  class className : public baseClass {\
-  public:\
-      className () : baseClass (#className) {}\
-  protected:\
-      className (const char* derivedClassName) : baseClass (derivedClassName) {}\
-  }; 
+#include <typeinfo>
 
 namespace moose {
 
@@ -23,26 +15,23 @@ namespace moose {
 class Exception : public std::runtime_error
 {
 public:
-  Exception ()
-    : std::runtime_error ("")
-    , m_what ("Exception: ")
-  {}
+  Exception () : std::runtime_error ("") {}
 
   const char* what () const noexcept override {return m_what.c_str();}
 
   template <class T>
-  Exception& operator << (const T& t)    {m_what.append (to_string (t)); return *this;}
-  Exception& operator << (const char* t) {m_what.append (t); return *this;}
+  Exception& operator << (const T& t)    {what ().append (to_string (t)); return *this;}
 
-protected:
-  Exception (const char* derivedClassName)
-    : std::runtime_error ("")
-    , m_what (derivedClassName)
-  {
-    m_what.append (": ");
-  }
+  Exception& operator << (const char* t) {what ().append (t); return *this;}
 
 private:
+  auto what () -> std::string&
+  {
+    if (m_what.empty ())
+      m_what.append (typeid (*this).name ()).append (": ");
+    return m_what;
+  }
+
   template <class T>
   auto to_string (const T& t) const -> std::string
   {
@@ -77,7 +66,7 @@ private:
   std::string m_what;
 };
 
-DECLARE_CUSTOM_EXCEPTION (ArchiveError, Exception);
-DECLARE_CUSTOM_EXCEPTION (FactoryError, Exception);
+class ArchiveError : public Exception {};
+class FactoryError : public Exception {};
 
 }// end of namespace moose
