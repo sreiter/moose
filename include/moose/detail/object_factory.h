@@ -10,7 +10,7 @@
 #include <type_traits>
 #include <vector>
 #include <moose/exceptions.h>
-#include <moose/detail/serialize.h>
+#include <moose/serialize.h>
 
 namespace moose
 {
@@ -22,17 +22,29 @@ namespace moose::detail
 
 class ObjectFactory {
 public:
-
   template <class T> static
   void register_type (std::string name)
   {
-    add_entry<T> (name);
+    add_entry<T> (std::move (name), &CallSerialize<T>);
   }
 
   template <class T, class TBase1, class... TBaseOthers> static
   void register_type (std::string name)
   {
-    Entry& e = add_entry<T>(name);
+    Entry& e = add_entry<T>(std::move (name), &CallSerialize<T>);
+    add_base_class<TBase1, TBaseOthers ...> (e);
+  }
+
+  template <class T> static
+  void register_empty_type (std::string name)
+  {
+    add_entry<T> (std::move (name), nullptr);
+  }
+
+  template <class T, class TBase1, class... TBaseOthers> static
+  void register_empty_type (std::string name)
+  {
+    Entry& e = add_entry<T>(std::move (name), nullptr);
     add_base_class<TBase1, TBaseOthers ...> (e);
   }
 
@@ -72,7 +84,8 @@ public:
       throw FactoryError () << "Can't create object for unregistered type '" << name << "'";
 
     Entry& e = i->second;
-    e.serializeFnc(ar, b);
+    if (e.serializeFnc != nullptr)
+      e.serializeFnc (ar, b);
   }
 
 private:
@@ -117,25 +130,25 @@ private:
 
   template <class T>
   static typename std::enable_if <!std::is_abstract <T>::value, Entry&>::type
-  add_entry (std::string name)
+  add_entry (std::string name, serialize_fnc_t serializeFnc)
   {
     Entry& e = entry_map()[name];
     typename_map()[typeid(T).hash_code()] = name;
-    e.name = name;
+    e.name = std::move (name);
     e.createFnc = &CreateFunc<T>;
-    e.serializeFnc = &CallSerialize<T>;
+    e.serializeFnc = serializeFnc;
     return e;
   }
 
   template <class T>
   static typename std::enable_if <std::is_abstract <T>::value, Entry&>::type
-  add_entry (std::string name)
+  add_entry (std::string name, serialize_fnc_t serializeFnc)
   {
     Entry& e = entry_map()[name];
     typename_map()[typeid(T).hash_code()] = name;
-    e.name = name;
+    e.name = std::move (name);
     e.createFnc = NULL;
-    e.serializeFnc = &CallSerialize<T>;
+    e.serializeFnc = serializeFnc;
     return e;
   }
 

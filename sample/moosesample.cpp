@@ -35,7 +35,6 @@ class ClassA : public BaseClass {
     {
       ar("value", m_value);
     }
-
   private:
     std::string m_value;
 };
@@ -56,7 +55,7 @@ int main (int, char**)
 
   try
   {
-    moose::RegisterType <BaseClass> ("BaseClass");
+    moose::RegisterEmptyType <BaseClass> ("BaseClass");
     moose::RegisterType <ClassA, BaseClass> ("ClassA");
     moose::RegisterType <ClassB, BaseClass> ("ClassB");
 
