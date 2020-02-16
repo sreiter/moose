@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <typeinfo>
+// #include <typeinfo>
 #include <type_traits>
 
 #include <moose/object_factory.h>
@@ -16,41 +16,41 @@ namespace moose
 {
 
 template <class T>
-void ObjectFactory::register_type (std::string name)
+void ObjectFactory::add (std::string name)
 {
-  add_entry<T> (std::move (name), &CallSerialize<T>);
+  add <T> (std::move (name), &CallSerialize<T>);
 }
 
 template <class T, class TBase1, class... TBaseOthers>
-void ObjectFactory::register_type (std::string name)
+void ObjectFactory::add (std::string name)
 {
-  Entry& e = add_entry<T>(std::move (name), &CallSerialize<T>);
-  add_base_class<TBase1, TBaseOthers ...> (e);
+  Type& type = add <T>(std::move (name), &CallSerialize<T>);
+  add_base_class<TBase1, TBaseOthers ...> (type);
 }
 
 template <class T>
-void ObjectFactory::register_empty_type (std::string name)
+void ObjectFactory::add_without_serialize (std::string name)
 {
-  add_entry<T> (std::move (name), nullptr);
+  add <T> (std::move (name), nullptr);
 }
 
 template <class T, class TBase1, class... TBaseOthers>
-void ObjectFactory::register_empty_type (std::string name)
+void ObjectFactory::add_without_serialize (std::string name)
 {
-  Entry& e = add_entry<T>(std::move (name), nullptr);
-  add_base_class<TBase1, TBaseOthers ...> (e);
+  Type& type = add <T>(std::move (name), nullptr);
+  add_base_class<TBase1, TBaseOthers ...> (type);
 }
 
 template <class TBase>
 TBase* ObjectFactory::create (const std::string& name)
 {
   using namespace std;
-  entry_map_t::iterator i = entry_map().find(name);
-  if (i == entry_map().end())
+  type_map_t::iterator i = type_map().find(name);
+  if (i == type_map().end())
     throw FactoryError () << "Can't create object for unregistered type '" << name<< "'";
 
-  Entry& e = i->second;
-  if (!e.createFnc)
+  Type& type = i->second;
+  if (!type.createFnc)
     throw FactoryError () << "Can't create instance of abstract type '" << name << "'";
 
 //  Make sure that we may convert the type we intend to create to 'TBase*'
@@ -60,25 +60,25 @@ TBase* ObjectFactory::create (const std::string& name)
                           << typeid(TBase).name() << "'";
 
 
-  if ((name != baseName) && !is_base(e, baseName))
+  if ((name != baseName) && !is_base(type, baseName))
     throw FactoryError () << "Can't convert type '" << name << "' to type '" << baseName << "' ";
 
 //todo: this may cause problem in cases of multiple inheritance.
 //    Think abount storing cast-methods between types and registered base classes.
-  return reinterpret_cast<TBase*> (e.createFnc());
+  return reinterpret_cast<TBase*> (type.createFnc());
 }
 
 template <class TBase>
 void ObjectFactory::call_serialize (const std::string& name, Archive& ar, TBase* b)
 {
   using namespace std;
-  entry_map_t::iterator i = entry_map().find(name);
-  if (i == entry_map().end())
+  type_map_t::iterator i = type_map().find(name);
+  if (i == type_map().end())
     throw FactoryError () << "Can't create object for unregistered type '" << name << "'";
 
-  Entry& e = i->second;
-  if (e.serializeFnc != nullptr)
-    e.serializeFnc (ar, b);
+  Type& type = i->second;
+  if (type.serializeFnc != nullptr)
+    type.serializeFnc (ar, b);
 }
 
 template <class T>
@@ -100,60 +100,61 @@ auto ObjectFactory::get_typename () -> std::string&
 }
 
 template <class T>
-auto ObjectFactory::add_entry (std::string name, serialize_fnc_t serializeFnc)
--> typename std::enable_if <!std::is_abstract <T>::value, Entry&>::type
+auto ObjectFactory::add (std::string name, serialize_fnc_t serializeFnc)
+-> typename std::enable_if <!std::is_abstract <T>::value, Type&>::type
 {
-  return add_entry <T> (std::move (name), serializeFnc, &CreateFunc <T>);
+  return add <T> (std::move (name), serializeFnc, &CreateFunc <T>);
 }
 
 template <class T>
-auto ObjectFactory::add_entry (std::string name, serialize_fnc_t serializeFnc)
--> typename std::enable_if <std::is_abstract <T>::value, Entry&>::type
+auto ObjectFactory::add (std::string name, serialize_fnc_t serializeFnc)
+-> typename std::enable_if <std::is_abstract <T>::value, Type&>::type
 {
-  return add_entry <T> (std::move (name), serializeFnc, nullptr);
+  return add <T> (std::move (name), serializeFnc, nullptr);
 }
 
 template <class T>
-auto ObjectFactory::add_entry (std::string name, serialize_fnc_t serializeFnc, create_fnc_t createFnc)
--> Entry&
+auto ObjectFactory::add (std::string name, serialize_fnc_t serializeFnc, create_fnc_t createFnc)
+-> Type&
 {
-  Entry& e = entry_map()[name];
+  Type& type = type_map()[name];
   typename_map()[typeid(T).hash_code()] = name;
-  e.name = std::move (name);
-  e.createFnc = createFnc;
-  e.serializeFnc = serializeFnc;
-  return e;
+  type.name = std::move (name);
+  type.createFnc = createFnc;
+  type.serializeFnc = serializeFnc;
+  return type;
 }
 
 template <class T>
-void ObjectFactory::add_base_class (Entry& e)
+void ObjectFactory::add_base_class (Type& type)
 {
   using namespace std;
   const std::string& baseName = get_typename<T>();
   if (baseName.empty())
     throw FactoryError () << "Can't associate unregistered base class of type '"
-                          << typeid(T).name() << "' with newly registered type '" << e.name << "'";
+                          << typeid(T).name() << "' with newly registered type '"
+                          << type.name << "'";
 
-  e.baseClasses.push_back(baseName);
+  type.baseClasses.push_back(baseName);
 }
 
 template <class HEAD, class TBase2, class... TBaseOthers>
-void ObjectFactory::add_base_class (Entry& e)
+void ObjectFactory::add_base_class (Type& type)
 {
-  add_base_class <HEAD> (e);
-  add_base_class <TBase2, TBaseOthers...> (e);
+  add_base_class <HEAD> (type);
+  add_base_class <TBase2, TBaseOthers...> (type);
 }
 
 template <class... T>
-void RegisterType (std::string name)
+void AddType (std::string name)
 {
-  ObjectFactory::register_type <T...>(std::move (name));
+  ObjectFactory::add <T...>(std::move (name));
 }
 
 template <class... T>
-void RegisterEmptyType (std::string name)
+void AddTypeWithoutSerialize (std::string name)
 {
-  ObjectFactory::register_empty_type <T...>(std::move (name));
+  ObjectFactory::add_without_serialize <T...>(std::move (name));
 }
 
 }// end of namespace moose

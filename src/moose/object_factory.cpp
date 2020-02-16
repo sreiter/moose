@@ -18,9 +18,9 @@ auto ObjectFactory::inst () -> ObjectFactory&
   static ObjectFactory of; return of;
 }
 
-auto ObjectFactory::entry_map () -> entry_map_t&
+auto ObjectFactory::type_map () -> type_map_t&
 {
-  return inst().m_entryMap;
+  return inst().m_typeMap;
 }
 
 auto ObjectFactory::typename_map () -> typename_map_t&
@@ -28,15 +28,15 @@ auto ObjectFactory::typename_map () -> typename_map_t&
   return inst().m_typenameMap;
 }
 
-bool ObjectFactory::is_base (Entry& e, const std::string& baseName)
+bool ObjectFactory::is_base (Type& type, const std::string& baseName)
 {
-  for(auto& name : e.baseClasses)
+  for(auto& name : type.baseClasses)
   {
     if(name == baseName)
       return true;
 
-    Entry& e = entry_map()[name];
-    if(is_base(e, baseName))
+    Type& type = type_map()[name];
+    if(is_base(type, baseName))
       return true;
   }
 

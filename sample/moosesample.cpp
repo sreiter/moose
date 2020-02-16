@@ -54,9 +54,9 @@ int main (int, char**)
 
   try
   {
-    moose::RegisterEmptyType <BaseClass> ("BaseClass");
-    moose::RegisterType <ClassA, BaseClass> ("ClassA");
-    moose::RegisterType <ClassB, BaseClass> ("ClassB");
+    moose::AddTypeWithoutSerialize <BaseClass> ("BaseClass");
+    moose::AddType <ClassA, BaseClass> ("ClassA");
+    moose::AddType <ClassB, BaseClass> ("ClassB");
 
     auto archive = moose::JSONArchive::fromString (jsonInputData);
 
