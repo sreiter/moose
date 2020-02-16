@@ -15,14 +15,26 @@ namespace moose {
 class Exception : public std::runtime_error
 {
 public:
-  Exception () : std::runtime_error ("") {}
+  Exception () : std::runtime_error ("")
+  {}
 
-  const char* what () const noexcept override {return m_what.c_str();}
+  const char* what () const noexcept override
+  {
+    return m_what.c_str();
+  }
 
   template <class T>
-  Exception& operator << (const T& t)    {what ().append (to_string (t)); return *this;}
+  Exception& operator << (const T& t)
+  {
+    what ().append (to_string (t));
+    return *this;
+  }
 
-  Exception& operator << (const char* t) {what ().append (t); return *this;}
+  Exception& operator << (const char* t)
+  {
+    what ().append (t);
+    return *this;
+  }
 
 private:
   auto what () -> std::string&
