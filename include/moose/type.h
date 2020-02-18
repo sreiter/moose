@@ -62,4 +62,4 @@ private:
 
 }// end of namespace
 
-#include <moose/type_impl.h>
+#include <moose/type.i>

@@ -104,4 +104,4 @@ void AddTypeWithoutSerialize (std::string name);
 
 }// end of namespace
 
-#include <moose/object_factory_impl.h>
+#include <moose/object_factory.i>
