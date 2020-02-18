@@ -6,14 +6,14 @@
 #include <typeinfo>
 #include <type_traits>
 
-#include <moose/object_factory.h>
+#include <moose/types.h>
 #include <moose/exceptions.h>
 #include <moose/serialize.h>
 
 namespace moose
 {
 
-Type& ObjectFactory::get (std::string const& name)
+Type& Types::get (std::string const& name)
 {
   auto iter = type_name_map ().find (name);
   if (iter == type_name_map ().end ())
@@ -21,17 +21,17 @@ Type& ObjectFactory::get (std::string const& name)
   return *iter->second;
 }
 
-auto ObjectFactory::inst () -> ObjectFactory&
+auto Types::inst () -> Types&
 {
-  static ObjectFactory of; return of;
+  static Types of; return of;
 }
 
-auto ObjectFactory::type_name_map () -> type_name_map_t&
+auto Types::type_name_map () -> type_name_map_t&
 {
   return inst().m_typeNameMap;
 }
 
-auto ObjectFactory::type_hash_map () -> type_hash_map_t&
+auto Types::type_hash_map () -> type_hash_map_t&
 {
   return inst().m_typeHashMap;
 }

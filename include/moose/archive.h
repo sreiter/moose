@@ -7,7 +7,7 @@
 #include <map>
 #include <memory>
 #include <string>
-#include <moose/object_factory.h>
+#include <moose/types.h>
 
 namespace moose{
 
@@ -66,7 +66,7 @@ protected:
   template <class T>
   void read (const char* name, std::shared_ptr<T>& sp)
   {
-    auto const& type = ObjectFactory::get (get_type_name ());
+    auto const& type = Types::get (get_type_name ());
     if(sp == nullptr)
       sp = type.make_shared <T> ();
 
@@ -76,7 +76,7 @@ protected:
   template <class T>
   void read (const char* name, std::unique_ptr<T>& up)
   {
-    auto const& type = ObjectFactory::get (get_type_name ());
+    auto const& type = Types::get (get_type_name ());
     if(up == nullptr)
       up = type.make_unique <T> ();
 
@@ -86,7 +86,7 @@ protected:
   template <class T>
   void read (const char* name, T*& p)
   {
-    auto const& type = ObjectFactory::get (get_type_name ());
+    auto const& type = Types::get (get_type_name ());
     if(!p)
       p = type.make_raw <T> ();
     type.serialize (*this, *p);

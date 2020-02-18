@@ -6,4 +6,4 @@
 
 #include <moose/json_archive.h>
 #include <moose/serialize.h>
-#include <moose/object_factory.h>
+#include <moose/types.h>

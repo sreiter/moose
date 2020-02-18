@@ -16,7 +16,7 @@ namespace moose
 class Archive;
 class Type;
 
-class ObjectFactory
+class Types
 {
 public:
   template <class T>
@@ -49,7 +49,7 @@ private:
   using types_t = std::vector <std::shared_ptr <Type>>;
 
 private:
-  ObjectFactory () = default;
+  Types () = default;
 
   template <class T>
   static void* CreateFunc ();
@@ -57,7 +57,7 @@ private:
   template <class T>
   static void CallSerialize (Archive& ar, void* val);
 
-  static ObjectFactory& inst ();
+  static Types& inst ();
 
   static type_name_map_t& type_name_map ();
 
@@ -96,12 +96,6 @@ private:
   type_hash_map_t m_typeHashMap;
 };
 
-template <class... T>
-void AddType (std::string name);
-
-template <class... T>
-void AddTypeWithoutSerialize (std::string name);
-
 }// end of namespace
 
-#include <moose/object_factory.i>
+#include <moose/types.i>

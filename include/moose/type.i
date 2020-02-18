@@ -5,8 +5,8 @@
 #pragma once
 
 #include <moose/exceptions.h>
-#include <moose/object_factory.h>
 #include <moose/type.h>
+#include <moose/types.h>
 
 namespace moose
 {
@@ -49,7 +49,7 @@ void Type::serialize (Archive& ar, Base& b) const
 template <class Base>
 bool Type::has_base_class () const
 {
-  return has_base_class (ObjectFactory::get <Base> ().name ());
+  return has_base_class (Types::get <Base> ().name ());
 }
 
 template <class Base>
@@ -57,7 +57,7 @@ void Type::throw_on_bad_base_class (const char* what) const
 {
   if (!has_base_class <Base> ())
     throw TypeError () << "Cannot cast instance of type '" << m_name << "' to type '"
-                       << ObjectFactory::get <Base> ().name () << "' " << what;
+                       << Types::get <Base> ().name () << "' " << what;
 }
 
 }
