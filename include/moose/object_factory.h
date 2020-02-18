@@ -6,6 +6,7 @@
 #pragma once
 
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -13,42 +14,39 @@ namespace moose
 {
 
 class Archive;
+class Type;
 
 class ObjectFactory
 {
 public:
-  using create_fnc_t    = void* (*)();
-  using serialize_fnc_t = void (*)(Archive&, void*);
-
-  struct Type
-  {
-    create_fnc_t              createFnc;
-    serialize_fnc_t           serializeFnc;
-    std::string               name;
-    std::vector <std::string> baseClasses;
-  };
-
   template <class T>
-  static void add (std::string name);
+  static Type& add (std::string name);
 
   template <class T, class TBase1, class... TBaseOthers>
-  static void add (std::string name);
+  static Type& add (std::string name);
 
   template <class T>
-  static void add_without_serialize (std::string name);
+  static Type& add_without_serialize (std::string name);
 
   template <class T, class TBase1, class... TBaseOthers>
-  static void add_without_serialize (std::string name);
+  static Type& add_without_serialize (std::string name);
 
-  template <class TBase>
-  static TBase* create (const std::string& name);
+  template <class T>
+  static Type& get ();
 
-  template <class TBase>
-  static void call_serialize (const std::string& name, Archive& ar, TBase* b);
+  static Type& get (std::string const& name);
+
+  template <class T>
+  static std::shared_ptr <Type> get_shared ();
 
 private:
-  using type_map_t     = std::map <std::string, Type>;
-  using typename_map_t = std::map <std::size_t, std::string>;
+  using make_raw_fnc_t  = void* (*)();
+  using serialize_fnc_t = void (*)(Archive&, void*);
+
+  using type_name_map_t = std::map <std::string, std::shared_ptr <Type>>;
+  using type_hash_map_t = std::map <std::size_t, std::shared_ptr <Type>>;
+
+  using types_t = std::vector <std::shared_ptr <Type>>;
 
 private:
   ObjectFactory () = default;
@@ -61,36 +59,41 @@ private:
 
   static ObjectFactory& inst ();
 
-  static type_map_t& type_map ();
+  static type_name_map_t& type_name_map ();
 
-  static typename_map_t& typename_map ();
-
-  template <class T>
-  static std::string& get_typename ();
+  static type_hash_map_t& type_hash_map ();
 
   static bool is_base (Type& type, const std::string& baseName);
 
+  template <class T, class TBase1, class... TBaseOthers>
+  static Type&
+  add (std::string name, serialize_fnc_t serializeFnc);
+
   template <class T>
   static typename std::enable_if <!std::is_abstract <T>::value, Type&>::type
-  add (std::string name, serialize_fnc_t serializeFnc);
+  add (std::string name,
+       types_t baseClasses,
+       serialize_fnc_t serializeFnc);
 
   template <class T>
   static typename std::enable_if <std::is_abstract <T>::value, Type&>::type
-  add (std::string name, serialize_fnc_t serializeFnc);
+  add (std::string name,
+       types_t baseClasses,
+       serialize_fnc_t serializeFnc);
 
   template <class T>
-  static Type&
-  add (std::string name, serialize_fnc_t serializeFnc, create_fnc_t createFnc);
+  static void
+  add (std::shared_ptr <Type> type);
 
   template <class T>
-  static void add_base_class (Type& type);
+  static void collect_types (types_t& typesOut);
 
   template <class HEAD, class TBase2, class... TBaseOthers>
-  static void add_base_class (Type& type);
+  static void collect_types (types_t& typesOut);
 
 private:
-  type_map_t     m_typeMap;
-  typename_map_t m_typenameMap;
+  type_name_map_t m_typeNameMap;
+  type_hash_map_t m_typeHashMap;
 };
 
 template <class... T>

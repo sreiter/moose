@@ -8,7 +8,8 @@ project (libmoose)
 
 set (mooseSrc   src/moose/archive.cpp
                 src/moose/json_archive.cpp
-                src/moose/object_factory.cpp)
+                src/moose/object_factory.cpp
+                src/moose/type.cpp)
 
 add_library(moose STATIC ${mooseSrc})
 

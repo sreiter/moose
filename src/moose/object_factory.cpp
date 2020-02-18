@@ -13,34 +13,27 @@
 namespace moose
 {
 
+Type& ObjectFactory::get (std::string const& name)
+{
+  auto iter = type_name_map ().find (name);
+  if (iter == type_name_map ().end ())
+    throw FactoryError () << "Trying to access unregistered type '" << name << "'.";
+  return *iter->second;
+}
+
 auto ObjectFactory::inst () -> ObjectFactory&
 {
   static ObjectFactory of; return of;
 }
 
-auto ObjectFactory::type_map () -> type_map_t&
+auto ObjectFactory::type_name_map () -> type_name_map_t&
 {
-  return inst().m_typeMap;
+  return inst().m_typeNameMap;
 }
 
-auto ObjectFactory::typename_map () -> typename_map_t&
+auto ObjectFactory::type_hash_map () -> type_hash_map_t&
 {
-  return inst().m_typenameMap;
-}
-
-bool ObjectFactory::is_base (Type& type, const std::string& baseName)
-{
-  for(auto& name : type.baseClasses)
-  {
-    if(name == baseName)
-      return true;
-
-    Type& type = type_map()[name];
-    if(is_base(type, baseName))
-      return true;
-  }
-
-  return false;
+  return inst().m_typeHashMap;
 }
 
 }// end of namespace

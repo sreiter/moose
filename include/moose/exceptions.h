@@ -80,5 +80,6 @@ private:
 
 class ArchiveError : public Exception {};
 class FactoryError : public Exception {};
+class TypeError : public Exception {};
 
 }// end of namespace moose

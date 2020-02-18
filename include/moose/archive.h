@@ -66,27 +66,30 @@ protected:
   template <class T>
   void read (const char* name, std::shared_ptr<T>& sp)
   {
-    if(!sp){
-      sp = std::shared_ptr<T>(ObjectFactory::create<T>(get_type_name()));
-    }
-    ObjectFactory::call_serialize (get_type_name(), *this, sp.get());
+    auto const& type = ObjectFactory::get (get_type_name ());
+    if(sp == nullptr)
+      sp = type.make_shared <T> ();
+
+    type.serialize (*this, *sp);
   }
 
   template <class T>
   void read (const char* name, std::unique_ptr<T>& up)
   {
-    if(!up){
-      up = std::unique_ptr<T>(ObjectFactory::create<T>(get_type_name()));
-    }
-    ObjectFactory::call_serialize (get_type_name(), *this, up.get());
+    auto const& type = ObjectFactory::get (get_type_name ());
+    if(up == nullptr)
+      up = type.make_unique <T> ();
+
+    type.serialize (*this, *up);
   }
 
   template <class T>
   void read (const char* name, T*& p)
   {
+    auto const& type = ObjectFactory::get (get_type_name ());
     if(!p)
-      p = ObjectFactory::create<T>(get_type_name());
-    ObjectFactory::call_serialize (get_type_name(), *this, p);
+      p = type.make_raw <T> ();
+    type.serialize (*this, *p);
   }
 
 
