@@ -31,7 +31,7 @@ std::shared_ptr <Base> Type::make_shared () const
 template <class Base>
 std::unique_ptr <Base> Type::make_unique () const
 {
-  return std::unique_ptr <Base> (make_raw ());
+  return std::unique_ptr <Base> (make_raw <Base> ());
 }
 
 template <class Base>
