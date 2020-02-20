@@ -24,6 +24,26 @@ Another interesting application for **archives** is the generation and synchroni
 
 While already usable, **moose** is not yet a full grown library. Most parts are in an early prototype stage.
 
+## Example
+A small sample is provided in **moose/sample/moosesample.cpp**. The generated output may give a slightly better idea of the general idea behind **moose**.
+Please note that ```ClassA``` and ```ClassB``` derive from a common base class ```BaseClass``` and are serialized into an ```std::vector``` of ```std::shared_ptr <BaseClass>```.
+
+    moosesample - reading json input:
+    
+      {
+        "sampleArray": {"0": 100, "1": 101},
+        "objects": [
+            {"@type": "ClassA", "value": "hello"},
+            {"@type": "ClassB", "data": {"0": 102, "1": 103}}
+          ]
+      }
+    
+    Output from generated objects:
+    simpleArray: 100, 101
+    objects:
+      hello
+      102, 103
+
 ## Building moose as a stand-alone project
 **moose** features a CMake based build system. Create a 'build' directory in the **moose** root folder and from that build directory execute, e.g.:
 
