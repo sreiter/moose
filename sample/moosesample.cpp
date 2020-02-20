@@ -32,7 +32,7 @@ auto const jsonInputData = R"""(
     "sampleArray": {"0": 100, "1": 101},
     "objects": [
         {"@type": "ClassA", "value": "hello"},
-        {"@type": "ClassB", "data": {"0": 100, "1": 101}}
+        {"@type": "ClassB", "data": {"0": 102, "1": 103}}
       ]
   })""";
 
@@ -47,14 +47,17 @@ namespace moose{
 class BaseClass {
   public:
     virtual ~BaseClass () = default;
+    virtual std::string to_string () const = 0;
 };
 
 class ClassA : public BaseClass {
   public:
     void serialize (moose::Archive& ar)
-    {
-      ar("value", m_value);
-    }
+    {ar("value", m_value);}
+
+    std::string to_string () const override
+    {return m_value;}
+
   private:
     std::string m_value;
 };
@@ -62,16 +65,19 @@ class ClassA : public BaseClass {
 class ClassB : public BaseClass {
   public:
     void serialize (moose::Archive& ar)
-    {
-      ar("data", m_data);
-    }
+    {ar("data", m_data);}
+
+    std::string to_string () const override
+    {return std::to_string (m_data [0]).append (", ").append (std::to_string (m_data [1]));}
+
   private:
     std::array <int, 2> m_data;
 };
 
 int main (int, char**)
 {
-  std::cout << "moosesample" << std::endl;
+  std::cout << "moosesample - reading json input:" << std::endl;
+  std::cout << jsonInputData << std::endl << std::endl;
 
   try
   {
@@ -86,6 +92,14 @@ int main (int, char**)
 
     std::vector <std::shared_ptr <BaseClass>> objects;
     archive ("objects", objects);
+
+    std::cout << "Output from generated objects:" << std::endl;
+
+    std::cout << "simpleArray: " << iarray2 [0] << ", " << iarray2 [1] << std::endl;
+
+    std::cout << "objects:" << std::endl;
+    for (auto const& o : objects)
+      std::cout << "  " << o->to_string () << std::endl;
   }
 
   catch (std::runtime_error& e)
