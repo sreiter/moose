@@ -12,9 +12,6 @@
 #include <rapidjson/error/en.h>
 #include <rapidjson/istreamwrapper.h>
 
-using namespace std;
-using namespace moose; // currently required for throw macros. Should be removed.
-
 namespace
 {
 
@@ -106,7 +103,7 @@ JSONArchive& JSONArchive::operator = (JSONArchive&& other)
 
 void JSONArchive::parse_file (const char* filename)
 {
-  ifstream in (filename);
+  std::ifstream in (filename);
   if (!in) throw ArchiveError () << "File not found: " << filename;
 
   auto& d = m_parseData->new_document ();
@@ -117,11 +114,11 @@ void JSONArchive::parse_file (const char* filename)
     //  read offset of 'res'.
     in.clear();
     in.seekg(0);
-    string buf;
+    std::string buf;
     int counter = 0;
     int curLine = 0;
     while(!in.eof() && (counter <= (int)res.Offset())){
-      getline(in, buf, '\n');
+      std::getline(in, buf, '\n');
       counter += (int)buf.size() + 1; //count line-ending
       ++curLine;
     }
@@ -224,7 +221,7 @@ void JSONArchive::read (const char* name, double& val)
   if (entries.empty()) throw ArchiveError () << "JSONArchive::read: entry stack empty!";
 
   auto& e = entries.top();
-  cout << "<dbg> reading field '" << e.name() << "' as double" << endl;
+  std::cout << "<dbg> reading field '" << e.name() << "' as double" << std::endl;
   val = e.value().GetDouble();
 }
 
@@ -235,7 +232,7 @@ void JSONArchive::read (const char* name, std::string& val)
   if (entries.empty()) throw ArchiveError () << "JSONArchive::read: entry stack empty!";
 
   auto& e = entries.top();
-  cout << "<dbg> reading field '" << e.name() << "' as string" << endl;
+  std::cout << "<dbg> reading field '" << e.name() << "' as string" << std::endl;
   val = e.value().GetString();
 }
 
@@ -281,7 +278,7 @@ bool JSONEntry::iter_valid () const
     case Object: return m_val && (m_icurMem != m_val->MemberEnd());
     case Array: return m_val && (m_icurVal != m_val->End());
     case Value: return false;
-    default: throw ArchiveError () << "Invalid code path";
+    default: throw moose::ArchiveError () << "Invalid code path";
   }
 }
 
@@ -305,8 +302,8 @@ JSONEntry::val_t& JSONEntry::iter_value ()
   switch(m_type) {
     case Object: return m_icurMem->value;
     case Array: return *m_icurVal;
-    case Value: throw ArchiveError () << "Values don't have iterators which could be accessed.";
-    default: throw ArchiveError () << "Invalid code path";
+    case Value: throw moose::ArchiveError () << "Values don't have iterators which could be accessed.";
+    default: throw moose::ArchiveError () << "Invalid code path";
   }
 }
 
@@ -315,8 +312,8 @@ const char* JSONEntry::iter_name ()
   switch(m_type) {
     case Object: return m_icurMem->name.GetString();
     case Array: return "";
-    case Value: throw ArchiveError () << "Values don't have iterators which could be accessed.";
-    default: throw ArchiveError () << "Invalid code path";
+    case Value: throw moose::ArchiveError () << "Values don't have iterators which could be accessed.";
+    default: throw moose::ArchiveError () << "Invalid code path";
   }
 }
 
