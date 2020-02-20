@@ -13,97 +13,24 @@ namespace moose{
 
 class Archive {
 public:
-  Archive (bool reading) :
-    m_reading (reading)
-  {}
+  Archive (bool reading);
 
-  virtual ~Archive () {}
+  virtual ~Archive ();
 
   template <class T>
-  void operator () (const char* name, T& value)
-  {
-    if(m_reading){
-      begin_read (name);
-      read (name, value);
-      end_read (name);
-    }
-    else{
-      // write (name, value);
-    }
-  }
+  void operator () (const char* name, T& value);
 
   /// Read with default value
   template <class T>
-  void operator () (const char* name, T& value, const T& defVal)
-  {
-    try{begin_read (name);}
-    catch(ArchiveError&){
-      value = defVal;
-      return;
-    }
-
-    try{read (name, value);}
-    catch(ArchiveError&){value = defVal;}
-
-    end_read (name);
-  }
+  void operator () (const char* name, T& value, const T& defVal);
 
 protected:
-  virtual void begin_read (const char* name) {};
-  virtual void end_read (const char* name) {};
+  virtual void begin_read (const char* name);
+  virtual void end_read (const char* name);
 
-  virtual void begin_array_read (const char* name) {};
+  virtual void begin_array_read (const char* name);
   virtual bool array_has_next (const char* name) = 0;
-  virtual void end_array_read (const char* name) {};
-
-  template <class T>
-  void read (const char* name, T& value)
-  {
-  ///todo: check for POD types and raise an error (->unsupported POD type)
-    Serialize (*this, value);
-  }
-
-  template <class T>
-  void read (const char* name, std::shared_ptr<T>& sp)
-  {
-    auto const& type = Types::get (get_type_name ());
-    if(sp == nullptr)
-      sp = type.make_shared <T> ();
-
-    type.serialize (*this, *sp);
-  }
-
-  template <class T>
-  void read (const char* name, std::unique_ptr<T>& up)
-  {
-    auto const& type = Types::get (get_type_name ());
-    if(up == nullptr)
-      up = type.make_unique <T> ();
-
-    type.serialize (*this, *up);
-  }
-
-  template <class T>
-  void read (const char* name, T*& p)
-  {
-    auto const& type = Types::get (get_type_name ());
-    if(!p)
-      p = type.make_raw <T> ();
-    type.serialize (*this, *p);
-  }
-
-
-  template <class T>
-  void read (const char* name, std::vector<T>& value)
-  {
-    begin_array_read (name);
-    while(array_has_next (name)) {
-      T tmpVal;
-      (*this) ("", tmpVal);
-      value.push_back(tmpVal);
-    }
-    end_array_read (name);
-  }
+  virtual void end_array_read (const char* name);
 
   virtual std::string get_type_name () = 0;
 
@@ -124,6 +51,21 @@ protected:
 
   virtual void read (const char* name, std::string& val) = 0;
 
+protected:
+  template <class T>
+  void read (const char* name, T& value);
+
+  template <class T>
+  void read (const char* name, std::shared_ptr<T>& sp);
+
+  template <class T>
+  void read (const char* name, std::unique_ptr<T>& up);
+
+  template <class T>
+  void read (const char* name, T*& p);
+
+  template <class T>
+  void read (const char* name, std::vector<T>& value);
 
 private:
   template <class T>
@@ -133,3 +75,5 @@ private:
 };
 
 }// end of namespace moose
+
+#include <moose/archive.i>

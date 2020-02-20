@@ -6,12 +6,31 @@
 
 namespace moose{
 
+Archive::Archive (bool reading)
+  : m_reading (reading)
+{}
+
+Archive::~Archive ()
+{}
+
+void Archive::begin_read (const char* name)
+{}
+
+void Archive::end_read (const char* name)
+{}
+
+void Archive::begin_array_read (const char* name)
+{}
+
+void Archive::end_array_read (const char* name)
+{}
+
 template <class T>
 void Archive::read_double(const char* name, T& val)
 {
   double d;
   read (name, d);
-  val = (T)d;
+  val = static_cast <T> (d);
 }
 
 void Archive::read (const char* name, char& val)
