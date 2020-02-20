@@ -5,7 +5,6 @@
 
 #pragma once
 
-// #include <typeinfo>
 #include <type_traits>
 
 #include <moose/exceptions.h>
@@ -77,8 +76,8 @@ void Types::CallSerialize (Archive& ar, void* val)
 
 template <class T>
 auto Types::add (std::string name,
-                         types_t baseClasses,
-                         serialize_fnc_t serializeFnc)
+                 types_t baseClasses,
+                 serialize_fnc_t serializeFnc)
 -> typename std::enable_if <!std::is_abstract <T>::value, Type&>::type
 {
   auto type = std::make_shared <Type> (std::move (name),
@@ -92,14 +91,14 @@ auto Types::add (std::string name,
 
 template <class T>
 auto Types::add (std::string name,
-                         types_t baseClasses,
-                         serialize_fnc_t serializeFnc)
+                 types_t baseClasses,
+                 serialize_fnc_t serializeFnc)
 -> typename std::enable_if <std::is_abstract <T>::value, Type&>::type
 {
   auto type = std::make_shared <Type> (std::move (name),
                                        std::move (baseClasses),
                                        nullptr,
-                                       serializeFnc)
+                                       serializeFnc);
   auto& ref = *type;
   add <T> (std::move (type));
   return ref;
