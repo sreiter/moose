@@ -25,7 +25,7 @@ Another interesting application for **archives** is the generation and synchroni
 While already usable, **moose** is not yet a full grown library. Most parts are in an early prototype stage.
 
 ## Example
-A small sample is provided in **moose/sample/moosesample.cpp**. The generated output may give a slightly better idea of the general idea behind **moose**.
+A small sample is provided in **moose/sample/moosesample.cpp**. The generated output may give a rough idea of the general idea behind **moose**.
 Please note that ```ClassA``` and ```ClassB``` derive from a common base class ```BaseClass``` and are serialized into an ```std::vector``` of ```std::shared_ptr <BaseClass>```.
 
     moosesample - reading json input:
