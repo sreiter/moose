@@ -24,7 +24,6 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <stdexcept>
-#include <iostream>
 #include <fstream>
 #include <moose/exceptions.h>
 #include <moose/json_archive.h>
@@ -228,10 +227,9 @@ std::string JSONArchive::get_type_name ()
   if (entries.empty()) throw ArchiveError () << "JSONArchive::read: entry stack empty!";
 
   auto& value = entries.top().value();
-  if(value.HasMember("@type")){
-    // cout << "<dbg> returning Typename: " << value["@type"].GetString() << endl;
+  
+  if(value.HasMember("@type"))
     return value["@type"].GetString();
-  }
   else
     return "_unknown_";
 }
@@ -242,7 +240,6 @@ void JSONArchive::read (const char* name, double& val)
   if (entries.empty()) throw ArchiveError () << "JSONArchive::read: entry stack empty!";
 
   auto& e = entries.top();
-  std::cout << "<dbg> reading field '" << e.name() << "' as double" << std::endl;
   val = e.value().GetDouble();
 }
 
@@ -253,7 +250,6 @@ void JSONArchive::read (const char* name, std::string& val)
   if (entries.empty()) throw ArchiveError () << "JSONArchive::read: entry stack empty!";
 
   auto& e = entries.top();
-  std::cout << "<dbg> reading field '" << e.name() << "' as string" << std::endl;
   val = e.value().GetString();
 }
 
