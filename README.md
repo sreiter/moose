@@ -1,6 +1,6 @@
 # moose &nbsp;&nbsp;&nbsp;&nbsp; [![Build Status](https://travis-ci.com/sreiter/moose.svg?branch=master)](https://travis-ci.com/sreiter/moose)
 ## Introduction
-**moose** (**MO**ose **O**bject **SE**rialization) is a *BSD* licensed *C++* library for the serialization of complex data structures.
+**Moose** (**MO**ose **O**bject **SE**rialization) is a *BSD* licensed *C++* library for the serialization of complex data structures.
 
 **Moose** provides functionality to create and populate instances of complex *C++* data structures, e.g., from **.json** files.
 By specifying properties and by optionally annotating objects with some keywords (e.g. ```"@type": "SomeDerivedClass"```), users can create human readable
@@ -20,12 +20,12 @@ one can add serialization support for custom types.
 
 The implementation of **moose** is kept simple on purpose to allow users of the library to easily create **custom archives**, which may be used to support more file formats.
 
-Another interesting application for **archives** is the generation and synchronization **GUI** elements given a serializable object.
+Another interesting application for **archives** is the generation and synchronization of **GUI** elements given a serializable object.
 
 While already usable, **moose** is not yet a full grown library. Most parts are in an early prototype stage.
 
 ## Example
-A small sample is provided in **moose/sample/moosesample.cpp**. The generated output may give a rough idea of the general idea behind **moose**.
+A small sample is provided in **moose/sample/moosesample.cpp**. The generated output shown below may give a rough idea of the general idea behind **moose**.
 Please note that ```ClassA``` and ```ClassB``` derive from a common base class ```BaseClass``` and are serialized into an ```std::vector``` of ```std::shared_ptr <BaseClass>```.
 
     moosesample - reading json input:
@@ -92,5 +92,4 @@ Necessary include directories will be automatically added to your target.
     ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
     (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
     THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-    
-    Please note that **moose** is deployed with the open source library **rapidjson** (MIT license).
+Please note that **moose** is deployed with the open source library **rapidjson** (MIT license).
