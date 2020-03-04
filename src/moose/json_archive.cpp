@@ -106,12 +106,12 @@ JSONArchive JSONArchive::fromString (const char* str)
 }
 
 JSONArchive::JSONArchive ()
-  : Archive (true)
+  : Archive (Archive::Mode::Read)
   , m_parseData (std::make_shared <ParseData> ())
 {}
 
 JSONArchive::JSONArchive (JSONArchive&& other)
-  : Archive (true)
+  : Archive (Archive::Mode::Read)
   , m_parseData (std::move (other.m_parseData))
 {}
 

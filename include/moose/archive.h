@@ -30,11 +30,20 @@
 #include <string>
 #include <moose/types.h>
 
-namespace moose{
+namespace moose
+{
 
-class Archive {
+class Archive
+{
 public:
-  Archive (bool reading);
+  enum class Mode
+  {
+    Read,
+    Write
+  };
+
+public:
+  Archive (Mode mode);
 
   virtual ~Archive ();
 
@@ -44,6 +53,8 @@ public:
   /// Read with default value
   template <class T>
   void operator () (const char* name, T& value, const T& defVal);
+
+  Mode mode () const;
 
 protected:
   virtual void begin_read (const char* name);
@@ -92,7 +103,7 @@ private:
   template <class T>
   void read_double(const char* name, T& val);
 
-  bool m_reading;
+  Mode m_mode;
 };
 
 }// end of namespace moose

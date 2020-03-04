@@ -27,13 +27,17 @@
 
 namespace moose{
 
-Archive::Archive (bool reading)
-  : m_reading (reading)
+Archive::Archive (Mode mode)
+  : m_mode (mode)
 {}
 
 Archive::~Archive ()
 {}
 
+auto Archive::mode () const -> Mode
+{
+  return m_mode;
+}
 void Archive::begin_read (const char* name)
 {}
 

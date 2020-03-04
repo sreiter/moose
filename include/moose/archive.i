@@ -33,7 +33,7 @@ namespace moose
 template <class T>
 void Archive::operator () (const char* name, T& value)
 {
-  if(m_reading)
+  if(m_mode == Mode::Read)
   {
     begin_read (name);
     read (name, value);
