@@ -56,6 +56,9 @@ public:
 
   Mode mode () const;
 
+  bool is_reading () const;
+  bool is_writing () const;
+  
 protected:
   virtual void begin_read (const char* name);
   virtual void end_read (const char* name);

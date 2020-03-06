@@ -38,6 +38,17 @@ auto Archive::mode () const -> Mode
 {
   return m_mode;
 }
+
+bool Archive::is_reading () const
+{
+  return mode () == Mode::Read;
+}
+
+bool Archive::is_writing () const
+{
+  return mode () == Mode::Write;
+}
+
 void Archive::begin_read (const char* name)
 {}
 
