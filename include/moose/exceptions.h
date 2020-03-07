@@ -33,10 +33,13 @@
 namespace moose {
 
 // moose exceptions derive from this class
+template <class Derived>
 class Exception : public std::runtime_error
 {
 public:
-  Exception () : std::runtime_error ("")
+  Exception ()
+    : std::runtime_error ("")
+    , m_what (std::string (typeid (Derived).name ()).append (": "))
   {}
 
   const char* what () const noexcept override
@@ -45,26 +48,19 @@ public:
   }
 
   template <class T>
-  Exception& operator << (const T& t)
+  Derived& operator << (const T& t)
   {
-    what ().append (to_string (t));
-    return *this;
+    m_what.append (to_string (t));
+    return *static_cast <Derived*> (this);
   }
 
-  Exception& operator << (const char* t)
+  Derived& operator << (const char* t)
   {
-    what ().append (t);
-    return *this;
+    m_what.append (t);
+    return *static_cast <Derived*> (this);
   }
 
 private:
-  auto what () -> std::string&
-  {
-    if (m_what.empty ())
-      m_what.append (typeid (*this).name ()).append (": ");
-    return m_what;
-  }
-
   template <class T>
   auto to_string (const T& t) const -> std::string
   {
@@ -99,8 +95,8 @@ private:
   std::string m_what;
 };
 
-class ArchiveError : public Exception {};
-class FactoryError : public Exception {};
-class TypeError : public Exception {};
+class ArchiveError : public Exception <ArchiveError> {};
+class FactoryError : public Exception <FactoryError> {};
+class TypeError : public Exception <TypeError> {};
 
 }// end of namespace moose
