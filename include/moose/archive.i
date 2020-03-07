@@ -27,6 +27,32 @@
 
 #include <moose/archive.h>
 
+namespace moose::detail
+{
+  
+template <class T, bool isPointer>
+struct InitialValue;
+
+template <class T>
+struct InitialValue <T, false>
+{
+  static T value () {return T {};}
+};
+
+template <class T>
+struct InitialValue <T, true>
+{
+  static T value () {return nullptr;}
+};
+
+template <class T>
+T initialValue ()
+{
+  return InitialValue <T, std::is_pointer <T>::value>::value ();
+}
+
+}// end of namespace
+
 namespace moose
 {
 
@@ -71,6 +97,15 @@ void Archive::operator () (const char* name, T& value, const T& defVal)
 }
 
 template <class T>
+Type const& Archive::concrete_type ()
+{
+  auto const typeName = get_type_name ();
+  if (typeName.empty ())
+    return Types::get <T> ();
+  return Types::get (typeName);
+}
+
+template <class T>
 void Archive::read (const char* name, T& value)
 {
 ///todo: check for POD types and raise an error (->unsupported POD type)
@@ -80,7 +115,7 @@ void Archive::read (const char* name, T& value)
 template <class T>
 void Archive::read (const char* name, std::shared_ptr<T>& sp)
 {
-  auto const& type = Types::get (get_type_name ());
+  auto const& type = concrete_type <T> ();
   if(sp == nullptr)
     sp = type.make_shared <T> ();
 
@@ -90,7 +125,7 @@ void Archive::read (const char* name, std::shared_ptr<T>& sp)
 template <class T>
 void Archive::read (const char* name, std::unique_ptr<T>& up)
 {
-  auto const& type = Types::get (get_type_name ());
+  auto const& type = concrete_type <T> ();
   if(up == nullptr)
     up = type.make_unique <T> ();
 
@@ -100,13 +135,12 @@ void Archive::read (const char* name, std::unique_ptr<T>& up)
 template <class T>
 void Archive::read (const char* name, T*& p)
 {
-  auto const& type = Types::get (get_type_name ());
+  auto const& type = concrete_type <T> ();
   if(!p)
     p = type.make_raw <T> ();
 
   type.serialize (*this, *p);
 }
-
 
 template <class T>
 void Archive::read (const char* name, std::vector<T>& value)
@@ -115,7 +149,7 @@ void Archive::read (const char* name, std::vector<T>& value)
 
   while(array_has_next (name))
   {
-    T tmpVal;
+    T tmpVal = detail::initialValue <T> ();
     (*this) ("", tmpVal);
     value.push_back(tmpVal);
   }

@@ -72,6 +72,7 @@ protected:
 /// reads a number value (int, float, ...).
 /** Default implementation redirects to 'read(const char*, double&)'
  * \{ */
+  virtual void read (const char* name, bool& val);
   virtual void read (const char* name, char& val);
   virtual void read (const char* name, unsigned char& val);
   virtual void read (const char* name, int& val);
@@ -87,6 +88,13 @@ protected:
   virtual void read (const char* name, std::string& val) = 0;
 
 protected:
+/** If a concrete type is defined by the current entry in the archive,
+  the corresponding Type object is returned. If not, the Type object
+  corresponding to the given template argument is returned.
+*/
+  template <class T>
+  Type const& concrete_type ();
+
   template <class T>
   void read (const char* name, T& value);
 
