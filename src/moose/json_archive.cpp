@@ -237,7 +237,7 @@ std::string JSONArchive::get_type_name ()
   if(value.HasMember("@type"))
     return value["@type"].GetString();
   else
-    return "_unknown_";
+    return {};
 }
 
 void JSONArchive::read (const char* name, double& val)
