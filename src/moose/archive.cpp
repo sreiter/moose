@@ -69,6 +69,9 @@ void Archive::read_double(const char* name, T& val)
   val = static_cast <T> (d);
 }
 
+void Archive::read (const char* name, bool& val)
+{read_double (name, val);}
+
 void Archive::read (const char* name, char& val)
 {read_double (name, val);}
 
