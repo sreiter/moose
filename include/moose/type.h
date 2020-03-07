@@ -71,8 +71,8 @@ public:
   bool has_base_class (std::string const& name) const;
 
 private:
-  template <class Base>
-  void throw_on_bad_base_class (const char* what) const;
+  template <class TypeOrBase>
+  void throw_on_bad_class_hierarchy (const char* what) const;
 
 private:
   std::string         m_name;

@@ -38,7 +38,7 @@ Base* Type::make_raw () const
   if (m_makeRawFnc == nullptr)
     throw TypeError () << "Cannot create instance of abstract type " << m_name;
 
-  throw_on_bad_base_class <Base> ("while executing 'Type::make_raw'");
+  throw_on_bad_class_hierarchy <Base> ("while executing 'Type::make_raw'");
 
   return reinterpret_cast <Base*> (m_makeRawFnc ());
 }
@@ -62,7 +62,7 @@ void Type::serialize (Archive& ar, Base& b) const
     throw TypeError () << "Cannot call serialize on '" << m_name
                        << "'. The type was created without serialization capabilities.";
 
-  throw_on_bad_base_class <Base> ("while executing 'Type::serialize'");
+  throw_on_bad_class_hierarchy <Base> ("while executing 'Type::serialize'");
 
   return m_serializeFnc (ar, &b);
 }
@@ -73,12 +73,15 @@ bool Type::has_base_class () const
   return has_base_class (Types::get <Base> ().name ());
 }
 
-template <class Base>
-void Type::throw_on_bad_base_class (const char* what) const
+template <class TypeOrBase>
+void Type::throw_on_bad_class_hierarchy (const char* what) const
 {
-  if (!has_base_class <Base> ())
+  if (Types::get <TypeOrBase> ().name () != name () &&
+      !has_base_class <TypeOrBase> ())
+  {
     throw TypeError () << "Cannot cast instance of type '" << m_name << "' to type '"
-                       << Types::get <Base> ().name () << "' " << what;
+                       << Types::get <TypeOrBase> ().name () << "' " << what;
+  }
 }
 
 }
