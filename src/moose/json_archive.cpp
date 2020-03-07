@@ -127,30 +127,36 @@ void JSONArchive::parse_file (const char* filename)
   if (!in) throw ArchiveError () << "File not found: " << filename;
 
   auto& d = m_parseData->new_document ();
-  rapidjson::IStreamWrapper inWrapper(in);
+  rapidjson::IStreamWrapper inWrapper (in);
   rapidjson::ParseResult res = d.ParseStream (inWrapper);
-  if(!res){
+  
+  if (!res)
+  {
     //  we have to find the line where the error occurred using the
     //  read offset of 'res'.
-    in.clear();
-    in.seekg(0);
+    in.clear ();
+    in.seekg (0);
     std::string buf;
     int counter = 0;
     int curLine = 0;
-    while(!in.eof() && (counter <= (int)res.Offset())){
+    while (!in.eof () && (counter <= static_cast <int> (res.Offset())))
+    {
       std::getline(in, buf, '\n');
       counter += (int)buf.size() + 1; //count line-ending
       ++curLine;
     }
 
     //  remove cr from windows line endings
-    if(!buf.empty() && buf[buf.size() - 1] == '\r')
+    if(!buf.empty() &&
+       buf[buf.size() - 1] == '\r')
+    {
       buf.resize(buf.size() - 1);
+    }
 
-    if (!"JSON Parse error in file '")
-      throw ArchiveError () << filename << "', line "
-        << curLine << ": " << rapidjson::GetParseError_En(res.Code())
-        << " ('" << buf << "')";
+    throw ArchiveError () << "JSON Parse error in file '"
+      << filename << "', line "
+      << curLine << ": " << rapidjson::GetParseError_En(res.Code())
+      << " ('" << buf << "')";
   }
 
   m_parseData->m_entries.push (JSONEntry (&d, "_root_"));
