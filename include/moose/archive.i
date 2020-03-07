@@ -115,7 +115,7 @@ void Archive::read (const char* name, T& value)
 template <class T>
 void Archive::read (const char* name, std::shared_ptr<T>& sp)
 {
-  auto const& type = concrete_type <T> ();
+  Type const& type = concrete_type <T> ();
   if(sp == nullptr)
     sp = type.make_shared <T> ();
 
@@ -125,7 +125,7 @@ void Archive::read (const char* name, std::shared_ptr<T>& sp)
 template <class T>
 void Archive::read (const char* name, std::unique_ptr<T>& up)
 {
-  auto const& type = concrete_type <T> ();
+  Type const& type = concrete_type <T> ();
   if(up == nullptr)
     up = type.make_unique <T> ();
 
@@ -135,7 +135,7 @@ void Archive::read (const char* name, std::unique_ptr<T>& up)
 template <class T>
 void Archive::read (const char* name, T*& p)
 {
-  auto const& type = concrete_type <T> ();
+  Type const& type = concrete_type <T> ();
   if(!p)
     p = type.make_raw <T> ();
 
