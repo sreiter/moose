@@ -28,10 +28,17 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <moose/range.h>
 #include <moose/types.h>
 
 namespace moose
 {
+
+template <class T>
+struct RangeSerialization
+{
+  static constexpr bool enabled = false;
+};
 
 class Archive
 {
@@ -109,6 +116,9 @@ protected:
 
   template <class T>
   void read (const char* name, std::vector<T>& value);
+
+  template <class T>
+  void read (const char* name, Range<T>& value);
 
 private:
   template <class T>

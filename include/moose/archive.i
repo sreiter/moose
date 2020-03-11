@@ -46,9 +46,33 @@ struct InitialValue <T, true>
 };
 
 template <class T>
-T initialValue ()
+T GetInitialValue ()
 {
   return InitialValue <T, std::is_pointer <T>::value>::value ();
+}
+
+template <class T, bool rangeSerialization>
+struct ValueOrRange;
+
+template <class T>
+struct ValueOrRange <T, false>
+{
+  using type_t = T&;
+  static type_t value (T& t) {return t;}
+};
+
+template <class T>
+struct ValueOrRange <T, true>
+{
+  using type_t = decltype (make_range (T{}));
+  static type_t value (T& t) {return make_range (t);}
+};
+
+template <class T>
+auto GetValueOrRange (T& value)
+-> typename ValueOrRange <T, RangeSerialization <T>::enabled>::type_t
+{
+  return ValueOrRange <T, RangeSerialization <T>::enabled>::value (value);
 }
 
 }// end of namespace
@@ -62,7 +86,7 @@ void Archive::operator () (const char* name, T& value)
   if(m_mode == Mode::Read)
   {
     begin_read (name);
-    read (name, value);
+    read (name, detail::GetValueOrRange (value));
     end_read (name);
   }
   else
@@ -86,7 +110,7 @@ void Archive::operator () (const char* name, T& value, const T& defVal)
 
   try
   {
-    read (name, value);
+    read (name, detail::GetValueOrRange (value));
   }
   catch(ArchiveError&)
   {
@@ -149,11 +173,30 @@ void Archive::read (const char* name, std::vector<T>& value)
 
   while(array_has_next (name))
   {
-    T tmpVal = detail::initialValue <T> ();
+    T tmpVal = detail::GetInitialValue <T> ();
     (*this) ("", tmpVal);
     value.push_back(tmpVal);
   }
   
+  end_array_read (name);
+}
+
+template <class T>
+void Archive::read (const char* name, Range<T>& range)
+{
+  begin_array_read (name);
+
+  for (auto i = range.begin; i != range.end; ++i)
+  {
+    if (!array_has_next (name))
+      throw ArchiveError () << "Too few entries while reading range '" << name << "'";
+
+    (*this) ("", *i);
+  }
+
+  if (array_has_next (name))
+    throw ArchiveError () << "Too many entries while reading range '" << name << "'";
+
   end_array_read (name);
 }
 
