@@ -32,20 +32,20 @@
 namespace moose
 {
 
-class JSONArchive : public Archive {
+class JSONArchiveIn : public Archive {
 public:
-  static JSONArchive fromFile (const char* filename);
-  static JSONArchive fromString (const char* str);
+  static JSONArchiveIn fromFile (const char* filename);
+  static JSONArchiveIn fromString (const char* str);
 
 public:
-  JSONArchive ();
-  JSONArchive (JSONArchive const&) = delete;
-  JSONArchive (JSONArchive&& other);
+  JSONArchiveIn ();
+  JSONArchiveIn (JSONArchiveIn const&) = delete;
+  JSONArchiveIn (JSONArchiveIn&& other);
 
-  virtual ~JSONArchive () = default;
+  virtual ~JSONArchiveIn () = default;
 
-  JSONArchive& operator = (JSONArchive const&) = delete;
-  JSONArchive& operator = (JSONArchive&& other);
+  JSONArchiveIn& operator = (JSONArchiveIn const&) = delete;
+  JSONArchiveIn& operator = (JSONArchiveIn&& other);
 
   void parse_file (const char* filename);
   void parse_string (const char* str);

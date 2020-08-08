@@ -25,6 +25,6 @@
 
 #pragma once
 
-#include <moose/json_archive.h>
+#include <moose/json_archive_in.h>
 #include <moose/serialize.h>
 #include <moose/types.h>

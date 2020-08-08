@@ -28,7 +28,7 @@ cmake_minimum_required (VERSION 3.1)
 project (libmoose)
 
 set (mooseSrc   src/moose/archive.cpp
-                src/moose/json_archive.cpp
+                src/moose/json_archive_in.cpp
                 src/moose/type.cpp
                 src/moose/types.cpp)
 

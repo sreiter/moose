@@ -26,7 +26,7 @@
 #include <stdexcept>
 #include <fstream>
 #include <moose/exceptions.h>
-#include <moose/json_archive.h>
+#include <moose/json_archive_in.h>
 #include <rapidjson/document.h>
 #include <rapidjson/error/error.h>
 #include <rapidjson/error/en.h>
@@ -75,7 +75,7 @@ private:
 namespace moose
 {
 
-struct JSONArchive::ParseData
+struct JSONArchiveIn::ParseData
 {
   typedef rapidjson::Document doc_t;
 
@@ -85,43 +85,43 @@ struct JSONArchive::ParseData
   std::unique_ptr <doc_t> m_doc;
 };
 
-auto JSONArchive::ParseData::new_document () -> doc_t&
+auto JSONArchiveIn::ParseData::new_document () -> doc_t&
 {
   m_doc = std::unique_ptr<doc_t>(new doc_t);
   return *m_doc;
 }
 
-JSONArchive JSONArchive::fromFile (const char* filename)
+JSONArchiveIn JSONArchiveIn::fromFile (const char* filename)
 {
-  JSONArchive ar;
+  JSONArchiveIn ar;
   ar.parse_file (filename);
   return ar;
 }
 
-JSONArchive JSONArchive::fromString (const char* str)
+JSONArchiveIn JSONArchiveIn::fromString (const char* str)
 {
-  JSONArchive ar;
+  JSONArchiveIn ar;
   ar.parse_string (str);
   return ar;
 }
 
-JSONArchive::JSONArchive ()
+JSONArchiveIn::JSONArchiveIn ()
   : Archive ()
   , m_parseData (std::make_shared <ParseData> ())
 {}
 
-JSONArchive::JSONArchive (JSONArchive&& other)
+JSONArchiveIn::JSONArchiveIn (JSONArchiveIn&& other)
   : Archive ()
   , m_parseData (std::move (other.m_parseData))
 {}
 
-JSONArchive& JSONArchive::operator = (JSONArchive&& other)
+JSONArchiveIn& JSONArchiveIn::operator = (JSONArchiveIn&& other)
 {
   m_parseData = std::move (other.m_parseData);
   return *this;
 }
 
-void JSONArchive::parse_file (const char* filename)
+void JSONArchiveIn::parse_file (const char* filename)
 {
   std::ifstream in (filename);
   if (!in) throw ArchiveError () << "File not found: " << filename;
@@ -162,7 +162,7 @@ void JSONArchive::parse_file (const char* filename)
   m_parseData->m_entries.push (JSONEntry (&d, "_root_"));
 }
 
-void JSONArchive::parse_string (const char* str)
+void JSONArchiveIn::parse_string (const char* str)
 {
   auto& d = m_parseData->new_document ();
   rapidjson::ParseResult res = d.Parse (str);
@@ -174,12 +174,12 @@ void JSONArchive::parse_string (const char* str)
   m_parseData->m_entries.push (JSONEntry (&d, "_root_"));
 }
 
-auto JSONArchive::mode () const -> Mode
+auto JSONArchiveIn::mode () const -> Mode
 {
   return Mode::Read;
 }
 
-void JSONArchive::begin_archive (const char* name)
+void JSONArchiveIn::begin_archive (const char* name)
 {
   auto& entries = m_parseData->m_entries;
   if (entries.empty())
@@ -206,24 +206,24 @@ void JSONArchive::begin_archive (const char* name)
   }
 }
 
-void JSONArchive::begin_array_archive (const char* name)
+void JSONArchiveIn::begin_array_archive (const char* name)
 {
 }
 
-bool JSONArchive::read_array_has_next (const char* name)
+bool JSONArchiveIn::read_array_has_next (const char* name)
 {
   return m_parseData->m_entries.top().iter_valid();
 }
 
-void JSONArchive::end_array_archive (const char* name)
+void JSONArchiveIn::end_array_archive (const char* name)
 {
 }
 
-void JSONArchive::end_archive (const char* name)
+void JSONArchiveIn::end_archive (const char* name)
 {
   auto& entries = m_parseData->m_entries;
   if (entries.empty())
-    throw ArchiveError () << "JSONArchive::end_read called on empty stack for entry '" << name << "'";
+    throw ArchiveError () << "JSONArchiveIn::end_read called on empty stack for entry '" << name << "'";
 
   entries.pop();
 
@@ -232,10 +232,10 @@ void JSONArchive::end_archive (const char* name)
   }
 }
 
-std::string JSONArchive::get_type_name ()
+std::string JSONArchiveIn::get_type_name ()
 {
   auto& entries = m_parseData->m_entries;
-  if (entries.empty()) throw ArchiveError () << "JSONArchive::get_type_name: entry stack empty!";
+  if (entries.empty()) throw ArchiveError () << "JSONArchiveIn::get_type_name: entry stack empty!";
 
   auto& value = entries.top().value();
   
@@ -245,19 +245,19 @@ std::string JSONArchive::get_type_name ()
     return {};
 }
 
-void JSONArchive::archive (const char* name, double& val)
+void JSONArchiveIn::archive (const char* name, double& val)
 {
   auto& entries = m_parseData->m_entries;
-  if (entries.empty()) throw ArchiveError () << "JSONArchive::archive: entry stack empty!";
+  if (entries.empty()) throw ArchiveError () << "JSONArchiveIn::archive: entry stack empty!";
 
   auto& e = entries.top();
   val = e.value().GetDouble();
 }
 
-void JSONArchive::archive (const char* name, std::string& val)
+void JSONArchiveIn::archive (const char* name, std::string& val)
 {
   auto& entries = m_parseData->m_entries;
-  if (entries.empty()) throw ArchiveError () << "JSONArchive::archive: entry stack empty!";
+  if (entries.empty()) throw ArchiveError () << "JSONArchiveIn::archive: entry stack empty!";
 
   auto& e = entries.top();
   val = e.value().GetString();

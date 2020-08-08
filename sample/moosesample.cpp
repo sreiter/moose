@@ -85,7 +85,7 @@ int main (int, char**)
     moose::Types::add <ClassA, BaseClass> ("ClassA");
     moose::Types::add <ClassB, BaseClass> ("ClassB");
 
-    auto archive = moose::JSONArchive::fromString (jsonInputData);
+    auto archive = moose::JSONArchiveIn::fromString (jsonInputData);
 
     std::array <int, 2> iarray2;
     archive ("sampleArray", iarray2);
