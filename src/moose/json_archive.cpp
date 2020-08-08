@@ -106,12 +106,12 @@ JSONArchive JSONArchive::fromString (const char* str)
 }
 
 JSONArchive::JSONArchive ()
-  : Archive (Archive::Mode::Read)
+  : Archive ()
   , m_parseData (std::make_shared <ParseData> ())
 {}
 
 JSONArchive::JSONArchive (JSONArchive&& other)
-  : Archive (Archive::Mode::Read)
+  : Archive ()
   , m_parseData (std::move (other.m_parseData))
 {}
 
@@ -174,11 +174,16 @@ void JSONArchive::parse_string (const char* str)
   m_parseData->m_entries.push (JSONEntry (&d, "_root_"));
 }
 
-void JSONArchive::begin_read (const char* name)
+auto JSONArchive::mode () const -> Mode
+{
+  return Mode::Read;
+}
+
+void JSONArchive::begin_archive (const char* name)
 {
   auto& entries = m_parseData->m_entries;
   if (entries.empty())
-    throw ArchiveError () << "End of file reached. Couldn't read field '" << name << "'";
+    throw ArchiveError () << "End of file reached. Couldn't archive field '" << name << "'";
 
   auto& e = entries.top();
 
@@ -201,20 +206,20 @@ void JSONArchive::begin_read (const char* name)
   }
 }
 
-void JSONArchive::begin_array_read (const char* name)
+void JSONArchive::begin_array_archive (const char* name)
 {
 }
 
-bool JSONArchive::array_has_next (const char* name)
+bool JSONArchive::read_array_has_next (const char* name)
 {
   return m_parseData->m_entries.top().iter_valid();
 }
 
-void JSONArchive::end_array_read (const char* name)
+void JSONArchive::end_array_archive (const char* name)
 {
 }
 
-void JSONArchive::end_read (const char* name)
+void JSONArchive::end_archive (const char* name)
 {
   auto& entries = m_parseData->m_entries;
   if (entries.empty())
@@ -230,7 +235,7 @@ void JSONArchive::end_read (const char* name)
 std::string JSONArchive::get_type_name ()
 {
   auto& entries = m_parseData->m_entries;
-  if (entries.empty()) throw ArchiveError () << "JSONArchive::read: entry stack empty!";
+  if (entries.empty()) throw ArchiveError () << "JSONArchive::get_type_name: entry stack empty!";
 
   auto& value = entries.top().value();
   
@@ -240,20 +245,19 @@ std::string JSONArchive::get_type_name ()
     return {};
 }
 
-void JSONArchive::read (const char* name, double& val)
+void JSONArchive::archive (const char* name, double& val)
 {
   auto& entries = m_parseData->m_entries;
-  if (entries.empty()) throw ArchiveError () << "JSONArchive::read: entry stack empty!";
+  if (entries.empty()) throw ArchiveError () << "JSONArchive::archive: entry stack empty!";
 
   auto& e = entries.top();
   val = e.value().GetDouble();
 }
 
-
-void JSONArchive::read (const char* name, std::string& val)
+void JSONArchive::archive (const char* name, std::string& val)
 {
   auto& entries = m_parseData->m_entries;
-  if (entries.empty()) throw ArchiveError () << "JSONArchive::read: entry stack empty!";
+  if (entries.empty()) throw ArchiveError () << "JSONArchive::archive: entry stack empty!";
 
   auto& e = entries.top();
   val = e.value().GetString();

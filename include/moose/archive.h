@@ -28,6 +28,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <vector>
 #include <moose/range.h>
 #include <moose/types.h>
 
@@ -50,7 +51,7 @@ public:
   };
 
 public:
-  Archive (Mode mode);
+  Archive ();
 
   virtual ~Archive ();
 
@@ -61,38 +62,38 @@ public:
   template <class T>
   void operator () (const char* name, T& value, const T& defVal);
 
-  Mode mode () const;
+  virtual Mode mode () const = 0;
 
   bool is_reading () const;
   bool is_writing () const;
   
 protected:
-  virtual void begin_read (const char* name);
-  virtual void end_read (const char* name);
+  virtual void begin_archive (const char* name);
+  virtual void end_archive (const char* name);
 
-  virtual void begin_array_read (const char* name);
-  virtual bool array_has_next (const char* name) = 0;
-  virtual void end_array_read (const char* name);
+  virtual void begin_array_archive (const char* name);
+  virtual bool read_array_has_next (const char* name) = 0;
+  virtual void end_array_archive (const char* name);
 
   virtual std::string get_type_name () = 0;
 
-/// reads a number value (int, float, ...).
-/** Default implementation redirects to 'read(const char*, double&)'
+/// reads/writes a number value (int, float, ...).
+/** Default implementation redirects to 'apply (const char*, double&)'
  * \{ */
-  virtual void read (const char* name, bool& val);
-  virtual void read (const char* name, char& val);
-  virtual void read (const char* name, unsigned char& val);
-  virtual void read (const char* name, int& val);
-  virtual void read (const char* name, long int& val);
-  virtual void read (const char* name, long long int& val);
-  virtual void read (const char* name, unsigned int& val);
-  virtual void read (const char* name, unsigned long int& val);
-  virtual void read (const char* name, unsigned long long int& val);
-  virtual void read (const char* name, float& val);
-  virtual void read (const char* name, double& val) = 0;
+  virtual void archive (const char* name, bool& val);
+  virtual void archive (const char* name, char& val);
+  virtual void archive (const char* name, unsigned char& val);
+  virtual void archive (const char* name, int& val);
+  virtual void archive (const char* name, long int& val);
+  virtual void archive (const char* name, long long int& val);
+  virtual void archive (const char* name, unsigned int& val);
+  virtual void archive (const char* name, unsigned long int& val);
+  virtual void archive (const char* name, unsigned long long int& val);
+  virtual void archive (const char* name, float& val);
+  virtual void archive (const char* name, double& val) = 0;
 /** \} */
 
-  virtual void read (const char* name, std::string& val) = 0;
+  virtual void archive (const char* name, std::string& val) = 0;
 
 protected:
 /** If a concrete type is defined by the current entry in the archive,
@@ -103,26 +104,26 @@ protected:
   Type const& concrete_type ();
 
   template <class T>
-  void read (const char* name, T& value);
+  void archive (const char* name, T& value);
 
   template <class T>
-  void read (const char* name, std::shared_ptr<T>& sp);
+  void archive (const char* name, std::shared_ptr<T>& sp);
 
   template <class T>
-  void read (const char* name, std::unique_ptr<T>& up);
+  void archive (const char* name, std::unique_ptr<T>& up);
 
   template <class T>
-  void read (const char* name, T*& p);
+  void archive (const char* name, T*& p);
 
   template <class T>
-  void read (const char* name, std::vector<T>& value);
+  void archive (const char* name, std::vector<T>& value);
 
   template <class T>
-  void read (const char* name, Range<T>& value);
+  void archive (const char* name, Range<T>& value);
 
 private:
   template <class T>
-  void read_double(const char* name, T& val);
+  void archive_double(const char* name, T& val);
 
   Mode m_mode;
 };

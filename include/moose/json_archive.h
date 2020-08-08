@@ -50,18 +50,20 @@ public:
   void parse_file (const char* filename);
   void parse_string (const char* str);
 
-protected:
-  void begin_read (const char* name) override;
-  void end_read (const char* name) override;
+  Mode mode () const override;
 
-  void begin_array_read (const char* name) override;
-  bool array_has_next (const char* name) override;
-  void end_array_read (const char* name) override;
+protected:
+  void begin_archive (const char* name) override;
+  void end_archive (const char* name) override;
+
+  void begin_array_archive (const char* name) override;
+  bool read_array_has_next (const char* name) override;
+  void end_array_archive (const char* name) override;
 
   std::string get_type_name () override;
   
-  void read (const char* name, double& val) override;
-  void read (const char* name, std::string& val) override;
+  void archive (const char* name, double& val) override;
+  void archive (const char* name, std::string& val) override;
 
 private:
   struct ParseData;

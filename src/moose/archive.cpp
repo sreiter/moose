@@ -27,17 +27,9 @@
 
 namespace moose{
 
-Archive::Archive (Mode mode)
-  : m_mode (mode)
-{}
+Archive::Archive () = default;
 
-Archive::~Archive ()
-{}
-
-auto Archive::mode () const -> Mode
-{
-  return m_mode;
-}
+Archive::~Archive () = default;
 
 bool Archive::is_reading () const
 {
@@ -49,55 +41,62 @@ bool Archive::is_writing () const
   return mode () == Mode::Write;
 }
 
-void Archive::begin_read (const char* name)
+void Archive::begin_archive (const char* name)
 {}
 
-void Archive::end_read (const char* name)
+void Archive::end_archive (const char* name)
 {}
 
-void Archive::begin_array_read (const char* name)
+void Archive::begin_array_archive (const char* name)
 {}
 
-void Archive::end_array_read (const char* name)
+void Archive::end_array_archive (const char* name)
 {}
 
 template <class T>
-void Archive::read_double(const char* name, T& val)
+void Archive::archive_double(const char* name, T& val)
 {
-  double d;
-  read (name, d);
-  val = static_cast <T> (d);
+  if (is_reading ())
+  {
+    double d;
+    archive (name, d);
+    val = static_cast <T> (d);
+  }
+  else
+  {
+    double d = static_cast <double> (val);
+    archive (name, d);
+  }
 }
 
-void Archive::read (const char* name, bool& val)
-{read_double (name, val);}
+void Archive::archive (const char* name, bool& val)
+{archive_double (name, val);}
 
-void Archive::read (const char* name, char& val)
-{read_double (name, val);}
+void Archive::archive (const char* name, char& val)
+{archive_double (name, val);}
 
-void Archive::read (const char* name, unsigned char& val)
-{read_double (name, val);}
+void Archive::archive (const char* name, unsigned char& val)
+{archive_double (name, val);}
 
-void Archive::read (const char* name, int& val)
-{read_double (name, val);}
+void Archive::archive (const char* name, int& val)
+{archive_double (name, val);}
 
-void Archive::read (const char* name, long int& val)
-{read_double (name, val);}
+void Archive::archive (const char* name, long int& val)
+{archive_double (name, val);}
 
-void Archive::read (const char* name, long long int& val)
-{read_double (name, val);}
+void Archive::archive (const char* name, long long int& val)
+{archive_double (name, val);}
 
-void Archive::read (const char* name, unsigned int& val)
-{read_double (name, val);}
+void Archive::archive (const char* name, unsigned int& val)
+{archive_double (name, val);}
 
-void Archive::read (const char* name, unsigned long int& val)
-{read_double (name, val);}
+void Archive::archive (const char* name, unsigned long int& val)
+{archive_double (name, val);}
 
-void Archive::read (const char* name, unsigned long long int& val)
-{read_double (name, val);}
+void Archive::archive (const char* name, unsigned long long int& val)
+{archive_double (name, val);}
 
-void Archive::read (const char* name, float& val)
-{read_double (name, val);}
-
+void Archive::archive (const char* name, float& val)
+{archive_double (name, val);}
 
 }// end of namespace moose
