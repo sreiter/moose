@@ -25,6 +25,7 @@
 
 #pragma once
 
+#include <fstream>
 #include <stack>
 #include <memory>
 #include <moose/archive.h>
@@ -32,38 +33,33 @@
 namespace moose
 {
 
-class JSONArchiveIn : public Archive {
+class JSONArchiveOut : public Archive {
 public:
-  static JSONArchiveIn fromFile (const char* filename);
-  static JSONArchiveIn fromString (const char* str);
+  JSONArchiveOut (const char* filename);
+  JSONArchiveOut (JSONArchiveOut const&) = delete;
+  JSONArchiveOut (JSONArchiveOut&& other);
 
-public:
-  JSONArchiveIn ();
-  JSONArchiveIn (JSONArchiveIn const&) = delete;
-  JSONArchiveIn (JSONArchiveIn&& other);
+  virtual ~JSONArchiveOut ();
 
-  virtual ~JSONArchiveIn () = default;
-
-  JSONArchiveIn& operator = (JSONArchiveIn const&) = delete;
-  JSONArchiveIn& operator = (JSONArchiveIn&& other);
-
-  void parse_file (const char* filename);
-  void parse_string (const char* str);
+  JSONArchiveOut& operator = (JSONArchiveOut const&) = delete;
+  JSONArchiveOut& operator = (JSONArchiveOut&& other);
 
 protected:
   void begin_entry (const char* name, EntryType entryType) override;
   void end_entry (const char* name, EntryType entryType) override;
 
-  bool read_array_has_next (const char* name) override;
+  void write_type_name (std::string const& typeName) override;
 
-  std::string read_type_name () override;
-  
   void archive (const char* name, double& val) override;
   void archive (const char* name, std::string& val) override;
 
 private:
-  struct ParseData;
-  std::shared_ptr <ParseData> m_parseData;
+  void prepare_content ();
+  
+private:
+  std::ofstream m_out;
+  size_t m_currentDepth {0};
+  size_t m_lastWrittenDepth {0};
 };
 
 }// end of namespace moose

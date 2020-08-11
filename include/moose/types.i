@@ -83,6 +83,15 @@ std::shared_ptr <Type> Types::get_shared ()
 }
 
 template <class T>
+Type& Types::get_polymorphic (T& derived)
+{
+  auto iter = type_hash_map ().find (typeid (derived).hash_code ());
+  if (iter == type_hash_map ().end ())
+    throw FactoryError () << "Trying to access unregistered type '" << typeid (T).name () << "'.";
+  return *iter->second;
+}
+
+template <class T>
 void* Types::CreateFunc ()
 {
   return new T;

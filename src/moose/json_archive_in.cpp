@@ -106,12 +106,12 @@ JSONArchiveIn JSONArchiveIn::fromString (const char* str)
 }
 
 JSONArchiveIn::JSONArchiveIn ()
-  : Archive ()
+  : Archive (Mode::Read)
   , m_parseData (std::make_shared <ParseData> ())
 {}
 
 JSONArchiveIn::JSONArchiveIn (JSONArchiveIn&& other)
-  : Archive ()
+  : Archive (Mode::Read)
   , m_parseData (std::move (other.m_parseData))
 {}
 
@@ -174,12 +174,7 @@ void JSONArchiveIn::parse_string (const char* str)
   m_parseData->m_entries.push (JSONEntry (&d, "_root_"));
 }
 
-auto JSONArchiveIn::mode () const -> Mode
-{
-  return Mode::Read;
-}
-
-void JSONArchiveIn::begin_archive (const char* name)
+void JSONArchiveIn::begin_entry (const char* name, EntryType entryType)
 {
   auto& entries = m_parseData->m_entries;
   if (entries.empty())
@@ -206,20 +201,7 @@ void JSONArchiveIn::begin_archive (const char* name)
   }
 }
 
-void JSONArchiveIn::begin_array_archive (const char* name)
-{
-}
-
-bool JSONArchiveIn::read_array_has_next (const char* name)
-{
-  return m_parseData->m_entries.top().iter_valid();
-}
-
-void JSONArchiveIn::end_array_archive (const char* name)
-{
-}
-
-void JSONArchiveIn::end_archive (const char* name)
+void JSONArchiveIn::end_entry (const char* name, EntryType entryType)
 {
   auto& entries = m_parseData->m_entries;
   if (entries.empty())
@@ -232,10 +214,15 @@ void JSONArchiveIn::end_archive (const char* name)
   }
 }
 
-std::string JSONArchiveIn::get_type_name ()
+bool JSONArchiveIn::read_array_has_next (const char* name)
+{
+  return m_parseData->m_entries.top().iter_valid();
+}
+
+std::string JSONArchiveIn::read_type_name ()
 {
   auto& entries = m_parseData->m_entries;
-  if (entries.empty()) throw ArchiveError () << "JSONArchiveIn::get_type_name: entry stack empty!";
+  if (entries.empty()) throw ArchiveError () << "JSONArchiveIn::read_type_name: entry stack empty!";
 
   auto& value = entries.top().value();
   

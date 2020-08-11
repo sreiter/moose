@@ -59,6 +59,9 @@ public:
   template <class T>
   static std::shared_ptr <Type> get_shared ();
 
+  template <class T>
+  static Type& get_polymorphic (T& derived);
+
 private:
   using make_raw_fnc_t  = void* (*)();
   using serialize_fnc_t = void (*)(Archive&, void*);

@@ -27,30 +27,35 @@
 
 namespace moose{
 
-Archive::Archive () = default;
+Archive::Archive (Mode mode)
+  : m_mode (mode)
+{}
 
 Archive::~Archive () = default;
 
 bool Archive::is_reading () const
 {
-  return mode () == Mode::Read;
+  return m_mode == Mode::Read;
 }
 
 bool Archive::is_writing () const
 {
-  return mode () == Mode::Write;
+  return m_mode == Mode::Write;
 }
 
-void Archive::begin_archive (const char* name)
+void Archive::begin_entry (const char* name, EntryType entryType)
 {}
 
-void Archive::end_archive (const char* name)
+void Archive::end_entry (const char* name, EntryType entryType)
 {}
 
-void Archive::begin_array_archive (const char* name)
-{}
+bool Archive::read_array_has_next (const char* name)
+{return false;}
 
-void Archive::end_array_archive (const char* name)
+std::string Archive::read_type_name ()
+{return {};}
+
+void Archive::write_type_name (std::string const&)
 {}
 
 template <class T>

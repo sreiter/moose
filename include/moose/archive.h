@@ -34,100 +34,99 @@
 
 namespace moose
 {
-
-template <class T>
-struct RangeSerialization
-{
-  static constexpr bool enabled = false;
-};
-
-class Archive
-{
-public:
-  enum class Mode
+  class Archive
   {
-    Read,
-    Write
+  public:
+    enum class Mode
+    {
+      Read,
+      Write
+    };
+
+  public:
+    Archive (Mode mode);
+
+    virtual ~Archive ();
+
+    template <class T>
+    void operator () (const char* name, T& value);
+
+    /// Read with default value
+    template <class T>
+    void operator () (const char* name, T& value, const T& defVal);
+
+    bool is_reading () const;
+    bool is_writing () const;
+
+  protected:
+    enum class EntryType
+    {
+      StructOrValue,
+      Array
+    };
+
+  protected:
+    virtual void begin_entry (const char* name, EntryType entryType);
+    virtual void end_entry (const char* name, EntryType entryType);
+
+    virtual bool read_array_has_next (const char* name);
+
+    virtual std::string read_type_name ();
+    virtual void write_type_name (std::string const& typeName);
+
+  /// reads/writes a number value (int, float, ...).
+  /** Default implementation redirects to 'apply (const char*, double&)'
+   * \{ */
+    virtual void archive (const char* name, bool& val);
+    virtual void archive (const char* name, char& val);
+    virtual void archive (const char* name, unsigned char& val);
+    virtual void archive (const char* name, int& val);
+    virtual void archive (const char* name, long int& val);
+    virtual void archive (const char* name, long long int& val);
+    virtual void archive (const char* name, unsigned int& val);
+    virtual void archive (const char* name, unsigned long int& val);
+    virtual void archive (const char* name, unsigned long long int& val);
+    virtual void archive (const char* name, float& val);
+    virtual void archive (const char* name, double& val) = 0;
+  /** \} */
+
+    virtual void archive (const char* name, std::string& val) = 0;
+
+  protected:
+  /** If a concrete type is defined by the current entry in the archive,
+    the corresponding Type object is returned. If not, the Type object
+    corresponding to the given template argument is returned.
+  */
+    template <class T>
+    Type const& archive_type (T& instance);
+
+    template <class T>
+    void archive (const char* name, T& value);
+
+    template <class T>
+    void archive (const char* name, std::shared_ptr<T>& sp);
+
+    template <class T>
+    void archive (const char* name, std::unique_ptr<T>& up);
+
+    template <class T>
+    void archive (const char* name, T*& p);
+
+    template <class T>
+    void archive (const char* name, std::vector<T>& value);
+
+    template <class T>
+    void archive (const char* name, Range<T>& value);
+
+  private:
+    template <class T>
+    void archive_double(const char* name, T& val);
+
+    template <class T>
+    EntryType get_entry_type () const;
+
+    Mode m_mode;
   };
-
-public:
-  Archive ();
-
-  virtual ~Archive ();
-
-  template <class T>
-  void operator () (const char* name, T& value);
-
-  /// Read with default value
-  template <class T>
-  void operator () (const char* name, T& value, const T& defVal);
-
-  virtual Mode mode () const = 0;
-
-  bool is_reading () const;
-  bool is_writing () const;
-  
-protected:
-  virtual void begin_archive (const char* name);
-  virtual void end_archive (const char* name);
-
-  virtual void begin_array_archive (const char* name);
-  virtual bool read_array_has_next (const char* name) = 0;
-  virtual void end_array_archive (const char* name);
-
-  virtual std::string get_type_name () = 0;
-
-/// reads/writes a number value (int, float, ...).
-/** Default implementation redirects to 'apply (const char*, double&)'
- * \{ */
-  virtual void archive (const char* name, bool& val);
-  virtual void archive (const char* name, char& val);
-  virtual void archive (const char* name, unsigned char& val);
-  virtual void archive (const char* name, int& val);
-  virtual void archive (const char* name, long int& val);
-  virtual void archive (const char* name, long long int& val);
-  virtual void archive (const char* name, unsigned int& val);
-  virtual void archive (const char* name, unsigned long int& val);
-  virtual void archive (const char* name, unsigned long long int& val);
-  virtual void archive (const char* name, float& val);
-  virtual void archive (const char* name, double& val) = 0;
-/** \} */
-
-  virtual void archive (const char* name, std::string& val) = 0;
-
-protected:
-/** If a concrete type is defined by the current entry in the archive,
-  the corresponding Type object is returned. If not, the Type object
-  corresponding to the given template argument is returned.
-*/
-  template <class T>
-  Type const& concrete_type ();
-
-  template <class T>
-  void archive (const char* name, T& value);
-
-  template <class T>
-  void archive (const char* name, std::shared_ptr<T>& sp);
-
-  template <class T>
-  void archive (const char* name, std::unique_ptr<T>& up);
-
-  template <class T>
-  void archive (const char* name, T*& p);
-
-  template <class T>
-  void archive (const char* name, std::vector<T>& value);
-
-  template <class T>
-  void archive (const char* name, Range<T>& value);
-
-private:
-  template <class T>
-  void archive_double(const char* name, T& val);
-
-  Mode m_mode;
-};
-
 }// end of namespace moose
 
 #include <moose/archive.i>

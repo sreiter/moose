@@ -25,45 +25,25 @@
 
 #pragma once
 
-#include <stack>
-#include <memory>
-#include <moose/archive.h>
+#include <vector>
 
 namespace moose
 {
+  template <class T>
+  struct IsArray
+  {
+    static constexpr bool value = false;
+  };
 
-class JSONArchiveIn : public Archive {
-public:
-  static JSONArchiveIn fromFile (const char* filename);
-  static JSONArchiveIn fromString (const char* str);
+  template <class T>
+  struct RangeSerialization
+  {
+    static constexpr bool enabled = false;
+  };
 
-public:
-  JSONArchiveIn ();
-  JSONArchiveIn (JSONArchiveIn const&) = delete;
-  JSONArchiveIn (JSONArchiveIn&& other);
-
-  virtual ~JSONArchiveIn () = default;
-
-  JSONArchiveIn& operator = (JSONArchiveIn const&) = delete;
-  JSONArchiveIn& operator = (JSONArchiveIn&& other);
-
-  void parse_file (const char* filename);
-  void parse_string (const char* str);
-
-protected:
-  void begin_entry (const char* name, EntryType entryType) override;
-  void end_entry (const char* name, EntryType entryType) override;
-
-  bool read_array_has_next (const char* name) override;
-
-  std::string read_type_name () override;
-  
-  void archive (const char* name, double& val) override;
-  void archive (const char* name, std::string& val) override;
-
-private:
-  struct ParseData;
-  std::shared_ptr <ParseData> m_parseData;
-};
-
+  template <class T>
+  struct IsArray <std::vector <T>>
+  {
+    static constexpr bool value = true;
+  };
 }// end of namespace moose

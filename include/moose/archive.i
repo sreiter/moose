@@ -26,202 +26,212 @@
 #pragma once
 
 #include <moose/archive.h>
+#include <moose/type_traits.h>
 
 namespace moose::detail
 {
-  
-template <class T, bool isPointer>
-struct InitialValue;
+  template <class T, bool isPointer>
+  struct InitialValue;
 
-template <class T>
-struct InitialValue <T, false>
-{
-  static T value () {return T {};}
-};
+  template <class T>
+  struct InitialValue <T, false>
+  {
+    static T value () {return T {};}
+  };
 
-template <class T>
-struct InitialValue <T, true>
-{
-  static T value () {return nullptr;}
-};
+  template <class T>
+  struct InitialValue <T, true>
+  {
+    static T value () {return nullptr;}
+  };
 
-template <class T>
-T GetInitialValue ()
-{
-  return InitialValue <T, std::is_pointer <T>::value>::value ();
-}
+  template <class T>
+  T GetInitialValue ()
+  {
+    return InitialValue <T, std::is_pointer <T>::value>::value ();
+  }
 
-template <class T, bool rangeSerialization>
-struct ValueOrRange;
+  template <class T, bool rangeSerialization>
+  struct ValueOrRange;
 
-template <class T>
-struct ValueOrRange <T, false>
-{
-  using type_t = T&;
-  static type_t value (T& t) {return t;}
-};
+  template <class T>
+  struct ValueOrRange <T, false>
+  {
+    using type_t = T&;
+    static type_t value (T& t) {return t;}
+  };
 
-template <class T>
-struct ValueOrRange <T, true>
-{
-  using type_t = decltype (make_range (T{}));
-  static type_t value (T& t) {return make_range (t);}
-};
+  template <class T>
+  struct ValueOrRange <T, true>
+  {
+    using type_t = decltype (make_range (T{}));
+    static type_t value (T& t) {return make_range (t);}
+  };
 
-template <class T>
-auto GetValueOrRange (T& value)
--> typename ValueOrRange <T, RangeSerialization <T>::enabled>::type_t
-{
-  return ValueOrRange <T, RangeSerialization <T>::enabled>::value (value);
-}
-
+  template <class T>
+  auto GetValueOrRange (T& value)
+  -> typename ValueOrRange <T, RangeSerialization <T>::enabled>::type_t
+  {
+    return ValueOrRange <T, RangeSerialization <T>::enabled>::value (value);
+  }
 }// end of namespace
 
 namespace moose
 {
-
-template <class T>
-void Archive::operator () (const char* name, T& value)
-{
-  begin_archive (name);
-  archive (name, detail::GetValueOrRange (value));
-  end_archive (name);
-}
-
-template <class T>
-void Archive::operator () (const char* name, T& value, const T& defVal)
-{
-  try
+  template <class T>
+  void Archive::operator () (const char* name, T& value)
   {
-    begin_read (name);
-  }
-  catch(ArchiveError&)
-  {
-    value = defVal;
-    return;
+    auto const entryType = get_entry_type <T> ();
+
+    begin_entry (name, entryType);
+    archive (name, detail::GetValueOrRange (value));
+    end_entry (name, entryType);
   }
 
-  try
+  template <class T>
+  void Archive::operator () (const char* name, T& value, const T& defVal)
   {
-    read (name, detail::GetValueOrRange (value));
-  }
-  catch(ArchiveError&)
-  {
-    value = defVal;
-  }
-
-  end_read (name);
-}
-
-template <class T>
-Type const& Archive::concrete_type ()
-{
-  auto const typeName = get_type_name ();
-  if (typeName.empty ())
-    return Types::get <T> ();
-  return Types::get (typeName);
-}
-
-template <class T>
-void Archive::archive (const char* name, T& value)
-{
-///todo: check for POD types and raise an error (->unsupported POD type)
-  Serialize (*this, value);
-}
-
-template <class T>
-void Archive::archive (const char* name, std::shared_ptr<T>& sp)
-{
-  Type const& type = concrete_type <T> ();
-  if(sp == nullptr)
-  {
-    if (is_reading ())
-      sp = type.make_shared <T> ();
-    else
-      throw ArchiveError () << "JSONArchive::write cannot serialize nullptr: '" << name << "'";
-  }
-
-  type.serialize (*this, *sp);
-}
-
-template <class T>
-void Archive::archive (const char* name, std::unique_ptr<T>& up)
-{
-  Type const& type = concrete_type <T> ();
-  if(up == nullptr)
-  {
-    if (is_reading ())
-      up = type.make_unique <T> ();
-    else
-      throw ArchiveError () << "JSONArchive::write cannot serialize nullptr: '" << name << "'";
-  }
-
-  type.serialize (*this, *up);
-}
-
-template <class T>
-void Archive::archive (const char* name, T*& p)
-{
-  Type const& type = concrete_type <T> ();
-  if(p ==  nullptr)
-  {
-    if (is_reading ())
-      p = type.make_raw <T> ();
-    else
-      throw ArchiveError () << "JSONArchive::write cannot serialize nullptr: '" << name << "'";
-  }
-
-  type.serialize (*this, *p);
-}
-
-template <class T>
-void Archive::archive (const char* name, std::vector<T>& value)
-{
-  begin_array_archive (name);
-
-  if (is_reading ())
-  {
-    while(read_array_has_next (name))
+    try
     {
-      T tmpVal = detail::GetInitialValue <T> ();
-      (*this) ("", tmpVal);
-      value.push_back(tmpVal);
+      begin_read (name);
     }
-  }
-  else
-  {
-    for (auto& v : value)
-      (*this) ("", v);
-  }
-  
-  end_array_archive (name);
-}
-
-template <class T>
-void Archive::archive (const char* name, Range<T>& range)
-{
-  begin_array_archive (name);
-
-  if (is_reading ())
-  {
-    for (auto i = range.begin; i != range.end; ++i)
+    catch(ArchiveError&)
     {
-      if (!read_array_has_next (name))
-        throw ArchiveError () << "Too few entries while reading range '" << name << "'";
-
-      (*this) ("", *i);
+      value = defVal;
+      return;
     }
 
-    if (read_array_has_next (name))
-      throw ArchiveError () << "Too many entries while reading range '" << name << "'";
+    try
+    {
+      read (name, detail::GetValueOrRange (value));
+    }
+    catch(ArchiveError&)
+    {
+      value = defVal;
+    }
+
+    end_read (name);
   }
-  else
+
+  template <class T>
+  Type const& Archive::archive_type (T& instance)
   {
-    for (auto i = range.begin; i != range.end; ++i)
-      (*this) ("", *i);
+    if (is_writing ())
+    {
+      auto const& type = Types::get_polymorphic (instance);
+      write_type_name (type.name ());
+      return type;
+    }
+    else
+    {
+      auto const& typeName = read_type_name ();
+      if (typeName.empty ())
+        return Types::get <T> ();
+      return Types::get (typeName);
+    }
   }
 
-  end_array_archive (name);
-}
+  template <class T>
+  void Archive::archive (const char* name, T& value)
+  {
+  ///todo: check for POD types and raise an error (->unsupported POD type)
+    Serialize (*this, value);
+  }
 
+  template <class T>
+  void Archive::archive (const char* name, std::shared_ptr<T>& sp)
+  {
+    Type const& type = archive_type <T> (*sp);
+    if(sp == nullptr)
+    {
+      if (is_reading ())
+        sp = type.make_shared <T> ();
+      else
+        throw ArchiveError () << "JSONArchive::write cannot serialize nullptr: '" << name << "'";
+    }
+
+    type.serialize (*this, *sp);
+  }
+
+  template <class T>
+  void Archive::archive (const char* name, std::unique_ptr<T>& up)
+  {
+    Type const& type = archive_type <T> (*up);
+    if(up == nullptr)
+    {
+      if (is_reading ())
+        up = type.make_unique <T> ();
+      else
+        throw ArchiveError () << "JSONArchive::write cannot serialize nullptr: '" << name << "'";
+    }
+
+    type.serialize (*this, *up);
+  }
+
+  template <class T>
+  void Archive::archive (const char* name, T*& p)
+  {
+    Type const& type = archive_type <T> (*p );
+    if(p ==  nullptr)
+    {
+      if (is_reading ())
+        p = type.make_raw <T> ();
+      else
+        throw ArchiveError () << "JSONArchive::write cannot serialize nullptr: '" << name << "'";
+    }
+
+    type.serialize (*this, *p);
+  }
+
+  template <class T>
+  void Archive::archive (const char* name, std::vector<T>& value)
+  {
+    if (is_reading ())
+    {
+      while(read_array_has_next (name))
+      {
+        T tmpVal = detail::GetInitialValue <T> ();
+        (*this) ("", tmpVal);
+        value.push_back(tmpVal);
+      }
+    }
+    else
+    {
+      for (auto& v : value)
+        (*this) ("", v);
+    }
+  }
+
+  template <class T>
+  void Archive::archive (const char* name, Range<T>& range)
+  {
+    if (is_reading ())
+    {
+      for (auto i = range.begin; i != range.end; ++i)
+      {
+        if (!read_array_has_next (name))
+          throw ArchiveError () << "Too few entries while reading range '" << name << "'";
+
+        (*this) ("", *i);
+      }
+
+      if (read_array_has_next (name))
+        throw ArchiveError () << "Too many entries while reading range '" << name << "'";
+    }
+    else
+    {
+      for (auto i = range.begin; i != range.end; ++i)
+        (*this) ("", *i);
+    }
+  }
+
+  template <class T>
+  auto Archive::get_entry_type () const -> EntryType
+  {
+    auto const isArray = IsArray <T>::value ||
+                         moose::RangeSerialization <T>::enabled;
+
+    return isArray ? EntryType::Array
+                   : EntryType::StructOrValue;
+  }
 }// end of namespace moose
