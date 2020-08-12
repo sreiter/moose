@@ -25,6 +25,7 @@
 
 #pragma once
 
+#include <array>
 #include <string>
 #include <vector>
 
@@ -83,4 +84,9 @@ namespace moose
   template <class T>
   struct TypeTraits <std::vector <T>>
   {static constexpr EntryType entryType = EntryType::Vector;};
+
+  template <class T, size_t n>
+  struct TypeTraits <std::array <T, n>>
+  {static constexpr EntryType entryType = EntryType::Range;};
+
 }// end of namespace moose

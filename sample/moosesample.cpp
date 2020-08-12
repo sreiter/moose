@@ -29,20 +29,12 @@
 
 auto const jsonInputData = R"""(
   {
-    "sampleArray": {"0": 100, "1": 101},
+    "sampleArray": [100, 101],
     "objects": [
-        {"@type": "ClassA", "value": "hello"},
-        {"@type": "ClassB", "data": {"0": 102, "1": 103}}
-      ]
+      {"@type": "ClassA", "value": "hello"},
+      {"@type": "ClassB", "data": [102, 103]}
+    ]
   })""";
-
-namespace moose{
-  inline void Serialize (Archive& ar, std::array <int, 2>& v)
-  {
-    ar ("0", v[0]);
-    ar ("1", v[1]);
-  }
-}
 
 class BaseClass {
   public:
