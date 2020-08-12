@@ -30,6 +30,7 @@
 #include <string>
 #include <vector>
 #include <moose/range.h>
+#include <moose/type_traits.h>
 #include <moose/types.h>
 
 namespace moose
@@ -59,13 +60,6 @@ namespace moose
     bool is_writing () const;
 
   protected:
-    enum class EntryType
-    {
-      StructOrValue,
-      Array
-    };
-
-  protected:
     virtual void begin_entry (const char* name, EntryType entryType);
     virtual void end_entry (const char* name, EntryType entryType);
 
@@ -92,7 +86,11 @@ namespace moose
 
     virtual void archive (const char* name, std::string& val) = 0;
 
-  protected:
+  private:
+    /// Used to allow for different overloads based on the entryType.
+    template <EntryType entryType>
+    struct EntryTypeDummy {};
+
   /** If a concrete type is defined by the current entry in the archive,
     the corresponding Type object is returned. If not, the Type object
     corresponding to the given template argument is returned.
@@ -101,30 +99,30 @@ namespace moose
     Type const& archive_type (T& instance);
 
     template <class T>
-    void archive (const char* name, T& value);
+    void archive (const char* name, T& value, EntryTypeDummy <EntryType::Value>);
 
     template <class T>
-    void archive (const char* name, std::shared_ptr<T>& sp);
+    void archive (const char* name, T& value, EntryTypeDummy <EntryType::Struct>);
 
     template <class T>
-    void archive (const char* name, std::unique_ptr<T>& up);
+    void archive (const char* name, std::shared_ptr<T>& sp, EntryTypeDummy <EntryType::Struct>);
 
     template <class T>
-    void archive (const char* name, T*& p);
+    void archive (const char* name, std::unique_ptr<T>& up, EntryTypeDummy <EntryType::Struct>);
 
     template <class T>
-    void archive (const char* name, std::vector<T>& value);
+    void archive (const char* name, T*& p, EntryTypeDummy <EntryType::Struct>);
 
     template <class T>
-    void archive (const char* name, Range<T>& value);
+    void archive (const char* name, T& value, EntryTypeDummy <EntryType::Vector>);
 
-  private:
+    template <class T>
+    void archive (const char* name, T& value, EntryTypeDummy <EntryType::Range>);
+
     template <class T>
     void archive_double(const char* name, T& val);
 
-    template <class T>
-    EntryType get_entry_type () const;
-
+  private:
     Mode m_mode;
   };
 }// end of namespace moose

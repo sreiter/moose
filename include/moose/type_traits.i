@@ -25,42 +25,62 @@
 
 #pragma once
 
+#include <string>
+#include <vector>
+
+#include <moose/type_traits.h>
+
 namespace moose
 {
-  enum class EntryType
-  {
-    Struct,
-    Value,
-    Range,
-    Vector
-  };
+  template <>
+  struct TypeTraits <bool>
+  {static constexpr EntryType entryType = EntryType::Value;};
+
+  template <>
+  struct TypeTraits <char>
+  {static constexpr EntryType entryType = EntryType::Value;};
+
+  template <>
+  struct TypeTraits <unsigned char>
+  {static constexpr EntryType entryType = EntryType::Value;};
+
+  template <>
+  struct TypeTraits <int>
+  {static constexpr EntryType entryType = EntryType::Value;};
+
+  template <>
+  struct TypeTraits <long int>
+  {static constexpr EntryType entryType = EntryType::Value;};
+
+  template <>
+  struct TypeTraits <long long int>
+  {static constexpr EntryType entryType = EntryType::Value;};
+
+  template <>
+  struct TypeTraits <unsigned int>
+  {static constexpr EntryType entryType = EntryType::Value;};
+
+  template <>
+  struct TypeTraits <unsigned long int>
+  {static constexpr EntryType entryType = EntryType::Value;};
+
+  template <>
+  struct TypeTraits <unsigned long long int>
+  {static constexpr EntryType entryType = EntryType::Value;};
+
+  template <>
+  struct TypeTraits <float>
+  {static constexpr EntryType entryType = EntryType::Value;};
+
+  template <>
+  struct TypeTraits <double>
+  {static constexpr EntryType entryType = EntryType::Value;};
+
+  template <>
+  struct TypeTraits <std::string>
+  {static constexpr EntryType entryType = EntryType::Value;};
 
   template <class T>
-  struct TypeTraits
-  {
-    static constexpr EntryType entryType = EntryType::Struct;
-  };
-
-  /** Has to be specified for each type of \a EntryType::Vector which
-    does not contain a typedef \a value_type.
-  */
-  template <class T>
-  struct VectorTraits
-  {
-    using ValueType = typename T::value_type;
-  };
-
-  /** This method is called for each value which is deserialized as part of
-    a \a EntryType::Vector entry.
-
-    Overload it for your custom \a EntryType::Vector type, if it doesn't feature
-    a \a push_back method.
-  */
-  template <class Vector, class Value>
-  void VectorPushBack (Vector& vector, Value const& value)
-  {
-    vector.push_back (value);
-  }
+  struct TypeTraits <std::vector <T>>
+  {static constexpr EntryType entryType = EntryType::Vector;};
 }// end of namespace moose
-
-#include <moose/type_traits.i>

@@ -85,13 +85,13 @@ int main (int, char**)
     moose::Types::add <ClassA, BaseClass> ("ClassA");
     moose::Types::add <ClassB, BaseClass> ("ClassB");
 
-    auto archive = moose::JSONArchiveIn::fromString (jsonInputData);
+    auto archiveIn = moose::JSONArchiveIn::fromString (jsonInputData);
 
     std::array <int, 2> iarray2;
-    archive ("sampleArray", iarray2);
+    archiveIn ("sampleArray", iarray2);
 
     std::vector <std::shared_ptr <BaseClass>> objects;
-    archive ("objects", objects);
+    archiveIn ("objects", objects);
 
     std::cout << "Output from generated objects:" << std::endl;
 
@@ -100,6 +100,12 @@ int main (int, char**)
     std::cout << "objects:" << std::endl;
     for (auto const& o : objects)
       std::cout << "  " << o->to_string () << std::endl;
+
+    std::cout << std::endl;
+    std::cout << "Writing to file 'moosesample.json'" << std::endl;
+    moose::JSONArchiveOut archiveOut ("moosesample.json");
+    archiveOut ("sampleArray", iarray2);
+    archiveOut ("objects", objects);
   }
 
   catch (std::runtime_error& e)

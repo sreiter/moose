@@ -29,6 +29,7 @@ project (libmoose)
 
 set (mooseSrc   src/moose/archive.cpp
                 src/moose/json_archive_in.cpp
+                src/moose/json_archive_out.cpp
                 src/moose/type.cpp
                 src/moose/types.cpp)
 

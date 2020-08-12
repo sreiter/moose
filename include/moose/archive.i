@@ -50,30 +50,6 @@ namespace moose::detail
   {
     return InitialValue <T, std::is_pointer <T>::value>::value ();
   }
-
-  template <class T, bool rangeSerialization>
-  struct ValueOrRange;
-
-  template <class T>
-  struct ValueOrRange <T, false>
-  {
-    using type_t = T&;
-    static type_t value (T& t) {return t;}
-  };
-
-  template <class T>
-  struct ValueOrRange <T, true>
-  {
-    using type_t = decltype (make_range (T{}));
-    static type_t value (T& t) {return make_range (t);}
-  };
-
-  template <class T>
-  auto GetValueOrRange (T& value)
-  -> typename ValueOrRange <T, RangeSerialization <T>::enabled>::type_t
-  {
-    return ValueOrRange <T, RangeSerialization <T>::enabled>::value (value);
-  }
 }// end of namespace
 
 namespace moose
@@ -81,20 +57,20 @@ namespace moose
   template <class T>
   void Archive::operator () (const char* name, T& value)
   {
-    auto const entryType = get_entry_type <T> ();
+    static constexpr EntryType entryType = TypeTraits <T>::entryType;
 
     begin_entry (name, entryType);
-    archive (name, detail::GetValueOrRange (value));
+    archive (name, value, EntryTypeDummy <entryType> ());
     end_entry (name, entryType);
   }
 
   template <class T>
   void Archive::operator () (const char* name, T& value, const T& defVal)
   {
+    static constexpr EntryType entryType = TypeTraits <T>::entryType;
+
     try
-    {
-      begin_read (name);
-    }
+      begin_archive (name, entryType);
     catch(ArchiveError&)
     {
       value = defVal;
@@ -102,15 +78,11 @@ namespace moose
     }
 
     try
-    {
-      read (name, detail::GetValueOrRange (value));
-    }
+      archive (name, value, EntryTypeDummy <entryType> ());
     catch(ArchiveError&)
-    {
       value = defVal;
-    }
 
-    end_read (name);
+    end_archive (name, entryType);
   }
 
   template <class T>
@@ -132,14 +104,20 @@ namespace moose
   }
 
   template <class T>
-  void Archive::archive (const char* name, T& value)
+  void Archive::archive (const char* name, T& value, EntryTypeDummy <EntryType::Value>)
+  {
+    archive (name, value);
+  }
+
+  template <class T>
+  void Archive::archive (const char* name, T& value, EntryTypeDummy <EntryType::Struct>)
   {
   ///todo: check for POD types and raise an error (->unsupported POD type)
     Serialize (*this, value);
   }
 
   template <class T>
-  void Archive::archive (const char* name, std::shared_ptr<T>& sp)
+  void Archive::archive (const char* name, std::shared_ptr<T>& sp, EntryTypeDummy <EntryType::Struct>)
   {
     Type const& type = archive_type <T> (*sp);
     if(sp == nullptr)
@@ -154,7 +132,7 @@ namespace moose
   }
 
   template <class T>
-  void Archive::archive (const char* name, std::unique_ptr<T>& up)
+  void Archive::archive (const char* name, std::unique_ptr<T>& up, EntryTypeDummy <EntryType::Struct>)
   {
     Type const& type = archive_type <T> (*up);
     if(up == nullptr)
@@ -169,7 +147,7 @@ namespace moose
   }
 
   template <class T>
-  void Archive::archive (const char* name, T*& p)
+  void Archive::archive (const char* name, T*& p, EntryTypeDummy <EntryType::Struct>)
   {
     Type const& type = archive_type <T> (*p );
     if(p ==  nullptr)
@@ -184,27 +162,29 @@ namespace moose
   }
 
   template <class T>
-  void Archive::archive (const char* name, std::vector<T>& value)
+  void Archive::archive (const char* name, T& value, EntryTypeDummy <EntryType::Vector>)
   {
     if (is_reading ())
     {
       while(read_array_has_next (name))
       {
-        T tmpVal = detail::GetInitialValue <T> ();
+        using ValueType = typename VectorTraits <T>::ValueType;
+        ValueType tmpVal = detail::GetInitialValue <ValueType> ();
         (*this) ("", tmpVal);
-        value.push_back(tmpVal);
+        VectorPushBack (value, tmpVal);
       }
     }
     else
     {
-      for (auto& v : value)
-        (*this) ("", v);
+      // Writing a vector type is the same as writing a range
+      archive (name, value, EntryTypeDummy <EntryType::Range> ());
     }
   }
 
   template <class T>
-  void Archive::archive (const char* name, Range<T>& range)
+  void Archive::archive (const char* name, T& value, EntryTypeDummy <EntryType::Range>)
   {
+    auto range = make_range (value);
     if (is_reading ())
     {
       for (auto i = range.begin; i != range.end; ++i)
@@ -223,15 +203,5 @@ namespace moose
       for (auto i = range.begin; i != range.end; ++i)
         (*this) ("", *i);
     }
-  }
-
-  template <class T>
-  auto Archive::get_entry_type () const -> EntryType
-  {
-    auto const isArray = IsArray <T>::value ||
-                         moose::RangeSerialization <T>::enabled;
-
-    return isArray ? EntryType::Array
-                   : EntryType::StructOrValue;
   }
 }// end of namespace moose

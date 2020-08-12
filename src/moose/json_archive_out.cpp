@@ -63,7 +63,7 @@ namespace moose
     if (!m_out)
       return;
 
-    m_out << "}" << endl;
+    m_out << endl << "}" << endl;
     --m_currentDepth;
     assert (m_currentDepth == 0);
   }
@@ -78,39 +78,50 @@ namespace moose
 
   void JSONArchiveOut::begin_entry (const char* name, EntryType entryType)
   {
-    WriteWhitespace (m_out, m_currentDepth * 2);
+    prepare_content ();
 
-    m_out << "\"" << name << "\": ";
+    if (strlen (name) > 0)
+      m_out << "\"" << name << "\": ";
 
     switch (entryType)
     {
-      case EntryType::StructOrValue:
-        m_out << "{" << std::endl;
+      case EntryType::Struct:
+        m_out << "{" << endl;
         break;
 
-      case EntryType::Array:
-        m_out << "[" << std::endl;
+      case EntryType::Vector:
+      case EntryType::Range:
+        m_out << "[" << endl;
+        break;
+
+      default:
         break;
     }
 
-    m_lastWrittenDepth = m_currentDepth;
     ++m_currentDepth;
   }
 
   void JSONArchiveOut::end_entry (const char* name, EntryType entryType)
   {
-    m_out << std::endl;
     --m_currentDepth;
-    WriteWhitespace (m_out, m_currentDepth * 2);
+    m_lastWrittenDepth = m_currentDepth;
 
     switch (entryType)
     {
-      case EntryType::StructOrValue:
-        m_out << "}" << std::endl;
+      case EntryType::Struct:
+        m_out << endl;
+        WriteWhitespace (m_out, m_currentDepth * 2);
+        m_out << "}";
         break;
 
-      case EntryType::Array:
-        m_out << "]" << std::endl;
+      case EntryType::Vector:
+      case EntryType::Range:
+        m_out << endl;
+        WriteWhitespace (m_out, m_currentDepth * 2);
+        m_out << "]";
+        break;
+
+      default:
         break;
     }
   }
@@ -119,17 +130,17 @@ namespace moose
   {
     prepare_content ();
     m_out << "\"@type\": \"" << typeName << "\"";
+    m_lastWrittenDepth = m_currentDepth;
   }
 
   void JSONArchiveOut::archive (const char* name, double& val)
   {
-    prepare_content ();
-    m_out << "\"" << name << "\": " << val;
+    m_out << val;
   }
 
   void JSONArchiveOut::archive (const char* name, std::string& val)
   {
-    m_out << "\"" << name << "\": \"" << val << "\"";
+    m_out << "\"" << val << "\"";
   }
 
   void JSONArchiveOut::prepare_content ()
