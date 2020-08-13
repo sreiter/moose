@@ -70,7 +70,9 @@ namespace moose
     static constexpr EntryType entryType = TypeTraits <T>::entryType;
 
     try
+    {
       begin_archive (name, entryType);
+    }
     catch(ArchiveError&)
     {
       value = defVal;
@@ -78,9 +80,13 @@ namespace moose
     }
 
     try
+    {
       archive (name, value, EntryTypeDummy <entryType> ());
+    }
     catch(ArchiveError&)
+    {
       value = defVal;
+    }
 
     end_archive (name, entryType);
   }
