@@ -71,7 +71,7 @@ namespace moose
 
     try
     {
-      begin_archive (name, entryType);
+      begin_entry (name, entryType);
     }
     catch(ArchiveError&)
     {
@@ -88,7 +88,7 @@ namespace moose
       value = defVal;
     }
 
-    end_archive (name, entryType);
+    end_entry (name, entryType);
   }
 
   template <class T>
