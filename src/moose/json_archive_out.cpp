@@ -24,7 +24,6 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <cassert>
-#include <cstring>
 
 #include <moose/json_archive_out.h>
 
@@ -81,8 +80,11 @@ namespace moose
   {
     prepare_content ();
 
-    if (strlen (name) > 0)
+    if (name != nullptr &&
+        *name != 0)
+    {
       m_out << "\"" << name << "\": ";
+    }
 
     switch (entryType)
     {
