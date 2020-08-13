@@ -118,7 +118,6 @@ namespace moose
   template <class T>
   void Archive::archive (const char* name, T& value, EntryTypeDummy <EntryType::Struct>)
   {
-  ///todo: check for POD types and raise an error (->unsupported POD type)
     Serialize (*this, value);
   }
 
