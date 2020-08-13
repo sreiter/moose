@@ -54,12 +54,23 @@ namespace moose
     a \a EntryType::Vector entry.
 
     Overload it for your custom \a EntryType::Vector type, if it doesn't feature
-    a \a push_back method.
+    a \a push_back(ValueType const&) method.
   */
   template <class Vector, class Value>
   void VectorPushBack (Vector& vector, Value const& value)
   {
     vector.push_back (value);
+  }
+
+  /** This method is called for each deserialized \a EntryType::Vector entry.
+
+    Overload it for your custom \a EntryType::Vector type, if it doesn't feature
+    a \a clear() method.
+  */
+  template <class Vector>
+  void VectorClear (Vector& vector)
+  {
+    vector.clear ();
   }
 }// end of namespace moose
 

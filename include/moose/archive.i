@@ -172,6 +172,7 @@ namespace moose
   {
     if (is_reading ())
     {
+      VectorClear (value);
       while(read_array_has_next (name))
       {
         using ValueType = typename VectorTraits <T>::ValueType;
