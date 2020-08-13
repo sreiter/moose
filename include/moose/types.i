@@ -107,7 +107,7 @@ template <class T>
 auto Types::add (std::string name,
                  types_t baseClasses,
                  serialize_fnc_t serializeFnc)
--> typename std::enable_if <!std::is_abstract <T>::value, Type&>::type
+-> typename std::enable_if <std::is_default_constructible <T>::value, Type&>::type
 {
   auto type = std::make_shared <Type> (std::move (name),
                                        std::move (baseClasses),
@@ -122,7 +122,7 @@ template <class T>
 auto Types::add (std::string name,
                  types_t baseClasses,
                  serialize_fnc_t serializeFnc)
--> typename std::enable_if <std::is_abstract <T>::value, Type&>::type
+-> typename std::enable_if <!std::is_default_constructible <T>::value, Type&>::type
 {
   auto type = std::make_shared <Type> (std::move (name),
                                        std::move (baseClasses),

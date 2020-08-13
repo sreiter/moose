@@ -93,13 +93,13 @@ private:
   add (std::string name, serialize_fnc_t serializeFnc);
 
   template <class T>
-  static typename std::enable_if <!std::is_abstract <T>::value, Type&>::type
+  static typename std::enable_if <std::is_default_constructible <T>::value, Type&>::type
   add (std::string name,
        types_t baseClasses,
        serialize_fnc_t serializeFnc);
 
   template <class T>
-  static typename std::enable_if <std::is_abstract <T>::value, Type&>::type
+  static typename std::enable_if <!std::is_default_constructible <T>::value, Type&>::type
   add (std::string name,
        types_t baseClasses,
        serialize_fnc_t serializeFnc);
