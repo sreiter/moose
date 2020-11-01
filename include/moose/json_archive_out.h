@@ -55,6 +55,7 @@ protected:
 
 private:
   void prepare_content ();
+  void optional_endl ();
   
 private:
   std::ofstream m_out;

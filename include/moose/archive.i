@@ -50,14 +50,37 @@ namespace moose::detail
   {
     return InitialValue <T, std::is_pointer <T>::value>::value ();
   }
+
+  template <class T>
+  class ValueScope
+  {
+  public:
+    ValueScope (T* var, T val)
+    : m_var (var)
+    , m_oldVal (*var)
+    {
+      *m_var = val;
+    }
+
+    ~ValueScope ()
+    {
+      *m_var = m_oldVal;
+    }
+
+  private:
+    T* m_var;
+    T m_oldVal;
+  };
 }// end of namespace
 
 namespace moose
 {
   template <class T>
-  void Archive::operator () (const char* name, T& value)
+  void Archive::operator () (const char* name, T& value, Hint hint)
   {
     static constexpr EntryType entryType = TypeTraits <T>::entryType;
+
+    detail::ValueScope <Hint> hintScope (&m_hint, hint == Hint::None ? m_hint : hint);
 
     begin_entry (name, entryType);
     archive (name, value, EntryTypeDummy <entryType> ());
@@ -65,9 +88,11 @@ namespace moose
   }
 
   template <class T>
-  void Archive::operator () (const char* name, T& value, const T& defVal)
+  void Archive::operator () (const char* name, T& value, const T& defVal, Hint hint)
   {
     static constexpr EntryType entryType = TypeTraits <T>::entryType;
+
+    detail::ValueScope <Hint> hintScope (&m_hint, hint == Hint::None ? m_hint : hint);
 
     try
     {

@@ -27,8 +27,6 @@
 
 #include <moose/json_archive_out.h>
 
-using std::endl;
-
 namespace
 {
   void WriteWhitespace (std::ostream& out, size_t n)
@@ -47,8 +45,9 @@ namespace moose
     if (!m_out)
       throw ArchiveError () << "Could not open '" << filename << "' for writing";
 
-    m_out << "{" << endl;
+    m_out << "{";
     ++m_currentDepth;
+    optional_endl ();
   }
 
   JSONArchiveOut::JSONArchiveOut (JSONArchiveOut&& other)
@@ -63,7 +62,8 @@ namespace moose
     if (!m_out)
       return;
 
-    m_out << endl << "}" << endl;
+    optional_endl ();
+    m_out << "}" << std::endl;
     --m_currentDepth;
     assert (m_currentDepth == 0);
   }
@@ -86,22 +86,24 @@ namespace moose
       m_out << "\"" << name << "\": ";
     }
 
+
+    ++m_currentDepth;
     switch (entryType)
     {
       case EntryType::Struct:
-        m_out << "{" << endl;
+        m_out << "{";
+        optional_endl ();
         break;
 
       case EntryType::Vector:
       case EntryType::Range:
-        m_out << "[" << endl;
+        m_out << "[";
+        optional_endl ();
         break;
 
       default:
         break;
     }
-
-    ++m_currentDepth;
   }
 
   void JSONArchiveOut::end_entry (const char* name, EntryType entryType)
@@ -112,15 +114,13 @@ namespace moose
     switch (entryType)
     {
       case EntryType::Struct:
-        m_out << endl;
-        WriteWhitespace (m_out, m_currentDepth * 2);
+        optional_endl ();
         m_out << "}";
         break;
 
       case EntryType::Vector:
       case EntryType::Range:
-        m_out << endl;
-        WriteWhitespace (m_out, m_currentDepth * 2);
+        optional_endl ();
         m_out << "]";
         break;
 
@@ -149,7 +149,17 @@ namespace moose
   void JSONArchiveOut::prepare_content ()
   {
     if (m_lastWrittenDepth == m_currentDepth)
-      m_out << "," << endl;
+    {
+      m_out << ",";
+      optional_endl ();
+    }
+  }
+
+  void JSONArchiveOut::optional_endl ()
+  {
+    if (hint () == Hint::OneLine)
+      return;
+    m_out << std::endl;
     WriteWhitespace (m_out, m_currentDepth * 2);
   }
 }

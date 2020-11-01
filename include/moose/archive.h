@@ -44,22 +44,30 @@ namespace moose
       Write
     };
 
+    enum class Hint
+    {
+      None,
+      OneLine
+    };
+
   public:
     Archive (Mode mode);
 
     virtual ~Archive ();
 
     template <class T>
-    void operator () (const char* name, T& value);
+    void operator () (const char* name, T& value, Hint hint = Hint::None);
 
     /// Read with default value
     template <class T>
-    void operator () (const char* name, T& value, const T& defVal);
+    void operator () (const char* name, T& value, const T& defVal, Hint hint = Hint::None);
 
     bool is_reading () const;
     bool is_writing () const;
 
   protected:
+    Hint hint () const;
+    
     virtual void begin_entry (const char* name, EntryType entryType);
     virtual void end_entry (const char* name, EntryType entryType);
 
@@ -124,6 +132,7 @@ namespace moose
 
   private:
     Mode m_mode;
+    Hint m_hint {Hint::None};
   };
 }// end of namespace moose
 
