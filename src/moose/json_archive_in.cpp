@@ -174,7 +174,7 @@ void JSONArchiveIn::parse_string (const char* str)
   m_parseData->m_entries.push (JSONEntry (&d, "_root_"));
 }
 
-void JSONArchiveIn::begin_entry (const char* name, EntryType entryType)
+void JSONArchiveIn::begin_entry (const char* name, EntryType entryType, Hint)
 {
   auto& entries = m_parseData->m_entries;
   if (entries.empty())

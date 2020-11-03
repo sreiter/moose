@@ -76,16 +76,20 @@ namespace moose
     return *this;
   }
 
-  void JSONArchiveOut::begin_entry (const char* name, EntryType entryType)
+  void JSONArchiveOut::begin_entry (const char* name, EntryType entryType, Hint hint)
   {
     prepare_content ();
+
+    if (this->hint () == Hint::ChildrenOneLine)
+      hint = Hint::OneLine;
+
+    m_hints.push (hint == Hint::None ? this->hint () : hint);
 
     if (name != nullptr &&
         *name != 0)
     {
       m_out << "\"" << name << "\": ";
     }
-
 
     ++m_currentDepth;
     switch (entryType)
@@ -127,6 +131,11 @@ namespace moose
       default:
         break;
     }
+
+    assert (!m_hints.empty ());
+
+    if (!m_hints.empty ())
+      m_hints.pop ();
   }
 
   void JSONArchiveOut::write_type_name (std::string const& typeName)
@@ -161,5 +170,12 @@ namespace moose
       return;
     m_out << std::endl;
     WriteWhitespace (m_out, m_currentDepth * 2);
+  }
+
+  auto JSONArchiveOut::hint () const -> Hint
+  {
+    if (m_hints.empty ())
+      return Hint::None;
+    return m_hints.top ();
   }
 }

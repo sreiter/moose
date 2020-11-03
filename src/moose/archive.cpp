@@ -43,15 +43,10 @@ bool Archive::is_writing () const
   return m_mode == Mode::Write;
 }
 
-auto Archive::hint () const -> Hint
-{
-  return m_hint;
-}
-
-void Archive::begin_entry (const char* name, EntryType entryType)
+void Archive::begin_entry (const char*, EntryType, Hint)
 {}
 
-void Archive::end_entry (const char* name, EntryType entryType)
+void Archive::end_entry (const char*, EntryType)
 {}
 
 bool Archive::read_array_has_next (const char* name)

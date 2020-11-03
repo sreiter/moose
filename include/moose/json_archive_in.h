@@ -51,7 +51,9 @@ public:
   void parse_string (const char* str);
 
 protected:
-  void begin_entry (const char* name, EntryType entryType) override;
+  using Hint = Archive::Hint;
+
+  void begin_entry (const char* name, EntryType entryType, Hint hint) override;
   void end_entry (const char* name, EntryType entryType) override;
 
   bool read_array_has_next (const char* name) override;

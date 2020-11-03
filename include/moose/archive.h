@@ -47,7 +47,8 @@ namespace moose
     enum class Hint
     {
       None,
-      OneLine
+      OneLine,
+      ChildrenOneLine
     };
 
   public:
@@ -66,9 +67,7 @@ namespace moose
     bool is_writing () const;
 
   protected:
-    Hint hint () const;
-    
-    virtual void begin_entry (const char* name, EntryType entryType);
+    virtual void begin_entry (const char* name, EntryType entryType, Hint hint);
     virtual void end_entry (const char* name, EntryType entryType);
 
     virtual bool read_array_has_next (const char* name);
@@ -132,7 +131,6 @@ namespace moose
 
   private:
     Mode m_mode;
-    Hint m_hint {Hint::None};
   };
 }// end of namespace moose
 
