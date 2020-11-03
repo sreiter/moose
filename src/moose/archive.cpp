@@ -43,8 +43,10 @@ bool Archive::is_writing () const
   return m_mode == Mode::Write;
 }
 
-void Archive::begin_entry (const char*, EntryType, Hint)
-{}
+bool Archive::begin_entry (const char*, EntryType, Hint)
+{
+  return false;
+}
 
 void Archive::end_entry (const char*, EntryType)
 {}

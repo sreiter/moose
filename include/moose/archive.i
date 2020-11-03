@@ -59,7 +59,9 @@ namespace moose
   {
     static constexpr EntryType entryType = TypeTraits <T>::entryType;
 
-    begin_entry (name, entryType, hint);
+    if (!begin_entry (name, entryType, hint))
+      throw ArchiveError () << "No entry with name '" << name
+        << "' found in current object '" << name << "'.";
     archive (name, value, EntryTypeDummy <entryType> ());
     end_entry (name, entryType);
   }
@@ -69,11 +71,7 @@ namespace moose
   {
     static constexpr EntryType entryType = TypeTraits <T>::entryType;
 
-    try
-    {
-      begin_entry (name, entryType, hint);
-    }
-    catch(ArchiveError&)
+    if (!begin_entry (name, entryType, hint))
     {
       value = defVal;
       return;

@@ -76,7 +76,7 @@ namespace moose
     return *this;
   }
 
-  void JSONArchiveOut::begin_entry (const char* name, EntryType entryType, Hint hint)
+  bool JSONArchiveOut::begin_entry (const char* name, EntryType entryType, Hint hint)
   {
     prepare_content ();
 
@@ -108,6 +108,8 @@ namespace moose
       default:
         break;
     }
+
+    return true;
   }
 
   void JSONArchiveOut::end_entry (const char* name, EntryType entryType)

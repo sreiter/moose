@@ -174,7 +174,7 @@ void JSONArchiveIn::parse_string (const char* str)
   m_parseData->m_entries.push (JSONEntry (&d, "_root_"));
 }
 
-void JSONArchiveIn::begin_entry (const char* name, EntryType entryType, Hint)
+bool JSONArchiveIn::begin_entry (const char* name, EntryType entryType, Hint)
 {
   auto& entries = m_parseData->m_entries;
   if (entries.empty())
@@ -185,20 +185,17 @@ void JSONArchiveIn::begin_entry (const char* name, EntryType entryType, Hint)
 //  if we're currently iterating over elements with the given name, we don't
 //  have to initialize the iterators
   if(!e.iter_valid() || (strcmp(name, e.iter_name()) != 0))
-  {
     e.init_iter(name);
-  }
 
   if (!e.iter_valid())
-    throw ArchiveError () << "No entry with name '" << name
-      << "' found in current object '" << e.name() << "'.";
+    return false;
 
   // cout << "<dbg> pushing entry '" << e.iter_name() << "'\n";
   entries.push (JSONEntry (&e.iter_value(), e.iter_name()));
   if(entries.top().is_array())
-  {
     entries.top().init_iter("");
-  }
+
+  return true;
 }
 
 void JSONArchiveIn::end_entry (const char* name, EntryType entryType)

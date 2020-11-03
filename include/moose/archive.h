@@ -67,7 +67,9 @@ namespace moose
     bool is_writing () const;
 
   protected:
-    virtual void begin_entry (const char* name, EntryType entryType, Hint hint);
+    /** Returns false if the specified entry was not found.
+      If false was returned, no matching end_entry may be called.*/
+    virtual bool begin_entry (const char* name, EntryType entryType, Hint hint);
     virtual void end_entry (const char* name, EntryType entryType);
 
     virtual bool read_array_has_next (const char* name);

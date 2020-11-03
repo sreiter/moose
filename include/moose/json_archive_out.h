@@ -48,7 +48,7 @@ public:
 protected:
   using Hint = Archive::Hint;
 
-  void begin_entry (const char* name, EntryType entryType, Hint hint) override;
+  bool begin_entry (const char* name, EntryType entryType, Hint hint) override;
   void end_entry (const char* name, EntryType entryType) override;
 
   void write_type_name (std::string const& typeName) override;
@@ -60,7 +60,7 @@ private:
   void prepare_content ();
   void optional_endl ();
   Hint hint () const;
-  
+
 private:
   std::ofstream m_out;
   size_t m_currentDepth {0};
