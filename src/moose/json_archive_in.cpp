@@ -125,6 +125,12 @@ void JSONArchiveIn::parse_file (const char* filename)
 {
   std::ifstream in (filename);
   if (!in) throw ArchiveError () << "File not found: " << filename;
+  parse_stream (in);
+}
+
+void JSONArchiveIn::parse_stream (std::istream& in)
+{
+  if (!in) throw ArchiveError () << "Invalid stream specified.";
 
   auto& d = m_parseData->new_document ();
   rapidjson::IStreamWrapper inWrapper (in);
@@ -153,8 +159,7 @@ void JSONArchiveIn::parse_file (const char* filename)
       buf.resize(buf.size() - 1);
     }
 
-    throw ArchiveError () << "JSON Parse error in file '"
-      << filename << "', line "
+    throw ArchiveError () << "JSON Parse error in line "
       << curLine << ": " << rapidjson::GetParseError_En(res.Code())
       << " ('" << buf << "')";
   }

@@ -48,6 +48,7 @@ public:
   JSONArchiveIn& operator = (JSONArchiveIn&& other);
 
   void parse_file (const char* filename);
+  void parse_stream (std::istream& in);
   void parse_string (const char* str);
 
 protected:
