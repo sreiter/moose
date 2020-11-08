@@ -39,13 +39,21 @@ namespace
 namespace moose
 {
   JSONArchiveOut::JSONArchiveOut (const char* filename)
-    : Archive (Mode::Write)
-    , m_out (filename)
+    : JSONArchiveOut (std::make_shared <std::ofstream> (filename))
   {
-    if (!m_out)
-      throw ArchiveError () << "Could not open '" << filename << "' for writing";
+  }
 
-    m_out << "{";
+  JSONArchiveOut::JSONArchiveOut (std::shared_ptr <std::ostream> out)
+    : Archive (Mode::Write)
+    , m_out (std::move (out))
+  {
+    if (!m_out ||
+        m_out->fail ())
+    {
+      throw ArchiveError () << "Invalid file or stream specified for writing.";
+    }
+
+    this->out () << "{";
     ++m_currentDepth;
     optional_endl ();
   }
@@ -59,11 +67,11 @@ namespace moose
 
   JSONArchiveOut::~JSONArchiveOut ()
   {
-    if (!m_out)
+    if (!out ())
       return;
 
     optional_endl ();
-    m_out << "}" << std::endl;
+    out () << "}" << std::endl;
     --m_currentDepth;
     assert (m_currentDepth == 0);
   }
@@ -88,20 +96,20 @@ namespace moose
     if (name != nullptr &&
         *name != 0)
     {
-      m_out << "\"" << name << "\": ";
+      out () << "\"" << name << "\": ";
     }
 
     ++m_currentDepth;
     switch (entryType)
     {
       case EntryType::Struct:
-        m_out << "{";
+        out () << "{";
         optional_endl ();
         break;
 
       case EntryType::Vector:
       case EntryType::Range:
-        m_out << "[";
+        out () << "[";
         optional_endl ();
         break;
 
@@ -121,13 +129,13 @@ namespace moose
     {
       case EntryType::Struct:
         optional_endl ();
-        m_out << "}";
+        out () << "}";
         break;
 
       case EntryType::Vector:
       case EntryType::Range:
         optional_endl ();
-        m_out << "]";
+        out () << "]";
         break;
 
       default:
@@ -143,25 +151,25 @@ namespace moose
   void JSONArchiveOut::write_type_name (std::string const& typeName)
   {
     prepare_content ();
-    m_out << "\"@type\": \"" << typeName << "\"";
+    out () << "\"@type\": \"" << typeName << "\"";
     m_lastWrittenDepth = m_currentDepth;
   }
 
   void JSONArchiveOut::archive (const char* name, double& val)
   {
-    m_out << val;
+    out () << val;
   }
 
   void JSONArchiveOut::archive (const char* name, std::string& val)
   {
-    m_out << "\"" << val << "\"";
+    out () << "\"" << val << "\"";
   }
 
   void JSONArchiveOut::prepare_content ()
   {
     if (m_lastWrittenDepth == m_currentDepth)
     {
-      m_out << ",";
+      out () << ",";
       optional_endl ();
     }
   }
@@ -170,8 +178,8 @@ namespace moose
   {
     if (hint () == Hint::OneLine)
       return;
-    m_out << std::endl;
-    WriteWhitespace (m_out, m_currentDepth * 2);
+    out () << std::endl;
+    WriteWhitespace (out (), m_currentDepth * 2);
   }
 
   auto JSONArchiveOut::hint () const -> Hint
@@ -179,5 +187,10 @@ namespace moose
     if (m_hints.empty ())
       return Hint::None;
     return m_hints.top ();
+  }
+
+  auto JSONArchiveOut::out () -> std::ostream &
+  {
+    return *m_out;
   }
 }

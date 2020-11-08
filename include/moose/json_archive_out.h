@@ -37,6 +37,7 @@ class JSONArchiveOut : public Archive
 {
 public:
   JSONArchiveOut (const char* filename);
+  JSONArchiveOut (std::shared_ptr <std::ostream> out);
   JSONArchiveOut (JSONArchiveOut const&) = delete;
   JSONArchiveOut (JSONArchiveOut&& other);
 
@@ -60,9 +61,10 @@ private:
   void prepare_content ();
   void optional_endl ();
   Hint hint () const;
+  auto out () -> std::ostream &;
 
 private:
-  std::ofstream m_out;
+  std::shared_ptr <std::ostream> m_out;
   size_t m_currentDepth {0};
   size_t m_lastWrittenDepth {0};
   std::stack <Hint> m_hints;
