@@ -52,8 +52,6 @@ public:
   void parse_string (const char* str);
 
 protected:
-  using Hint = Archive::Hint;
-
   bool begin_entry (const char* name, EntryType entryType, Hint hint) override;
   void end_entry (const char* name, EntryType entryType) override;
 

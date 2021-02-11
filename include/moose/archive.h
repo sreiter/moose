@@ -35,6 +35,13 @@
 
 namespace moose
 {
+  enum class Hint
+  {
+    None,
+    OneLine,
+    ChildrenOneLine
+  };
+    
   class Archive
   {
   public:
@@ -42,13 +49,6 @@ namespace moose
     {
       Read,
       Write
-    };
-
-    enum class Hint
-    {
-      None,
-      OneLine,
-      ChildrenOneLine
     };
 
   public:
