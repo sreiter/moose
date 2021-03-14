@@ -27,6 +27,7 @@
 
 #include <map>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 #include <moose/range.h>
@@ -62,6 +63,10 @@ namespace moose
     /// Read with default value
     template <class T>
     void operator () (const char* name, T& value, const T& defVal, Hint hint = Hint::None);
+
+    /// Read/write optionals
+    template <class T>
+    void operator () (const char* name, std::optional <T>& value, Hint hint = Hint::None);
 
     bool is_reading () const;
     bool is_writing () const;
