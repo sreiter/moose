@@ -90,19 +90,19 @@ namespace moose
   struct TypeTraits <std::array <T, n>>
   {static constexpr EntryType entryType = EntryType::Range;};
 
-  template <class Key, class Value>
-  struct TypeTraits <std::map <Key, Value>>
+  template <class Key, class Value, class Compare, class Allocator>
+  struct TypeTraits <std::map <Key, Value, Compare, Allocator>>
   {static constexpr EntryType entryType = EntryType::Vector;};
 
   // std::map <Key, Value>::value_type has a const key and is thus not suitable for deserialization
-  template <class Key, class Value>
-  struct VectorTraits <std::map <Key, Value>>
+  template <class Key, class Value, class Compare, class Allocator>
+  struct VectorTraits <std::map <Key, Value, Compare, Allocator>>
   {
     using ValueType = std::pair <Key, Value>;
   };
 
-  template <class Key, class Value>
-  void VectorPushBack (std::map <Key, Value>& map, std::pair <Key, Value> const& value)
+  template <class Key, class Value, class Compare, class Allocator>
+  void VectorPushBack (std::map <Key, Value, Compare, Allocator>& map, std::pair <Key, Value> const& value)
   {
     map.emplace (value);
   }
