@@ -162,7 +162,16 @@ namespace moose
 
   void JSONArchiveOut::archive (const char* name, std::string& val)
   {
-    out () << "\"" << val << "\"";
+    auto& out = this->out ();
+    out << "\"";
+    for (auto c : val)
+    {
+      if (c == '\\')
+        out << "\\\\";
+      else
+        out << c; 
+    }
+    out << "\"";
   }
 
   void JSONArchiveOut::prepare_content ()
