@@ -25,6 +25,8 @@
 
 #pragma once
 
+#pragma warning (disable : 4201) // warning in type_quat.hpp in glm 9.9.8
+
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/fwd.hpp>
 

@@ -135,7 +135,7 @@ namespace moose
   }
 
   template <class T>
-  void Archive::archive (const char* name, T& value, EntryTypeDummy <EntryType::Struct>)
+  void Archive::archive (const char* /*name*/, T& value, EntryTypeDummy <EntryType::Struct>)
   {
     Serialize (*this, value);
   }
