@@ -26,9 +26,10 @@
 #pragma once
 
 #include <array>
+#include <map>
+#include <set>
 #include <string>
 #include <vector>
-#include <map>
 
 #include <moose/type_traits.h>
 
@@ -94,6 +95,10 @@ namespace moose
   struct TypeTraits <std::map <Key, Value, Compare, Allocator>>
   {static constexpr EntryType entryType = EntryType::Vector;};
 
+  template <class Key, class Compare, class Allocator>
+  struct TypeTraits <std::set <Key, Compare, Allocator>>
+  {static constexpr EntryType entryType = EntryType::Vector;};
+
   // std::map <Key, Value>::value_type has a const key and is thus not suitable for deserialization
   template <class Key, class Value, class Compare, class Allocator>
   struct VectorTraits <std::map <Key, Value, Compare, Allocator>>
@@ -104,6 +109,12 @@ namespace moose
   template <class Key, class Value, class Compare, class Allocator>
   void VectorPushBack (std::map <Key, Value, Compare, Allocator>& map, std::pair <Key, Value> const& value)
   {
-    map.emplace (value);
+    map.insert (value);
+  }
+
+  template <class Key, class Compare, class Allocator>
+  void VectorPushBack (std::set <Key, Compare, Allocator>& map, Key const& key)
+  {
+    map.insert (key);
   }
 }// end of namespace moose

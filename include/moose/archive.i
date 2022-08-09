@@ -27,6 +27,7 @@
 
 #include <moose/archive.h>
 #include <moose/type_traits.h>
+#include <cassert>
 
 namespace moose::detail
 {
