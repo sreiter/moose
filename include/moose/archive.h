@@ -25,11 +25,9 @@
 
 #pragma once
 
-#include <map>
 #include <memory>
 #include <optional>
 #include <string>
-#include <vector>
 #include <moose/range.h>
 #include <moose/type_traits.h>
 #include <moose/types.h>
@@ -67,6 +65,19 @@ namespace moose
     /// Read/write optionals
     template <class T>
     void operator () (const char* name, std::optional <T>& value, Hint hint = Hint::None);
+
+    // Const overloads for writing only.
+    /// Write a const value
+    template <class T>
+    void operator () (const char* name, T const& value, Hint hint = Hint::None);
+
+    /// Read with default value
+    template <class T>
+    void operator () (const char* name, T const& value, const T& defVal, Hint hint = Hint::None);
+
+    /// Read/write optionals
+    template <class T>
+    void operator () (const char* name, std::optional <T> const& value, Hint hint = Hint::None);
 
     bool is_reading () const;
     bool is_writing () const;
