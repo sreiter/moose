@@ -155,6 +155,17 @@ namespace moose
     m_lastWrittenDepth = m_currentDepth;
   }
 
+  auto JSONArchiveOut::read_type_version () -> Version
+  {
+    assert (!"Cannot read class version in output archive.");
+    return {};
+  }
+
+  void JSONArchiveOut::write_type_version (Version const& version)
+  {
+    (*this) ("@type_version", version, Hint::OneLine);
+  }
+
   void JSONArchiveOut::archive (const char* name, double& val)
   {
     out () << val;

@@ -31,6 +31,7 @@
 #include <moose/range.h>
 #include <moose/type_traits.h>
 #include <moose/types.h>
+#include <moose/version.h>
 
 namespace moose
 {
@@ -54,6 +55,14 @@ namespace moose
     Archive (Mode mode);
 
     virtual ~Archive ();
+
+    /** For output archives, latestVersion is stored as version of the currently processed type
+      and is also returned.
+
+      For input archives, the type version stored in the underlying archive is returned.
+      If no version was stored, {0,0,0} is returned.
+    */
+    auto type_version (Version const& latestVersion) -> Version;
 
     template <class T>
     void operator () (const char* name, T& value, Hint hint = Hint::None);
@@ -92,6 +101,9 @@ namespace moose
 
     virtual std::string read_type_name ();
     virtual void write_type_name (std::string const& typeName);
+
+    virtual auto read_type_version () -> Version = 0;
+    virtual void write_type_version (Version const& version) = 0;
 
   /// reads/writes a number value (int, float, ...).
   /** Default implementation redirects to 'apply (const char*, double&)'

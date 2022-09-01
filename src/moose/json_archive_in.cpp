@@ -234,6 +234,18 @@ std::string JSONArchiveIn::read_type_name ()
     return {};
 }
 
+auto JSONArchiveIn::read_type_version () -> Version
+{
+  Version version;
+  (*this) ("@type_version", version, Version {});
+  return version;
+}
+
+void JSONArchiveIn::write_type_version (Version const& version)
+{
+  assert (!"Cannot write class version in input archive.");
+}
+
 void JSONArchiveIn::archive (const char* name, double& val)
 {
   auto& entries = m_parseData->m_entries;

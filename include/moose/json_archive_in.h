@@ -58,6 +58,9 @@ protected:
   bool read_array_has_next (const char* name) override;
 
   std::string read_type_name () override;
+
+  auto read_type_version () -> Version override;
+  void write_type_version (Version const& version) override;
   
   void archive (const char* name, double& val) override;
   void archive (const char* name, std::string& val) override;

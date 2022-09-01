@@ -38,6 +38,19 @@ bool Archive::is_reading () const
   return m_mode == Mode::Read;
 }
 
+auto Archive::type_version (Version const& latestVersion) -> Version
+{
+  if (is_reading ())
+  {
+    return read_type_version ();
+  }
+  else
+  {
+    write_type_version (latestVersion);
+    return latestVersion;
+  }
+}
+
 bool Archive::is_writing () const
 {
   return m_mode == Mode::Write;
