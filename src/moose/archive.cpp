@@ -25,6 +25,7 @@
 
 #include <moose/archive.h>
 #include <moose/exceptions.h>
+#include <moose/types.h>
 
 namespace moose
 {
