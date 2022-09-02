@@ -26,10 +26,50 @@
 #pragma once
 
 #include <moose/archive.h>
+
+#include <array>
+#include <map>
+#include <set>
 #include <utility>
+#include <vector>
 
 namespace moose
 {
+  template <class T>
+  struct TypeTraits <std::vector <T>>
+  {static constexpr EntryType entryType = EntryType::Vector;};
+
+  template <class T, size_t n>
+  struct TypeTraits <std::array <T, n>>
+  {static constexpr EntryType entryType = EntryType::Range;};
+
+  template <class Key, class Value, class Compare, class Allocator>
+  struct TypeTraits <std::map <Key, Value, Compare, Allocator>>
+  {static constexpr EntryType entryType = EntryType::Vector;};
+
+  template <class Key, class Compare, class Allocator>
+  struct TypeTraits <std::set <Key, Compare, Allocator>>
+  {static constexpr EntryType entryType = EntryType::Vector;};
+
+  // std::map <Key, Value>::value_type has a const key and is thus not suitable for deserialization
+  template <class Key, class Value, class Compare, class Allocator>
+  struct VectorTraits <std::map <Key, Value, Compare, Allocator>>
+  {
+    using ValueType = std::pair <Key, Value>;
+  };
+
+  template <class Key, class Value, class Compare, class Allocator>
+  void VectorPushBack (std::map <Key, Value, Compare, Allocator>& map, std::pair <Key, Value> const& value)
+  {
+    map.insert (value);
+  }
+
+  template <class Key, class Compare, class Allocator>
+  void VectorPushBack (std::set <Key, Compare, Allocator>& map, Key const& key)
+  {
+    map.insert (key);
+  }
+
   template <class FIRST, class SECOND>
   void Serialize (
     Archive& archive,

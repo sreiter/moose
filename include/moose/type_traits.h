@@ -25,6 +25,8 @@
 
 #pragma once
 
+#include <string>
+
 namespace moose
 {
   enum class EntryType
@@ -72,6 +74,52 @@ namespace moose
   {
     vector.clear ();
   }
-}// end of namespace moose
 
-#include <moose/type_traits.i>
+  template <>
+  struct TypeTraits <bool>
+  {static constexpr EntryType entryType = EntryType::Value;};
+
+  template <>
+  struct TypeTraits <char>
+  {static constexpr EntryType entryType = EntryType::Value;};
+
+  template <>
+  struct TypeTraits <unsigned char>
+  {static constexpr EntryType entryType = EntryType::Value;};
+
+  template <>
+  struct TypeTraits <int>
+  {static constexpr EntryType entryType = EntryType::Value;};
+
+  template <>
+  struct TypeTraits <long int>
+  {static constexpr EntryType entryType = EntryType::Value;};
+
+  template <>
+  struct TypeTraits <long long int>
+  {static constexpr EntryType entryType = EntryType::Value;};
+
+  template <>
+  struct TypeTraits <unsigned int>
+  {static constexpr EntryType entryType = EntryType::Value;};
+
+  template <>
+  struct TypeTraits <unsigned long int>
+  {static constexpr EntryType entryType = EntryType::Value;};
+
+  template <>
+  struct TypeTraits <unsigned long long int>
+  {static constexpr EntryType entryType = EntryType::Value;};
+
+  template <>
+  struct TypeTraits <float>
+  {static constexpr EntryType entryType = EntryType::Value;};
+
+  template <>
+  struct TypeTraits <double>
+  {static constexpr EntryType entryType = EntryType::Value;};
+
+  template <>
+  struct TypeTraits <std::string>
+  {static constexpr EntryType entryType = EntryType::Value;};
+}// end of namespace moose
