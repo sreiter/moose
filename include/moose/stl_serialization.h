@@ -1,7 +1,7 @@
 // This file is part of moose, a C++ serialization library
 //
 // Copyright (C) 2017 Sebastian Reiter, G-CSC Frankfurt <s.b.reiter@gmail.com>
-// Copyright (C) 2020 Sebastian Reiter <s.b.reiter@gmail.com>
+// Copyright (C) 2020-2022 Sebastian Reiter <s.b.reiter@gmail.com>
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,16 @@
 #pragma once
 
 #include <moose/archive.h>
-#include <moose/json_archive_in.h>
-#include <moose/json_archive_out.h>
-#include <moose/serialize.h>
-#include <moose/stl_serialization.h>
-#include <moose/types.h>
+#include <utility>
+
+namespace moose
+{
+  template <class FIRST, class SECOND>
+  void Serialize (
+    Archive& archive,
+    std::pair <FIRST, SECOND>& value)
+  {
+    archive ("key", *value.first);
+    archive ("value", value.second);
+  }
+}// end of namespace

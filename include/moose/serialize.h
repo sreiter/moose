@@ -25,23 +25,13 @@
 
 #pragma once
 
-#include <moose/archive.h>
-#include <utility>
-
 namespace moose
 {
+  class Archive;
+
   template <class T>
   void Serialize (Archive& archive, T& value)
   {
     value.serialize (archive);
-  }
-
-  template <class FIRST, class SECOND>
-  void Serialize (
-    Archive& archive,
-    std::pair <FIRST, SECOND>& value)
-  {
-    archive ("key", *value.first);
-    archive ("value", value.second);
   }
 }// end of namespace

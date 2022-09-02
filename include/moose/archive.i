@@ -29,6 +29,7 @@
 #include <moose/exceptions.h>
 #include <moose/serialize.h>
 #include <moose/type_traits.h>
+#include <moose/types.h>
 #include <cassert>
 
 namespace moose::detail
