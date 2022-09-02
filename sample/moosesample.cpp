@@ -77,7 +77,7 @@ int main (int, char**)
     moose::Types::add <ClassA, BaseClass> ("ClassA");
     moose::Types::add <ClassB, BaseClass> ("ClassB");
 
-    auto archiveIn = moose::JSONArchiveIn::fromString (jsonInputData);
+    moose::Archive archiveIn {moose::JSONArchiveIn::fromString (jsonInputData)};
 
     std::array <int, 2> iarray2;
     archiveIn ("sampleArray", iarray2);
@@ -95,7 +95,7 @@ int main (int, char**)
 
     std::cout << std::endl;
     std::cout << "Writing to file 'moosesample.json'" << std::endl;
-    moose::JSONArchiveOut archiveOut ("moosesample.json");
+    moose::Archive archiveOut {moose::JSONArchiveOut::toFile ("moosesample.json")};
     archiveOut ("sampleArray", iarray2);
     archiveOut ("objects", objects);
   }

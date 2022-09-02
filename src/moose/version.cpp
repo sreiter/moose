@@ -27,6 +27,35 @@
 
 namespace moose
 {
+  auto Version::fromString (std::string_view s) -> Version
+  {
+    using namespace std;
+    auto const first = s.find_first_of ('.');
+    auto const last = s.find_last_of ('.');
+    if (first == string::npos ||
+        last == string::npos ||
+        first >= last)
+    {
+      assert (!"Invalid version string supplied. Expected is a version string like `3.2.1`.");
+      return {};
+    }
+
+    try
+    {
+      uint32_t major, minor, patch;
+      major = static_cast <uint32_t> (stoi (std::string {s.substr (0, first)}));
+      minor = static_cast <uint32_t> (stoi (std::string {s.substr (first + 1, last - first + 1)}));
+      patch = static_cast <uint32_t> (stoi (std::string {s.substr (last + 1, s.size () - last + 1)}));
+      return {major, minor, patch};
+    }
+    catch (...)
+    {
+      assert (!"Failure while converting string to int. Expected is a version string like `3.2.1`.");
+    }
+
+    return {};
+  }
+
   Version::Version () = default;
 
   Version::Version (uint32_t patch)
@@ -41,18 +70,19 @@ namespace moose
     : mValues {major, minor, patch}
   {}
 
+  bool Version::operator == (Version const& other) const
+  {
+    return mValues == other.mValues;
+  }
+
   bool Version::operator < (Version const& other) const
   {
     return mValues < other.mValues;
   }
 
-  auto Version::begin () -> iterator
+  auto Version::toString () const -> std::string
   {
-    return mValues.begin ();
-  }
-
-  auto Version::end () -> iterator
-  {
-    return mValues.end ();
+    using namespace std;
+    return to_string (mValues [0]) + "." + to_string (mValues [1]) + "." + to_string (mValues [2]);
   }
 }//  end of namespace moose

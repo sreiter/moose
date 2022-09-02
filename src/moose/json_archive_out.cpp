@@ -25,6 +25,7 @@
 
 #include <cassert>
 
+#include <moose/exceptions.h>
 #include <moose/json_archive_out.h>
 
 namespace
@@ -38,14 +39,18 @@ namespace
 
 namespace moose
 {
+  auto JSONArchiveOut::toFile (const char* filename) -> std::shared_ptr<JSONArchiveOut>
+  {
+    return std::make_shared <JSONArchiveOut> (filename);
+  }
+
   JSONArchiveOut::JSONArchiveOut (const char* filename)
     : JSONArchiveOut (std::make_shared <std::ofstream> (filename))
   {
   }
 
   JSONArchiveOut::JSONArchiveOut (std::shared_ptr <std::ostream> out)
-    : Archive (Mode::Write)
-    , m_out (std::move (out))
+    : m_out (std::move (out))
   {
     if (!m_out ||
         m_out->fail ())
@@ -59,8 +64,7 @@ namespace moose
   }
 
   JSONArchiveOut::JSONArchiveOut (JSONArchiveOut&& other)
-    : Archive (Mode::Write)
-    , m_out {std::move (other.m_out)}
+    : m_out {std::move (other.m_out)}
     , m_currentDepth {other.m_currentDepth}
     , m_lastWrittenDepth {other.m_lastWrittenDepth}
   {}
@@ -155,23 +159,19 @@ namespace moose
     m_lastWrittenDepth = m_currentDepth;
   }
 
-  auto JSONArchiveOut::read_type_version () -> Version
-  {
-    assert (!"Cannot read class version in output archive.");
-    return {};
-  }
-
   void JSONArchiveOut::write_type_version (Version const& version)
   {
-    (*this) ("@type_version", version, Hint::OneLine);
+    prepare_content ();
+    out () << "\"@type_version\": \"" << version.toString () << "\"";
+    m_lastWrittenDepth = m_currentDepth;
   }
 
-  void JSONArchiveOut::archive (const char* name, double& val)
+  void JSONArchiveOut::write (const char* name, double val)
   {
     out () << val;
   }
 
-  void JSONArchiveOut::archive (const char* name, std::string& val)
+  void JSONArchiveOut::write (const char* name, std::string const& val)
   {
     auto& out = this->out ();
     out << "\"";

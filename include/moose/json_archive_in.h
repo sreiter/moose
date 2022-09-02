@@ -27,47 +27,42 @@
 
 #include <stack>
 #include <memory>
-#include <moose/archive.h>
+#include <moose/input_archive.h>
 
 namespace moose
 {
+  class JSONArchiveIn : public InputArchive {
+  public:
+    static auto fromFile (const char* filename) -> std::shared_ptr<JSONArchiveIn>;
+    static auto fromString (const char* str) -> std::shared_ptr<JSONArchiveIn>;
 
-class JSONArchiveIn : public Archive {
-public:
-  static JSONArchiveIn fromFile (const char* filename);
-  static JSONArchiveIn fromString (const char* str);
+  public:
+    JSONArchiveIn ();
+    JSONArchiveIn (JSONArchiveIn const&) = delete;
+    JSONArchiveIn (JSONArchiveIn&& other);
 
-public:
-  JSONArchiveIn ();
-  JSONArchiveIn (JSONArchiveIn const&) = delete;
-  JSONArchiveIn (JSONArchiveIn&& other);
+    virtual ~JSONArchiveIn () = default;
 
-  virtual ~JSONArchiveIn () = default;
+    JSONArchiveIn& operator = (JSONArchiveIn const&) = delete;
+    JSONArchiveIn& operator = (JSONArchiveIn&& other);
 
-  JSONArchiveIn& operator = (JSONArchiveIn const&) = delete;
-  JSONArchiveIn& operator = (JSONArchiveIn&& other);
+    void parse_file (const char* filename);
+    void parse_stream (std::istream& in);
+    void parse_string (const char* str);
 
-  void parse_file (const char* filename);
-  void parse_stream (std::istream& in);
-  void parse_string (const char* str);
+    bool begin_entry (const char* name, EntryType entryType) override;
+    void end_entry (const char* name, EntryType entryType) override;
 
-protected:
-  bool begin_entry (const char* name, EntryType entryType, Hint hint) override;
-  void end_entry (const char* name, EntryType entryType) override;
+    bool array_has_next (const char* name) const override;
 
-  bool read_array_has_next (const char* name) override;
+    auto type_name () const -> std::string override;
+    auto type_version () const -> Version override;
+    
+    void read (const char* name, double& val) const override;
+    void read (const char* name, std::string& val) const override;
 
-  std::string read_type_name () override;
-
-  auto read_type_version () -> Version override;
-  void write_type_version (Version const& version) override;
-  
-  void archive (const char* name, double& val) override;
-  void archive (const char* name, std::string& val) override;
-
-private:
-  struct ParseData;
-  std::shared_ptr <ParseData> m_parseData;
-};
-
+  private:
+    struct ParseData;
+    std::shared_ptr <ParseData> m_parseData;
+  };
 }// end of namespace moose

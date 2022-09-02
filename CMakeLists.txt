@@ -28,8 +28,10 @@ cmake_minimum_required (VERSION 3.1)
 project (libmoose)
 
 set (mooseSrc   src/moose/archive.cpp
+                src/moose/input_archive.cpp
                 src/moose/json_archive_in.cpp
                 src/moose/json_archive_out.cpp
+                src/moose/output_archive.cpp
                 src/moose/type.cpp
                 src/moose/types.cpp
                 src/moose/version.cpp)
@@ -48,3 +50,4 @@ target_include_directories(moose
 target_compile_features(moose PUBLIC cxx_std_17)
 
 add_subdirectory (sample)
+add_subdirectory (tests)

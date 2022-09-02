@@ -26,6 +26,8 @@
 #pragma once
 
 #include <moose/archive.h>
+#include <moose/exceptions.h>
+#include <moose/serialize.h>
 #include <moose/type_traits.h>
 #include <cassert>
 
@@ -156,12 +158,12 @@ namespace moose
     if (is_writing ())
     {
       auto const& type = Types::get_polymorphic (instance);
-      write_type_name (type.name ());
+      mOutput->write_type_name (type.name ());
       return type;
     }
     else
     {
-      auto const& typeName = read_type_name ();
+      auto const& typeName = mInput->type_name ();
       if (typeName.empty ())
         return Types::get <T> ();
       return Types::get (typeName);
@@ -231,7 +233,7 @@ namespace moose
     if (is_reading ())
     {
       VectorClear (value);
-      while(read_array_has_next (name))
+      while(mInput->array_has_next (name))
       {
         using ValueType = typename VectorTraits <T>::ValueType;
         ValueType tmpVal = detail::GetInitialValue <ValueType> ();
@@ -254,13 +256,13 @@ namespace moose
     {
       for (auto i = range.begin; i != range.end; ++i)
       {
-        if (!read_array_has_next (name))
+        if (!mInput->array_has_next (name))
           throw ArchiveError () << "Too few entries while reading range '" << name << "'";
 
         (*this) ("", *i);
       }
 
-      if (read_array_has_next (name))
+      if (mInput->array_has_next (name))
         throw ArchiveError () << "Too many entries while reading range '" << name << "'";
     }
     else
@@ -268,5 +270,14 @@ namespace moose
       for (auto i = range.begin; i != range.end; ++i)
         (*this) ("", *i);
     }
+  }
+
+  template <class T>
+  void Archive::archive (const char* name, T& value)
+  {
+    if (is_reading ())
+      mInput->read (name, value);
+    else
+      mOutput->write (name, value);
   }
 }// end of namespace moose

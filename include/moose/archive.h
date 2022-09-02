@@ -1,7 +1,7 @@
 // This file is part of moose, a C++ serialization library
 //
 // Copyright (C) 2017 Sebastian Reiter, G-CSC Frankfurt <s.b.reiter@gmail.com>
-// Copyright (C) 2020 Sebastian Reiter <s.b.reiter@gmail.com>
+// Copyright (C) 2020-2022 Sebastian Reiter <s.b.reiter@gmail.com>
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -30,31 +30,21 @@
 #include <string>
 #include <moose/range.h>
 #include <moose/type_traits.h>
-#include <moose/types.h>
 #include <moose/version.h>
+#include <moose/input_archive.h>
+#include <moose/output_archive.h>
 
 namespace moose
 {
-  enum class Hint
-  {
-    None,
-    OneLine,
-    ChildrenOneLine
-  };
-    
+  class Type;
+
+  /** \brief An archive yields either read or write access to an underlying data stream.
+  */
   class Archive
   {
   public:
-    enum class Mode
-    {
-      Read,
-      Write
-    };
-
-  public:
-    Archive (Mode mode);
-
-    virtual ~Archive ();
+    Archive (std::shared_ptr<InputArchive> archive);
+    Archive (std::shared_ptr<OutputArchive> archive);
 
     /** For output archives, latestVersion is stored as version of the currently processed type
       and is also returned.
@@ -64,10 +54,15 @@ namespace moose
     */
     auto type_version (Version const& latestVersion) -> Version;
 
+    /** \brief Read/write without default value.
+      If the archive is reading and the given name can not be found, an exception is thrown.
+    */
     template <class T>
     void operator () (const char* name, T& value, Hint hint = Hint::None);
 
-    /// Read with default value
+    /** \brief Read/write with default value
+      If the archive is reading and the given name can not be found, the default value is returned.
+    */
     template <class T>
     void operator () (const char* name, T& value, const T& defVal, Hint hint = Hint::None);
 
@@ -91,39 +86,10 @@ namespace moose
     bool is_reading () const;
     bool is_writing () const;
 
-  protected:
-    /** Returns false if the specified entry was not found.
-      If false was returned, no matching end_entry may be called.*/
-    virtual bool begin_entry (const char* name, EntryType entryType, Hint hint);
-    virtual void end_entry (const char* name, EntryType entryType);
-
-    virtual bool read_array_has_next (const char* name);
-
-    virtual std::string read_type_name ();
-    virtual void write_type_name (std::string const& typeName);
-
-    virtual auto read_type_version () -> Version = 0;
-    virtual void write_type_version (Version const& version) = 0;
-
-  /// reads/writes a number value (int, float, ...).
-  /** Default implementation redirects to 'apply (const char*, double&)'
-   * \{ */
-    virtual void archive (const char* name, bool& val);
-    virtual void archive (const char* name, char& val);
-    virtual void archive (const char* name, unsigned char& val);
-    virtual void archive (const char* name, int& val);
-    virtual void archive (const char* name, long int& val);
-    virtual void archive (const char* name, long long int& val);
-    virtual void archive (const char* name, unsigned int& val);
-    virtual void archive (const char* name, unsigned long int& val);
-    virtual void archive (const char* name, unsigned long long int& val);
-    virtual void archive (const char* name, float& val);
-    virtual void archive (const char* name, double& val) = 0;
-  /** \} */
-
-    virtual void archive (const char* name, std::string& val) = 0;
-
   private:
+    bool begin_entry (const char* name, EntryType entryType, Hint hint);
+    void end_entry (const char* name, EntryType entryType);
+
     /// Used to allow for different overloads based on the entryType.
     template <EntryType entryType>
     struct EntryTypeDummy {};
@@ -157,10 +123,11 @@ namespace moose
     void archive (const char* name, T& value, EntryTypeDummy <EntryType::Range>);
 
     template <class T>
-    void archive_double(const char* name, T& val);
-
+    void archive (const char* name, T& value);
+    
   private:
-    Mode m_mode;
+    std::shared_ptr<InputArchive> mInput;
+    std::shared_ptr<OutputArchive> mOutput;
   };
 }// end of namespace moose
 

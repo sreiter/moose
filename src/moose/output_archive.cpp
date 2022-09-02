@@ -23,51 +23,45 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#pragma once
-
-#include <fstream>
-#include <stack>
-#include <memory>
 #include <moose/output_archive.h>
 
 namespace moose
 {
+  OutputArchive::~OutputArchive () = default;
 
-class JSONArchiveOut : public OutputArchive
-{
-public:
-  static auto toFile (const char* filename) -> std::shared_ptr<JSONArchiveOut>;
+  template <class T>
+  void OutputArchive::write_double (const char* name, T val)
+  {
+    write (name, static_cast <double> (val));
+  }
 
-  JSONArchiveOut (const char* filename);
-  JSONArchiveOut (std::shared_ptr <std::ostream> out);
-  JSONArchiveOut (JSONArchiveOut const&) = delete;
-  JSONArchiveOut (JSONArchiveOut&& other);
+  void OutputArchive::write (const char* name, bool val)
+  {write_double (name, val);}
 
-  virtual ~JSONArchiveOut ();
+  void OutputArchive::write (const char* name, char val)
+  {write_double (name, val);}
 
-  JSONArchiveOut& operator = (JSONArchiveOut const&) = delete;
-  JSONArchiveOut& operator = (JSONArchiveOut&& other);
+  void OutputArchive::write (const char* name, unsigned char val)
+  {write_double (name, val);}
 
-  bool begin_entry (const char* name, EntryType entryType, Hint hint) override;
-  void end_entry (const char* name, EntryType entryType) override;
+  void OutputArchive::write (const char* name, int val)
+  {write_double (name, val);}
 
-  void write_type_name (std::string const& typeName) override;
-  void write_type_version (Version const& version) override;
-  
-  void write (const char* name, double val) override;
-  void write (const char* name, std::string const& val) override;
+  void OutputArchive::write (const char* name, long int val)
+  {write_double (name, val);}
 
-private:
-  void prepare_content ();
-  void optional_endl ();
-  Hint hint () const;
-  auto out () -> std::ostream &;
+  void OutputArchive::write (const char* name, long long int val)
+  {write_double (name, val);}
 
-private:
-  std::shared_ptr <std::ostream> m_out;
-  size_t m_currentDepth {0};
-  size_t m_lastWrittenDepth {0};
-  std::stack <Hint> m_hints;
-};
+  void OutputArchive::write (const char* name, unsigned int val)
+  {write_double (name, val);}
 
+  void OutputArchive::write (const char* name, unsigned long int val)
+  {write_double (name, val);}
+
+  void OutputArchive::write (const char* name, unsigned long long int val)
+  {write_double (name, val);}
+
+  void OutputArchive::write (const char* name, float val)
+  {write_double (name, val);}
 }// end of namespace moose

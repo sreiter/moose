@@ -24,99 +24,60 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <moose/archive.h>
+#include <moose/exceptions.h>
 
-namespace moose{
-
-Archive::Archive (Mode mode)
-  : m_mode (mode)
-{}
-
-Archive::~Archive () = default;
-
-bool Archive::is_reading () const
+namespace moose
 {
-  return m_mode == Mode::Read;
-}
-
-auto Archive::type_version (Version const& latestVersion) -> Version
-{
-  if (is_reading ())
+  Archive::Archive (std::shared_ptr<InputArchive> archive)
+    : mInput {std::move (archive)}
   {
-    return read_type_version ();
+    if (mInput == nullptr)
+      throw ArchiveError () << "A valid input archive is expected, but nullptr was provided.";
   }
-  else
+
+  Archive::Archive (std::shared_ptr<OutputArchive> archive)
+    : mOutput {std::move (archive)}
   {
-    write_type_version (latestVersion);
-    return latestVersion;
+    if (mOutput == nullptr)
+      throw ArchiveError () << "A valid output archive is expected, but nullptr was provided.";
   }
-}
 
-bool Archive::is_writing () const
-{
-  return m_mode == Mode::Write;
-}
-
-bool Archive::begin_entry (const char*, EntryType, Hint)
-{
-  return false;
-}
-
-void Archive::end_entry (const char*, EntryType)
-{}
-
-bool Archive::read_array_has_next (const char* name)
-{return false;}
-
-std::string Archive::read_type_name ()
-{return {};}
-
-void Archive::write_type_name (std::string const&)
-{}
-
-template <class T>
-void Archive::archive_double(const char* name, T& val)
-{
-  if (is_reading ())
+  bool Archive::is_reading () const
   {
-    double d;
-    archive (name, d);
-    val = static_cast <T> (d);
+    return mInput != nullptr;
   }
-  else
+
+  bool Archive::is_writing () const
   {
-    double d = static_cast <double> (val);
-    archive (name, d);
+    return mOutput != nullptr;
   }
-}
 
-void Archive::archive (const char* name, bool& val)
-{archive_double (name, val);}
+  auto Archive::type_version (Version const& latestVersion) -> Version
+  {
+    if (is_reading ())
+    {
+      return mInput->type_version ();
+    }
+    else
+    {
+      mOutput->write_type_version (latestVersion);
+      return latestVersion;
+    }
+  }
 
-void Archive::archive (const char* name, char& val)
-{archive_double (name, val);}
+  bool Archive::begin_entry (const char* name, EntryType entryType, Hint hint)
+  {
+    if (is_reading ())
+      return mInput->begin_entry (name, entryType);
+    else
+      return mOutput->begin_entry (name, entryType, hint);
+  }
 
-void Archive::archive (const char* name, unsigned char& val)
-{archive_double (name, val);}
-
-void Archive::archive (const char* name, int& val)
-{archive_double (name, val);}
-
-void Archive::archive (const char* name, long int& val)
-{archive_double (name, val);}
-
-void Archive::archive (const char* name, long long int& val)
-{archive_double (name, val);}
-
-void Archive::archive (const char* name, unsigned int& val)
-{archive_double (name, val);}
-
-void Archive::archive (const char* name, unsigned long int& val)
-{archive_double (name, val);}
-
-void Archive::archive (const char* name, unsigned long long int& val)
-{archive_double (name, val);}
-
-void Archive::archive (const char* name, float& val)
-{archive_double (name, val);}
-
+  void Archive::end_entry (const char* name, EntryType entryType)
+  {
+    if (is_reading ())
+      mInput->end_entry (name, entryType);
+    else
+      mOutput->end_entry (name, entryType);
+  }
 }// end of namespace moose

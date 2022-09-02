@@ -24,11 +24,9 @@
 
 #pragma once
 
-#include <moose/moose_fwd.h>
-#include <moose/type_traits.h>
-
 #include <array>
 #include <cstdint>
+#include <string>
 
 namespace moose
 {
@@ -39,21 +37,19 @@ namespace moose
     using iterator = Values::iterator;
 
   public:
+    static auto fromString (std::string_view s) -> Version;
+
     Version ();
     Version (uint32_t patch);
     Version (uint32_t minor, uint32_t patch);
     Version (uint32_t major, uint32_t minor, uint32_t patch);
+    
+    bool operator == (Version const& other) const;
     bool operator < (Version const& other) const;
 
-    auto begin () -> iterator;
-    auto end () -> iterator;
-
+    auto toString () const -> std::string;
+    
   private:
     Values mValues {0, 0, 0};
   };
-
-  template <>
-  struct TypeTraits <Version>
-  {static constexpr EntryType entryType = EntryType::Range;};
-
 }//  end of namespace moose
