@@ -180,7 +180,7 @@ namespace moose
     m_parseData->m_entries.push (JSONEntry (&d, "_root_"));
   }
 
-  bool JSONArchiveIn::begin_entry (const char* name, EntryType entryType)
+  bool JSONArchiveIn::begin_entry (const char* name, EntryType)
   {
     auto& entries = m_parseData->m_entries;
     if (entries.empty())
@@ -204,7 +204,7 @@ namespace moose
     return true;
   }
 
-  void JSONArchiveIn::end_entry (const char* name, EntryType entryType)
+  void JSONArchiveIn::end_entry (const char* name, EntryType)
   {
     auto& entries = m_parseData->m_entries;
     if (entries.empty())

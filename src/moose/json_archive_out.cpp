@@ -124,7 +124,7 @@ namespace moose
     return true;
   }
 
-  void JSONArchiveOut::end_entry (const char* name, EntryType entryType)
+  void JSONArchiveOut::end_entry (const char*, EntryType entryType)
   {
     --m_currentDepth;
     m_lastWrittenDepth = m_currentDepth;
@@ -166,12 +166,12 @@ namespace moose
     m_lastWrittenDepth = m_currentDepth;
   }
 
-  void JSONArchiveOut::write (const char* name, double val)
+  void JSONArchiveOut::write (const char*, double val)
   {
     out () << val;
   }
 
-  void JSONArchiveOut::write (const char* name, std::string const& val)
+  void JSONArchiveOut::write (const char*, std::string const& val)
   {
     auto& out = this->out ();
     out << "\"";

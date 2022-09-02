@@ -49,5 +49,11 @@ target_include_directories(moose
 
 target_compile_features(moose PUBLIC cxx_std_17)
 
+if(MSVC)
+  target_compile_options(moose PRIVATE /W4 /WX)
+else()
+  target_compile_options(moose PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()
+
 add_subdirectory (sample)
 add_subdirectory (tests)
