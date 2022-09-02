@@ -38,17 +38,13 @@ namespace
   {
     typedef rapidjson::Value val_t;
 
-    JSONEntry ();
     JSONEntry (val_t* _val, const char* _name);
 
     void init_iter (const char* name);
 
     bool iter_valid () const;
 
-    bool value_valid () const;
-
     val_t& value ();
-    const char* name ();
 
     val_t& iter_value ();
     const char* iter_name ();
@@ -251,12 +247,6 @@ namespace moose
 
 namespace
 {
-  JSONEntry::JSONEntry () :
-    m_val (nullptr),
-    m_name (""),
-    m_type (Value)
-  {}
-
   JSONEntry::JSONEntry (val_t* _val, const char* _name) :
     m_val (_val),
     m_name (_name)
@@ -292,19 +282,9 @@ namespace
     }
   }
 
-  bool JSONEntry::value_valid () const
-  {
-    return m_val != nullptr;
-  }
-
   JSONEntry::val_t& JSONEntry::value ()
   {
     return *m_val;
-  }
-
-  const char* JSONEntry::name ()
-  {
-    return m_name;
   }
 
   JSONEntry::val_t& JSONEntry::iter_value ()
