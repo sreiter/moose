@@ -23,45 +23,45 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <moose/output_archive.h>
+#include <moose/writer.h>
 
 namespace moose
 {
-  OutputArchive::~OutputArchive () = default;
+  Writer::~Writer () = default;
 
   template <class T>
-  void OutputArchive::write_double (const char* name, T val)
+  void Writer::write_double (const char* name, T val)
   {
     write (name, static_cast <double> (val));
   }
 
-  void OutputArchive::write (const char* name, bool val)
+  void Writer::write (const char* name, bool val)
   {write_double (name, val);}
 
-  void OutputArchive::write (const char* name, char val)
+  void Writer::write (const char* name, char val)
   {write_double (name, val);}
 
-  void OutputArchive::write (const char* name, unsigned char val)
+  void Writer::write (const char* name, unsigned char val)
   {write_double (name, val);}
 
-  void OutputArchive::write (const char* name, int val)
+  void Writer::write (const char* name, int val)
   {write_double (name, val);}
 
-  void OutputArchive::write (const char* name, long int val)
+  void Writer::write (const char* name, long int val)
   {write_double (name, val);}
 
-  void OutputArchive::write (const char* name, long long int val)
+  void Writer::write (const char* name, long long int val)
   {write_double (name, val);}
 
-  void OutputArchive::write (const char* name, unsigned int val)
+  void Writer::write (const char* name, unsigned int val)
   {write_double (name, val);}
 
-  void OutputArchive::write (const char* name, unsigned long int val)
+  void Writer::write (const char* name, unsigned long int val)
   {write_double (name, val);}
 
-  void OutputArchive::write (const char* name, unsigned long long int val)
+  void Writer::write (const char* name, unsigned long long int val)
   {write_double (name, val);}
 
-  void OutputArchive::write (const char* name, float val)
+  void Writer::write (const char* name, float val)
   {write_double (name, val);}
 }// end of namespace moose

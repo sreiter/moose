@@ -17,7 +17,7 @@ class JSONArchiveInFixture : public ::testing::Test
 {
 public:
   JSONArchiveInFixture ()
-    : archive {JSONArchiveIn::fromString (jsonInputData)}
+    : archive {JSONReader::fromString (jsonInputData)}
   {}
 protected:
   Archive archive;

@@ -26,7 +26,7 @@
 #include <stdexcept>
 #include <fstream>
 #include <moose/exceptions.h>
-#include <moose/json_archive_in.h>
+#include <moose/json_reader.h>
 #include <rapidjson/document.h>
 #include <rapidjson/error/error.h>
 #include <rapidjson/error/en.h>
@@ -74,7 +74,7 @@ namespace
 
 namespace moose
 {
-  struct JSONArchiveIn::ParseData
+  struct JSONReader::ParseData
   {
     typedef rapidjson::Document doc_t;
 
@@ -84,48 +84,48 @@ namespace moose
     std::unique_ptr <doc_t> m_doc;
   };
 
-  auto JSONArchiveIn::ParseData::new_document () -> doc_t&
+  auto JSONReader::ParseData::new_document () -> doc_t&
   {
     m_doc = std::unique_ptr<doc_t>(new doc_t);
     return *m_doc;
   }
 
-  auto JSONArchiveIn::fromFile (const char* filename) -> std::shared_ptr<JSONArchiveIn>
+  auto JSONReader::fromFile (const char* filename) -> std::shared_ptr<JSONReader>
   {
-    auto ar = std::make_shared <JSONArchiveIn> ();
+    auto ar = std::make_shared <JSONReader> ();
     ar->parse_file (filename);
     return ar;
   }
 
-  auto JSONArchiveIn::fromString (const char* str) -> std::shared_ptr<JSONArchiveIn>
+  auto JSONReader::fromString (const char* str) -> std::shared_ptr<JSONReader>
   {
-    auto ar = std::make_shared <JSONArchiveIn> ();
+    auto ar = std::make_shared <JSONReader> ();
     ar->parse_string (str);
     return ar;
   }
 
-  JSONArchiveIn::JSONArchiveIn ()
+  JSONReader::JSONReader ()
     : m_parseData (std::make_shared <ParseData> ())
   {}
 
-  JSONArchiveIn::JSONArchiveIn (JSONArchiveIn&& other)
+  JSONReader::JSONReader (JSONReader&& other)
     : m_parseData (std::move (other.m_parseData))
   {}
 
-  JSONArchiveIn& JSONArchiveIn::operator = (JSONArchiveIn&& other)
+  JSONReader& JSONReader::operator = (JSONReader&& other)
   {
     m_parseData = std::move (other.m_parseData);
     return *this;
   }
 
-  void JSONArchiveIn::parse_file (const char* filename)
+  void JSONReader::parse_file (const char* filename)
   {
     std::ifstream in (filename);
     if (!in) throw ArchiveError () << "File not found: " << filename;
     parse_stream (in);
   }
 
-  void JSONArchiveIn::parse_stream (std::istream& in)
+  void JSONReader::parse_stream (std::istream& in)
   {
     if (!in) throw ArchiveError () << "Invalid stream specified.";
 
@@ -164,7 +164,7 @@ namespace moose
     m_parseData->m_entries.push (JSONEntry (&d, "_root_"));
   }
 
-  void JSONArchiveIn::parse_string (const char* str)
+  void JSONReader::parse_string (const char* str)
   {
     auto& d = m_parseData->new_document ();
     rapidjson::ParseResult res = d.Parse (str);
@@ -176,7 +176,7 @@ namespace moose
     m_parseData->m_entries.push (JSONEntry (&d, "_root_"));
   }
 
-  bool JSONArchiveIn::begin_entry (const char* name, EntryType)
+  bool JSONReader::begin_entry (const char* name, EntryType)
   {
     auto& entries = m_parseData->m_entries;
     if (entries.empty())
@@ -200,7 +200,7 @@ namespace moose
     return true;
   }
 
-  void JSONArchiveIn::end_entry (const char* name, EntryType)
+  void JSONReader::end_entry (const char* name, EntryType)
   {
     auto& entries = m_parseData->m_entries;
     if (entries.empty())
@@ -213,12 +213,12 @@ namespace moose
     }
   }
 
-  bool JSONArchiveIn::array_has_next (const char*) const
+  bool JSONReader::array_has_next (const char*) const
   {
     return m_parseData->m_entries.top().iter_valid();
   }
 
-  auto JSONArchiveIn::type_name () const -> std::string
+  auto JSONReader::type_name () const -> std::string
   {
     auto& value = currentValue (m_parseData->m_entries);
     if(value.HasMember("@type"))
@@ -226,7 +226,7 @@ namespace moose
     return {};
   }
 
-  auto JSONArchiveIn::type_version () const -> Version
+  auto JSONReader::type_version () const -> Version
   {
     auto& value = currentValue (m_parseData->m_entries);
     if(value.HasMember("@type_version"))
@@ -234,12 +234,12 @@ namespace moose
     return {};
   }
 
-  void JSONArchiveIn::read (const char*, double& val) const
+  void JSONReader::read (const char*, double& val) const
   {
     val = currentValue (m_parseData->m_entries).GetDouble();
   }
 
-  void JSONArchiveIn::read (const char*, std::string& val) const
+  void JSONReader::read (const char*, std::string& val) const
   {
     val = currentValue (m_parseData->m_entries).GetString();
   }

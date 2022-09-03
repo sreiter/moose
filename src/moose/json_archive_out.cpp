@@ -26,7 +26,7 @@
 #include <cassert>
 
 #include <moose/exceptions.h>
-#include <moose/json_archive_out.h>
+#include <moose/json_writer.h>
 
 namespace
 {
@@ -39,17 +39,17 @@ namespace
 
 namespace moose
 {
-  auto JSONArchiveOut::toFile (const char* filename) -> std::shared_ptr<JSONArchiveOut>
+  auto JSONWriter::toFile (const char* filename) -> std::shared_ptr<JSONWriter>
   {
-    return std::make_shared <JSONArchiveOut> (filename);
+    return std::make_shared <JSONWriter> (filename);
   }
 
-  JSONArchiveOut::JSONArchiveOut (const char* filename)
-    : JSONArchiveOut (std::make_shared <std::ofstream> (filename))
+  JSONWriter::JSONWriter (const char* filename)
+    : JSONWriter (std::make_shared <std::ofstream> (filename))
   {
   }
 
-  JSONArchiveOut::JSONArchiveOut (std::shared_ptr <std::ostream> out)
+  JSONWriter::JSONWriter (std::shared_ptr <std::ostream> out)
     : m_out (std::move (out))
   {
     if (!m_out ||
@@ -63,13 +63,13 @@ namespace moose
     optional_endl ();
   }
 
-  JSONArchiveOut::JSONArchiveOut (JSONArchiveOut&& other)
+  JSONWriter::JSONWriter (JSONWriter&& other)
     : m_out {std::move (other.m_out)}
     , m_currentDepth {other.m_currentDepth}
     , m_lastWrittenDepth {other.m_lastWrittenDepth}
   {}
 
-  JSONArchiveOut::~JSONArchiveOut ()
+  JSONWriter::~JSONWriter ()
   {
     if (!out ())
       return;
@@ -80,7 +80,7 @@ namespace moose
     assert (m_currentDepth == 0);
   }
 
-  JSONArchiveOut& JSONArchiveOut::operator = (JSONArchiveOut&& other)
+  JSONWriter& JSONWriter::operator = (JSONWriter&& other)
   {
     m_out = std::move (other.m_out);
     m_currentDepth = other.m_currentDepth;
@@ -88,7 +88,7 @@ namespace moose
     return *this;
   }
 
-  bool JSONArchiveOut::begin_entry (const char* name, EntryType entryType, Hint hint)
+  bool JSONWriter::begin_entry (const char* name, EntryType entryType, Hint hint)
   {
     prepare_content ();
 
@@ -124,7 +124,7 @@ namespace moose
     return true;
   }
 
-  void JSONArchiveOut::end_entry (const char*, EntryType entryType)
+  void JSONWriter::end_entry (const char*, EntryType entryType)
   {
     --m_currentDepth;
     m_lastWrittenDepth = m_currentDepth;
@@ -152,26 +152,26 @@ namespace moose
       m_hints.pop ();
   }
 
-  void JSONArchiveOut::write_type_name (std::string const& typeName)
+  void JSONWriter::write_type_name (std::string const& typeName)
   {
     prepare_content ();
     out () << "\"@type\": \"" << typeName << "\"";
     m_lastWrittenDepth = m_currentDepth;
   }
 
-  void JSONArchiveOut::write_type_version (Version const& version)
+  void JSONWriter::write_type_version (Version const& version)
   {
     prepare_content ();
     out () << "\"@type_version\": \"" << version.toString () << "\"";
     m_lastWrittenDepth = m_currentDepth;
   }
 
-  void JSONArchiveOut::write (const char*, double val)
+  void JSONWriter::write (const char*, double val)
   {
     out () << val;
   }
 
-  void JSONArchiveOut::write (const char*, std::string const& val)
+  void JSONWriter::write (const char*, std::string const& val)
   {
     auto& out = this->out ();
     out << "\"";
@@ -185,7 +185,7 @@ namespace moose
     out << "\"";
   }
 
-  void JSONArchiveOut::prepare_content ()
+  void JSONWriter::prepare_content ()
   {
     if (m_lastWrittenDepth == m_currentDepth)
     {
@@ -194,7 +194,7 @@ namespace moose
     }
   }
 
-  void JSONArchiveOut::optional_endl ()
+  void JSONWriter::optional_endl ()
   {
     if (hint () == Hint::OneLine)
       return;
@@ -202,14 +202,14 @@ namespace moose
     WriteWhitespace (out (), m_currentDepth * 2);
   }
 
-  auto JSONArchiveOut::hint () const -> Hint
+  auto JSONWriter::hint () const -> Hint
   {
     if (m_hints.empty ())
       return Hint::None;
     return m_hints.top ();
   }
 
-  auto JSONArchiveOut::out () -> std::ostream &
+  auto JSONWriter::out () -> std::ostream &
   {
     return *m_out;
   }

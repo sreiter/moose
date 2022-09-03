@@ -29,14 +29,14 @@
 
 namespace moose
 {
-  Archive::Archive (std::shared_ptr<InputArchive> archive)
+  Archive::Archive (std::shared_ptr<Reader> archive)
     : mInput {std::move (archive)}
   {
     if (mInput == nullptr)
       throw ArchiveError () << "A valid input archive is expected, but nullptr was provided.";
   }
 
-  Archive::Archive (std::shared_ptr<OutputArchive> archive)
+  Archive::Archive (std::shared_ptr<Writer> archive)
     : mOutput {std::move (archive)}
   {
     if (mOutput == nullptr)

@@ -28,25 +28,25 @@
 #include <fstream>
 #include <stack>
 #include <memory>
-#include <moose/output_archive.h>
+#include <moose/writer.h>
 
 namespace moose
 {
 
-class JSONArchiveOut : public OutputArchive
+class JSONWriter : public Writer
 {
 public:
-  static auto toFile (const char* filename) -> std::shared_ptr<JSONArchiveOut>;
+  static auto toFile (const char* filename) -> std::shared_ptr<JSONWriter>;
 
-  JSONArchiveOut (const char* filename);
-  JSONArchiveOut (std::shared_ptr <std::ostream> out);
-  JSONArchiveOut (JSONArchiveOut const&) = delete;
-  JSONArchiveOut (JSONArchiveOut&& other);
+  JSONWriter (const char* filename);
+  JSONWriter (std::shared_ptr <std::ostream> out);
+  JSONWriter (JSONWriter const&) = delete;
+  JSONWriter (JSONWriter&& other);
 
-  virtual ~JSONArchiveOut ();
+  virtual ~JSONWriter ();
 
-  JSONArchiveOut& operator = (JSONArchiveOut const&) = delete;
-  JSONArchiveOut& operator = (JSONArchiveOut&& other);
+  JSONWriter& operator = (JSONWriter const&) = delete;
+  JSONWriter& operator = (JSONWriter&& other);
 
   bool begin_entry (const char* name, EntryType entryType, Hint hint) override;
   void end_entry (const char* name, EntryType entryType) override;

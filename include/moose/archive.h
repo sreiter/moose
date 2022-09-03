@@ -31,8 +31,8 @@
 #include <moose/range.h>
 #include <moose/type_traits.h>
 #include <moose/version.h>
-#include <moose/input_archive.h>
-#include <moose/output_archive.h>
+#include <moose/reader.h>
+#include <moose/writer.h>
 
 namespace moose
 {
@@ -43,8 +43,8 @@ namespace moose
   class Archive
   {
   public:
-    Archive (std::shared_ptr<InputArchive> archive);
-    Archive (std::shared_ptr<OutputArchive> archive);
+    Archive (std::shared_ptr<Reader> archive);
+    Archive (std::shared_ptr<Writer> archive);
 
     /** For output archives, latestVersion is stored as version of the currently processed type
       and is also returned.
@@ -126,8 +126,8 @@ namespace moose
     void archive (const char* name, T& value);
     
   private:
-    std::shared_ptr<InputArchive> mInput;
-    std::shared_ptr<OutputArchive> mOutput;
+    std::shared_ptr<Reader> mInput;
+    std::shared_ptr<Writer> mOutput;
   };
 }// end of namespace moose
 

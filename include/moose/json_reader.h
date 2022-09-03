@@ -22,29 +22,28 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
 #pragma once
 
 #include <stack>
 #include <memory>
-#include <moose/input_archive.h>
+#include <moose/reader.h>
 
 namespace moose
 {
-  class JSONArchiveIn : public InputArchive {
+  class JSONReader : public Reader {
   public:
-    static auto fromFile (const char* filename) -> std::shared_ptr<JSONArchiveIn>;
-    static auto fromString (const char* str) -> std::shared_ptr<JSONArchiveIn>;
+    static auto fromFile (const char* filename) -> std::shared_ptr<JSONReader>;
+    static auto fromString (const char* str) -> std::shared_ptr<JSONReader>;
 
   public:
-    JSONArchiveIn ();
-    JSONArchiveIn (JSONArchiveIn const&) = delete;
-    JSONArchiveIn (JSONArchiveIn&& other);
+    JSONReader ();
+    JSONReader (JSONReader const&) = delete;
+    JSONReader (JSONReader&& other);
 
-    virtual ~JSONArchiveIn () = default;
+    virtual ~JSONReader () = default;
 
-    JSONArchiveIn& operator = (JSONArchiveIn const&) = delete;
-    JSONArchiveIn& operator = (JSONArchiveIn&& other);
+    JSONReader& operator = (JSONReader const&) = delete;
+    JSONReader& operator = (JSONReader&& other);
 
     void parse_file (const char* filename);
     void parse_stream (std::istream& in);

@@ -23,47 +23,47 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <moose/input_archive.h>
+#include <moose/reader.h>
 
 namespace moose
 {
-  InputArchive::~InputArchive () = default;
+  Reader::~Reader () = default;
 
   template <class T>
-  void InputArchive::read_double (const char* name, T& val) const
+  void Reader::read_double (const char* name, T& val) const
   {
     double d;
     read (name, d);
     val = static_cast <T> (d);
   }
 
-  void InputArchive::read (const char* name, bool& val) const
+  void Reader::read (const char* name, bool& val) const
   {read_double (name, val);}
 
-  void InputArchive::read (const char* name, char& val) const
+  void Reader::read (const char* name, char& val) const
   {read_double (name, val);}
 
-  void InputArchive::read (const char* name, unsigned char& val) const
+  void Reader::read (const char* name, unsigned char& val) const
   {read_double (name, val);}
 
-  void InputArchive::read (const char* name, int& val) const
+  void Reader::read (const char* name, int& val) const
   {read_double (name, val);}
 
-  void InputArchive::read (const char* name, long int& val) const
+  void Reader::read (const char* name, long int& val) const
   {read_double (name, val);}
 
-  void InputArchive::read (const char* name, long long int& val) const
+  void Reader::read (const char* name, long long int& val) const
   {read_double (name, val);}
 
-  void InputArchive::read (const char* name, unsigned int& val) const
+  void Reader::read (const char* name, unsigned int& val) const
   {read_double (name, val);}
 
-  void InputArchive::read (const char* name, unsigned long int& val) const
+  void Reader::read (const char* name, unsigned long int& val) const
   {read_double (name, val);}
 
-  void InputArchive::read (const char* name, unsigned long long int& val) const
+  void Reader::read (const char* name, unsigned long long int& val) const
   {read_double (name, val);}
 
-  void InputArchive::read (const char* name, float& val) const
+  void Reader::read (const char* name, float& val) const
   {read_double (name, val);}
 }// end of namespace moose

@@ -31,49 +31,50 @@
 
 namespace moose
 {
-  enum class Hint
-  {
-    None,
-    OneLine,
-    ChildrenOneLine
-  };
-  
-  /** \brief Abstract base class for the implementation of output archives.
-    An instance of a concrete derived class is passed to the `Archive` wrapper to perform serialization.
+  /** \brief Abstract base class for the implementation of readers for specific formats.
+    An instance of a concrete derived class is passed to an `Archive` to perform deserialization.
   */
-  class OutputArchive
+  class Reader
   {
   public:
-    virtual ~OutputArchive ();
+    virtual ~Reader ();
 
     /** \brief Returns false if the specified entry was not found.
       If false was returned, no matching `end_entry` may be called.*/
-    virtual bool begin_entry (const char* name, EntryType entryType, Hint hint) = 0;
+    virtual bool begin_entry (const char* name, EntryType entryType) = 0;
     virtual void end_entry (const char* name, EntryType entryType) = 0;
 
-    virtual void write_type_name (std::string const& typeName) = 0;
-    virtual void write_type_version (Version const& version) = 0;
+    /** Called between `begin_entry` and `end_entry`.
+      Returns `true` if further values are available in the currently read array.
+      If the current entry is not an array, the method should return false.*/
+    virtual bool array_has_next (const char* name) const = 0;
 
-    virtual void write (const char* name, double val) = 0;
-    virtual void write (const char* name, std::string const& val) = 0;
+    /** Called between `begin_entry` and `end_entry`.*/
+    virtual std::string type_name () const = 0;
 
-  /** \brief writes a number value (int, float, ...).
-    Default implementation redirects to 'write (const char*, double&)'
+    /** Called between `begin_entry` and `end_entry`.*/
+    virtual auto type_version () const -> Version = 0;
+
+    virtual void read (const char* name, double& val) const = 0;
+    virtual void read (const char* name, std::string& val) const = 0;
+
+  /** \brief reads a number value (int, float, ...).
+    Default implementation redirects to 'read (const char*, double&)'
     \{ */
-    virtual void write (const char* name, bool val);
-    virtual void write (const char* name, char val);
-    virtual void write (const char* name, unsigned char val);
-    virtual void write (const char* name, int val);
-    virtual void write (const char* name, long int val);
-    virtual void write (const char* name, long long int val);
-    virtual void write (const char* name, unsigned int val);
-    virtual void write (const char* name, unsigned long int val);
-    virtual void write (const char* name, unsigned long long int val);
-    virtual void write (const char* name, float val);
+    virtual void read (const char* name, bool& val) const;
+    virtual void read (const char* name, char& val) const;
+    virtual void read (const char* name, unsigned char& val) const;
+    virtual void read (const char* name, int& val) const;
+    virtual void read (const char* name, long int& val) const;
+    virtual void read (const char* name, long long int& val) const;
+    virtual void read (const char* name, unsigned int& val) const;
+    virtual void read (const char* name, unsigned long int& val) const;
+    virtual void read (const char* name, unsigned long long int& val) const;
+    virtual void read (const char* name, float& val) const;
   /** \} */
 
   private:
     template <class T>
-    void write_double (const char* name, T val);
+    void read_double (const char* name, T& val) const;
   };
 }// end of namespace moose
