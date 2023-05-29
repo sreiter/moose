@@ -57,6 +57,7 @@ namespace moose
     auto type_name () const -> std::string override;
     auto type_version () const -> Version override;
     
+    void read (const char* name, bool& val) const override;
     void read (const char* name, double& val) const override;
     void read (const char* name, std::string& val) const override;
 

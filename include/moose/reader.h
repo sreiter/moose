@@ -55,13 +55,13 @@ namespace moose
     /** Called between `begin_entry` and `end_entry`.*/
     virtual auto type_version () const -> Version = 0;
 
+    virtual void read (const char* name, bool& val) const = 0;
     virtual void read (const char* name, double& val) const = 0;
     virtual void read (const char* name, std::string& val) const = 0;
 
   /** \brief reads a number value (int, float, ...).
     Default implementation redirects to 'read (const char*, double&)'
     \{ */
-    virtual void read (const char* name, bool& val) const;
     virtual void read (const char* name, char& val) const;
     virtual void read (const char* name, unsigned char& val) const;
     virtual void read (const char* name, int& val) const;

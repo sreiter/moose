@@ -166,6 +166,11 @@ namespace moose
     m_lastWrittenDepth = m_currentDepth;
   }
 
+  void JSONWriter::write (const char*, bool val)
+  {
+    out () << val;
+  }
+
   void JSONWriter::write (const char*, double val)
   {
     out () << val;

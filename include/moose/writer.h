@@ -54,13 +54,13 @@ namespace moose
     virtual void write_type_name (std::string const& typeName) = 0;
     virtual void write_type_version (Version const& version) = 0;
 
+    virtual void write (const char* name, bool val) = 0;
     virtual void write (const char* name, double val) = 0;
     virtual void write (const char* name, std::string const& val) = 0;
 
   /** \brief writes a number value (int, float, ...).
     Default implementation redirects to 'write (const char*, double&)'
     \{ */
-    virtual void write (const char* name, bool val);
     virtual void write (const char* name, char val);
     virtual void write (const char* name, unsigned char val);
     virtual void write (const char* name, int val);

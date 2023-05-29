@@ -37,9 +37,6 @@ namespace moose
     val = static_cast <T> (d);
   }
 
-  void Reader::read (const char* name, bool& val) const
-  {read_double (name, val);}
-
   void Reader::read (const char* name, char& val) const
   {read_double (name, val);}
 

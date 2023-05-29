@@ -54,6 +54,7 @@ public:
   void write_type_name (std::string const& typeName) override;
   void write_type_version (Version const& version) override;
   
+  void write (const char* name, bool val) override;
   void write (const char* name, double val) override;
   void write (const char* name, std::string const& val) override;
 

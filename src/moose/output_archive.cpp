@@ -35,9 +35,6 @@ namespace moose
     write (name, static_cast <double> (val));
   }
 
-  void Writer::write (const char* name, bool val)
-  {write_double (name, val);}
-
   void Writer::write (const char* name, char val)
   {write_double (name, val);}
 

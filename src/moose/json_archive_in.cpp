@@ -234,6 +234,18 @@ namespace moose
     return {};
   }
 
+  void JSONReader::read (const char* name, bool& val) const
+  {
+    if (currentValue (m_parseData->m_entries).IsBool ())
+      val = currentValue (m_parseData->m_entries).GetBool();
+    else
+    {
+      double d;
+      read (name, d);
+      val = static_cast<bool> (d);
+    }
+  }
+
   void JSONReader::read (const char*, double& val) const
   {
     val = currentValue (m_parseData->m_entries).GetDouble();
