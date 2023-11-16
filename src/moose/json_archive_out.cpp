@@ -150,6 +150,9 @@ namespace moose
 
     if (!m_hints.empty ())
       m_hints.pop ();
+
+    if (m_currentDepth == 0)
+      out ().flush ();
   }
 
   void JSONWriter::write_type_name (std::string const& typeName)
