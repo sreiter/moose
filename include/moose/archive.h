@@ -123,6 +123,9 @@ namespace moose
     void archive (const char* name, T& value, EntryTypeDummy <EntryType::Range>);
 
     template <class T>
+    void archive (const char* name, T& value, EntryTypeDummy <EntryType::ForwardValue>);
+    
+    template <class T>
     void archive (const char* name, T& value);
     
   private:

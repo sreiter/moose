@@ -32,9 +32,24 @@ namespace moose
   enum class EntryType
   {
     Struct,
-    Value,
+    Value, ///< Built in values. Todo: Call this `BuiltIn`
     Range,
-    Vector
+    Vector,
+    /** Types which just wrap a single value of a different type may not need a custom entry. Instead
+      it may be convenient to just forward the wrapped value for serialization.
+      For such type, the TypeTraits have to specify the following:
+      \code
+        template <>
+        struct TypeTraits <YourWrappingType>
+        {
+          static constexpr EntryType entryType = EntryType::ForwardValue;
+          using ForwardedType = YourForwardedType;
+          static ForwardedType const& getForwardedValue (YourWrappingType const& from);
+          static void setForwardedValue (YourWrappingType& to, ForwardedType&& value);
+        };
+      \endcode
+    */
+    ForwardValue ///< For types which wrap a single value and don't want to use a separate struct
   };
 
   template <class T>

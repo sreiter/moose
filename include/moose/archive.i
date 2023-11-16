@@ -274,6 +274,23 @@ namespace moose
   }
 
   template <class T>
+  void Archive::archive (const char* name, T& value, EntryTypeDummy <EntryType::ForwardValue>)
+  {
+    using ForwardedType = typename TypeTraits<T>::ForwardedType;
+    
+    if (is_reading ())
+    {
+      ForwardedType t;
+      archive (name, t);
+      TypeTraits<T>::setForwardedValue (value, std::move (t));
+    }
+    else
+    {
+      archive (name, const_cast<ForwardedType&> (TypeTraits<T>::getForwardedValue (value)));
+    }
+  }
+
+  template <class T>
   void Archive::archive (const char* name, T& value)
   {
     if (is_reading ())
