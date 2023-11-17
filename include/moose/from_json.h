@@ -1,7 +1,7 @@
 // This file is part of moose, a C++ serialization library
 //
 // Copyright (C) 2017 Sebastian Reiter, G-CSC Frankfurt <s.b.reiter@gmail.com>
-// Copyright (C) 2020 Sebastian Reiter <s.b.reiter@gmail.com>
+// Copyright (C) 2023 Sebastian Reiter <s.b.reiter@gmail.com>
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -25,11 +25,19 @@
 
 #pragma once
 
-#include <moose/archive.h>
-#include <moose/from_json.h>
 #include <moose/json_reader.h>
-#include <moose/json_writer.h>
-#include <moose/serialize.h>
-#include <moose/stl_serialization.h>
-#include <moose/to_json.h>
-#include <moose/types.h>
+#include <moose/archive.h>
+
+#include <sstream>
+
+namespace moose
+{
+  template <class T>
+  T fromJson (const char* name, const char* jsonString)
+  {
+    moose::Archive archive {moose::JSONReader::fromString (jsonString)};
+    T out;
+    archive (name, out);
+    return out;
+  }
+}
