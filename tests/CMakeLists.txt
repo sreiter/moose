@@ -3,6 +3,7 @@ cmake_minimum_required (VERSION 3.15)
 add_executable (
     moose_tests
     json_archive_in.t.cpp
+    stl.t.cpp
     version.t.cpp)
 
 include (FetchContent)
