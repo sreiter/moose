@@ -124,7 +124,10 @@ namespace moose
 
     template <class T>
     void archive (const char* name, T& value, EntryTypeDummy <EntryType::ForwardValue>);
-    
+
+    template <class T>
+    void archive (const char* name, T& value, EntryTypeDummy <EntryType::ForwardReference>);
+
     template <class T>
     void archive (const char* name, T& value);
     

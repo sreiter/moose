@@ -34,6 +34,20 @@ namespace moose
     Struct,
     Value, ///< Built in values. Todo: Call this `BuiltIn`
     Range,
+    /** A dynamic sequence of values. Think of a `std::vector`. The following typetraits has to
+      be specified for it to be compatible with the archive.
+      \code
+        template <>
+        struct TypeTraits <YourVectorType>
+        {
+          static constexpr EntryType entryType = EntryType::Vector;
+          using Type = YourVectorType;
+          using ValueType = typename Type::value_type;
+          static void pushBack (Type& vector, ValueType const& value);
+          static void clear (Type& vector);
+        };
+      \endcode
+    */
     Vector,
     /** Types which just wrap a single value of a different type may not need a custom entry. Instead
       it may be convenient to just forward the wrapped value for serialization.
@@ -44,12 +58,14 @@ namespace moose
         {
           static constexpr EntryType entryType = EntryType::ForwardValue;
           using ForwardedType = YourForwardedType;
-          static ForwardedType const& getForwardedValue (YourWrappingType const& from);
+          static ForwardedType getForwardedValue (YourWrappingType const& from);
           static void setForwardedValue (YourWrappingType& to, ForwardedType&& value);
         };
       \endcode
     */
-    ForwardValue ///< For types which wrap a single value and don't want to use a separate struct
+    ForwardValue,
+    /** Just like `ForwardValue`, but `getForwardedValue` returns a reference.*/
+    ForwardReference,
   };
 
   template <class T>
@@ -57,38 +73,6 @@ namespace moose
   {
     static constexpr EntryType entryType = EntryType::Struct;
   };
-
-  /** Has to be specified for each type of \a EntryType::Vector which
-    does not contain a typedef \a value_type.
-  */
-  template <class T>
-  struct VectorTraits
-  {
-    using ValueType = typename T::value_type;
-  };
-
-  /** This method is called for each value which is deserialized as part of
-    a \a EntryType::Vector entry.
-
-    Overload it for your custom \a EntryType::Vector type, if it doesn't feature
-    a \a push_back(ValueType const&) method.
-  */
-  template <class Vector, class Value>
-  void VectorPushBack (Vector& vector, Value const& value)
-  {
-    vector.push_back (value);
-  }
-
-  /** This method is called for each deserialized \a EntryType::Vector entry.
-
-    Overload it for your custom \a EntryType::Vector type, if it doesn't feature
-    a \a clear() method.
-  */
-  template <class Vector>
-  void VectorClear (Vector& vector)
-  {
-    vector.clear ();
-  }
 
   template <>
   struct TypeTraits <bool>
@@ -137,4 +121,27 @@ namespace moose
   template <>
   struct TypeTraits <std::string>
   {static constexpr EntryType entryType = EntryType::Value;};
+
+  /** Convenience class from which type traits for enum class types may derive, if they
+    should be converted to `int` and back during serialization/deserialization.
+
+    \warning The integer constants of the enum class should not change, at least not for
+             serialized constants.
+  */
+  template <class T>
+  struct EnumClassToIntTypeTraits
+  {
+    static constexpr EntryType entryType = EntryType::ForwardValue;
+    using ForwardedType = int;
+
+    static int getForwardedValue (T const& from)
+    {
+      return static_cast<int> (from);
+    }
+
+    static void setForwardedValue (T& to, int value)
+    {
+      to = static_cast<T> (value);
+    }
+  };
 }// end of namespace moose

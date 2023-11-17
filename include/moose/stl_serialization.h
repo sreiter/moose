@@ -35,9 +35,29 @@
 
 namespace moose
 {
-  template <class T>
-  struct TypeTraits <std::vector <T>>
-  {static constexpr EntryType entryType = EntryType::Vector;};
+  template <class FIRST, class SECOND>
+  void Serialize (
+    Archive& archive,
+    std::pair <FIRST, SECOND>& value)
+  {
+    archive ("key", value.first);
+    archive ("value", value.second);
+  }
+
+  template <class T, class Allocator>
+  struct TypeTraits <std::vector <T, Allocator>>
+  {
+    using Type = std::vector <T, Allocator>;
+    using ValueType = typename Type::value_type;
+
+    static constexpr EntryType entryType = EntryType::Vector;
+
+    static void pushBack (Type& vector, ValueType const& value)
+    { vector.push_back (value); }
+
+    static void clear (Type& vector)
+    { vector.clear (); }
+  };
 
   template <class T, size_t n>
   struct TypeTraits <std::array <T, n>>
@@ -45,37 +65,32 @@ namespace moose
 
   template <class Key, class Value, class Compare, class Allocator>
   struct TypeTraits <std::map <Key, Value, Compare, Allocator>>
-  {static constexpr EntryType entryType = EntryType::Vector;};
+  {
+    using Type = std::map <Key, Value, Compare, Allocator>;
+    // std::map <Key, Value>::value_type has a const key and is thus not suitable for deserialization
+    using ValueType = std::pair <Key, Value>;
+
+    static constexpr EntryType entryType = EntryType::Vector;
+
+    static void pushBack (Type& map, ValueType const& value)
+    { map.insert (value); }
+
+    static void clear (Type& map)
+    { map.clear (); }
+  };
 
   template <class Key, class Compare, class Allocator>
   struct TypeTraits <std::set <Key, Compare, Allocator>>
-  {static constexpr EntryType entryType = EntryType::Vector;};
-
-  // std::map <Key, Value>::value_type has a const key and is thus not suitable for deserialization
-  template <class Key, class Value, class Compare, class Allocator>
-  struct VectorTraits <std::map <Key, Value, Compare, Allocator>>
   {
-    using ValueType = std::pair <Key, Value>;
+    using Type = std::set <Key, Compare, Allocator>;
+    using ValueType = typename Type::value_type;
+
+    static constexpr EntryType entryType = EntryType::Vector;
+
+    static void pushBack (Type& set, ValueType const& value)
+    { set.insert (value); }
+
+    static void clear (Type& set)
+    { set.clear (); }
   };
-
-  template <class Key, class Value, class Compare, class Allocator>
-  void VectorPushBack (std::map <Key, Value, Compare, Allocator>& map, std::pair <Key, Value> const& value)
-  {
-    map.insert (value);
-  }
-
-  template <class Key, class Compare, class Allocator>
-  void VectorPushBack (std::set <Key, Compare, Allocator>& map, Key const& key)
-  {
-    map.insert (key);
-  }
-
-  template <class FIRST, class SECOND>
-  void Serialize (
-    Archive& archive,
-    std::pair <FIRST, SECOND>& value)
-  {
-    archive ("key", *value.first);
-    archive ("value", value.second);
-  }
 }// end of namespace

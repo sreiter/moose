@@ -43,7 +43,7 @@ public:
   JSONWriter (JSONWriter const&) = delete;
   JSONWriter (JSONWriter&& other);
 
-  virtual ~JSONWriter ();
+  ~JSONWriter () override;
 
   JSONWriter& operator = (JSONWriter const&) = delete;
   JSONWriter& operator = (JSONWriter&& other);

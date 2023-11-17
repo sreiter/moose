@@ -233,13 +233,13 @@ namespace moose
   {
     if (is_reading ())
     {
-      VectorClear (value);
+      TypeTraits<T>::clear (value);
       while(mInput->array_has_next (name))
       {
-        using ValueType = typename VectorTraits <T>::ValueType;
+        using ValueType = typename TypeTraits<T>::ValueType;
         ValueType tmpVal = detail::GetInitialValue <ValueType> ();
         (*this) ("", tmpVal);
-        VectorPushBack (value, tmpVal);
+        TypeTraits<T>::pushBack (value, tmpVal);
       }
     }
     else
@@ -277,16 +277,39 @@ namespace moose
   void Archive::archive (const char* name, T& value, EntryTypeDummy <EntryType::ForwardValue>)
   {
     using ForwardedType = typename TypeTraits<T>::ForwardedType;
-    
+    auto constexpr forwardedEntryType = TypeTraits<ForwardedType>::entryType;
+
     if (is_reading ())
     {
       ForwardedType t;
-      archive (name, t);
+      archive (name, t, EntryTypeDummy <forwardedEntryType> ());
       TypeTraits<T>::setForwardedValue (value, std::move (t));
     }
     else
     {
-      archive (name, const_cast<ForwardedType&> (TypeTraits<T>::getForwardedValue (value)));
+      auto tmp = TypeTraits<T>::getForwardedValue (value);
+      archive (name, tmp, EntryTypeDummy<forwardedEntryType> ());
+    }
+  }
+
+  template <class T>
+  void Archive::archive (const char* name, T& value, EntryTypeDummy <EntryType::ForwardReference>)
+  {
+    using ForwardedType = typename TypeTraits<T>::ForwardedType;
+    auto constexpr forwardedEntryType = TypeTraits<ForwardedType>::entryType;
+
+    if (is_reading ())
+    {
+      ForwardedType t;
+      archive (name, t, EntryTypeDummy <forwardedEntryType> ());
+      TypeTraits<T>::setForwardedValue (value, std::move (t));
+    }
+    else
+    {
+      archive (
+          name,
+          const_cast<ForwardedType&> (TypeTraits<T>::getForwardedValue (value)),
+          EntryTypeDummy<forwardedEntryType> ());
     }
   }
 
