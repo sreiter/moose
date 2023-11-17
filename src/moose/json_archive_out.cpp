@@ -71,12 +71,10 @@ namespace moose
 
   JSONWriter::~JSONWriter ()
   {
-    if (!out ())
-      return;
-
+    --m_currentDepth;
     optional_endl ();
     out () << "}" << std::endl;
-    --m_currentDepth;
+    out ().flush ();
     assert (m_currentDepth == 0);
   }
 
@@ -150,9 +148,6 @@ namespace moose
 
     if (!m_hints.empty ())
       m_hints.pop ();
-
-    if (m_currentDepth == 0)
-      out ().flush ();
   }
 
   void JSONWriter::write_type_name (std::string const& typeName)
