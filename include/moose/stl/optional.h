@@ -1,7 +1,7 @@
 // This file is part of moose, a C++ serialization library
 //
 // Copyright (C) 2017 Sebastian Reiter, G-CSC Frankfurt <s.b.reiter@gmail.com>
-// Copyright (C) 2020-2022 Sebastian Reiter <s.b.reiter@gmail.com>
+// Copyright (C) 2020-2023 Sebastian Reiter <s.b.reiter@gmail.com>
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without

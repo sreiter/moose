@@ -94,27 +94,6 @@ namespace moose
   }
 
   template <class T>
-  void Archive::operator () (const char* name, std::optional <T>& value, Hint hint)
-  {
-    static constexpr EntryType entryType = TypeTraits <T>::entryType;
-
-    if (is_writing () && !value)
-      return;
-
-    if (!begin_entry (name, entryType, hint))
-    {
-      value = {};
-      return;
-    }
-
-    if (is_reading () && !value)
-      value = T {};
-
-    archive (name, *value, EntryTypeDummy <entryType> ());
-    end_entry (name, entryType);
-  }
-
-  template <class T>
   void Archive::operator () (const char* name, T const& value, Hint hint)
   {
     if (!is_writing ())
@@ -138,19 +117,6 @@ namespace moose
 
     T t = value;
     (*this) (name, t, defVal, hint);
-  }
-
-  template <class T>
-  void Archive::operator () (const char* name, std::optional <T> const& value, Hint hint)
-  {
-    if (!is_writing ())
-    {
-      assert (!"Const values may only be passed to writing archives.");
-      return;
-    }
-
-    std::optional<T> t = value;
-    (*this) (name, t, hint);
   }
 
   template <class T>
