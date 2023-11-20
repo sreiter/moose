@@ -41,3 +41,18 @@ TEST (stl, map)
   std::map<int, std::string> v {{{1, "This"}, {2, "is"}, {3, "a"}, {4, "test"}}};
   EXPECT_EQ (v, toJsonAndBack (v));
 }
+
+TEST (stl, variant)
+{
+  using Variant = std::variant<std::monostate, int, std::string, float>;
+
+  Variant v0 {};
+  Variant v1 {34};
+  Variant v2 {"This is a test"};
+  Variant v3 {1.34f};
+
+  EXPECT_EQ (v0, toJsonAndBack (v0));
+  EXPECT_EQ (v1, toJsonAndBack (v1));
+  EXPECT_EQ (v2, toJsonAndBack (v2));
+  EXPECT_EQ (v3, toJsonAndBack (v3));
+}

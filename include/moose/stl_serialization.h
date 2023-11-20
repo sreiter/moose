@@ -28,6 +28,7 @@
 #include <moose/archive.h>
 
 #include <moose/stl/optional.h>
+#include <moose/stl/variant.h>
 #include <array>
 #include <map>
 #include <set>
