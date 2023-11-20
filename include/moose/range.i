@@ -45,7 +45,7 @@ static auto make_range (Value* v, size_t size)
 
 template <class Container>
 static auto make_range (Container& container)
--> Range <typename Container::iterator>
+-> Range <decltype (container.begin ())>
 {
   return make_range (container.begin (), container.end ());
 }
