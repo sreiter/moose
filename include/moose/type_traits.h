@@ -29,6 +29,13 @@
 
 namespace moose
 {
+  enum class Hint
+  {
+    None,
+    OneLine,
+    ChildrenOneLine
+  };
+
   enum class EntryType
   {
     Struct,
@@ -71,7 +78,13 @@ namespace moose
   template <class T>
   struct TypeTraits
   {
+    /** Required entry type. This determines how the archive proceeds with a given type.
+      The default traits default to `EntryType::Struct`. I.e., a `serialize` member method
+      or a global `Serialize` method for the given type is expected.
+    */
     static constexpr EntryType entryType = EntryType::Struct;
+    /// Optional default hint which is used if no user specified hint is given.
+    static constexpr Hint defaultHint = Hint::None;
   };
 
   template <>

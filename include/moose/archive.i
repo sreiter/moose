@@ -54,6 +54,26 @@ namespace moose::detail
   {
     return InitialValue <T, std::is_pointer <T>::value>::value ();
   }
+
+  template <class TRAITS>
+  concept HasDefaultHint = requires (TRAITS)
+  {
+    {TRAITS::defaultHint} -> std::convertible_to<Hint>;
+  };
+
+  template <HasDefaultHint TRAITS>
+  Hint hintOrDefault (Hint hint)
+  {
+    if (hint != Hint::None)
+      return hint;
+    return TRAITS::defaultHint;
+  }
+
+  template <class TRAITS>
+  Hint hintOrDefault (Hint hint)
+  {
+    return hint;
+  }
 }// end of namespace
 
 namespace moose
@@ -63,7 +83,7 @@ namespace moose
   {
     static constexpr EntryType entryType = TypeTraits <T>::entryType;
 
-    if (!begin_entry (name, entryType, hint))
+    if (!begin_entry (name, entryType, detail::hintOrDefault<TypeTraits<T>> (hint)))
       throw ArchiveError () << "No entry with name '" << name
         << "' found in current object '" << name << "'.";
     archive (name, value, EntryTypeDummy <entryType> ());
@@ -75,7 +95,7 @@ namespace moose
   {
     static constexpr EntryType entryType = TypeTraits <T>::entryType;
 
-    if (!begin_entry (name, entryType, hint))
+    if (!begin_entry (name, entryType, detail::hintOrDefault<TypeTraits<T>> (hint)))
     {
       value = defVal;
       return;

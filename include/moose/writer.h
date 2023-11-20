@@ -31,13 +31,6 @@
 
 namespace moose
 {
-  enum class Hint
-  {
-    None,
-    OneLine,
-    ChildrenOneLine
-  };
-  
   /** \brief Abstract base class for the implementation of writers for specific format.
     An instance of a concrete derived class is passed to an `Archive` to perform serialization.
   */
