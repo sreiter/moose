@@ -27,6 +27,7 @@
 
 #include <moose/archive.h>
 
+#include <moose/stl/array.h>
 #include <moose/stl/optional.h>
 #include <moose/stl/variant.h>
 #include <array>
@@ -60,10 +61,6 @@ namespace moose
     static void clear (Type& vector)
     { vector.clear (); }
   };
-
-  template <class T, size_t n>
-  struct TypeTraits <std::array <T, n>>
-  {static constexpr EntryType entryType = EntryType::Range;};
 
   template <class Key, class Value, class Compare, class Allocator>
   struct TypeTraits <std::map <Key, Value, Compare, Allocator>>
