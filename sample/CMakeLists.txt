@@ -31,6 +31,6 @@ set (src moosesample.cpp)
 
 add_executable(moosesample ${src})
 
-target_compile_features(moosesample PUBLIC cxx_std_20)
+target_compile_features(moosesample PUBLIC cxx_std_17)
 
 target_link_libraries(moosesample moose)

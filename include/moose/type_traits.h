@@ -78,9 +78,14 @@ namespace moose
       or a global `Serialize` method for the given type is expected.
     */
     static constexpr EntryType entryType = EntryType::Struct;
-    /// Optional default hint which is used if no user specified hint is given.
-    static constexpr Hint defaultHint = Hint::None;
   };
+
+  /** Overload this method for your types to specify a custom default hint which will be used
+    during serialization, if a user didn't specify a hint in the archive call.
+  */
+  template <class T>
+  auto getDefaultHint (T const&) -> Hint
+  { return Hint::None; }
 
   template <>
   struct TypeTraits <bool>
