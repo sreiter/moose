@@ -49,8 +49,8 @@ namespace moose
     void parse_stream (std::istream& in);
     void parse_string (const char* str);
 
-    bool begin_entry (const char* name, EntryType entryType) override;
-    void end_entry (const char* name, EntryType entryType) override;
+    bool begin_entry (const char* name, ContentType type) override;
+    void end_entry (const char* name, ContentType type) override;
 
     bool array_has_next (const char* name) const override;
 

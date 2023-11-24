@@ -82,20 +82,22 @@ namespace moose
   void Archive::operator () (const char* name, T& value, Hint hint)
   {
     static constexpr EntryType entryType = TypeTraits <T>::entryType;
+    auto const contentType = this->contentType (TypeTraits <T> {}, EntryTypeDummy<entryType> {});
 
-    if (!begin_entry (name, entryType, detail::hintOrDefault<TypeTraits<T>> (hint)))
+    if (!begin_entry (name, contentType, detail::hintOrDefault<TypeTraits<T>> (hint)))
       throw ArchiveError () << "No entry with name '" << name
         << "' found in current object '" << name << "'.";
     archive (name, value, EntryTypeDummy <entryType> ());
-    end_entry (name, entryType);
+    end_entry (name, contentType);
   }
 
   template <class T>
   void Archive::operator () (const char* name, T& value, const T& defVal, Hint hint)
   {
     static constexpr EntryType entryType = TypeTraits <T>::entryType;
+    auto const contentType = this->contentType (TypeTraits <T> {}, EntryTypeDummy<entryType> {});
 
-    if (!begin_entry (name, entryType, detail::hintOrDefault<TypeTraits<T>> (hint)))
+    if (!begin_entry (name, contentType, detail::hintOrDefault<TypeTraits<T>> (hint)))
     {
       value = defVal;
       return;
@@ -110,7 +112,7 @@ namespace moose
       value = defVal;
     }
 
-    end_entry (name, entryType);
+    end_entry (name, contentType);
   }
 
   template <class T>
@@ -306,5 +308,43 @@ namespace moose
       mInput->read (name, value);
     else
       mOutput->write (name, value);
+  }
+
+  template <class TRAITS>
+  auto Archive::contentType (TRAITS const&, EntryTypeDummy<EntryType::Struct>) -> ContentType
+  {
+    return ContentType::Struct;
+  }
+
+  template <class TRAITS>
+  auto Archive::contentType (TRAITS const&, EntryTypeDummy<EntryType::Value>) -> ContentType
+  {
+    return ContentType::Value;
+  }
+
+  template <class TRAITS>
+  auto Archive::contentType (TRAITS const&, EntryTypeDummy<EntryType::Range>) -> ContentType
+  {
+    return ContentType::Array;
+  }
+
+  template <class TRAITS>
+  auto Archive::contentType (TRAITS const&, EntryTypeDummy<EntryType::Vector>) -> ContentType
+  {
+    return ContentType::Array;
+  }
+
+  template <class TRAITS>
+  auto Archive::contentType (TRAITS const&, EntryTypeDummy<EntryType::ForwardValue>) -> ContentType
+  {
+    using ForwardTraits = TypeTraits<typename TRAITS::ForwardedType>;
+    return contentType (ForwardTraits {}, EntryTypeDummy<ForwardTraits::entryType> {});
+  }
+
+  template <class TRAITS>
+  auto Archive::contentType (TRAITS const&, EntryTypeDummy<EntryType::ForwardReference>) -> ContentType
+  {
+    using ForwardTraits = TypeTraits<typename TRAITS::ForwardedType>;
+    return contentType (ForwardTraits {}, EntryTypeDummy<ForwardTraits::entryType> {});
   }
 }// end of namespace moose

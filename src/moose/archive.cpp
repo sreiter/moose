@@ -66,19 +66,19 @@ namespace moose
     }
   }
 
-  bool Archive::begin_entry (const char* name, EntryType entryType, Hint hint)
+  bool Archive::begin_entry (const char* name, ContentType contentType, Hint hint)
   {
     if (is_reading ())
-      return mInput->begin_entry (name, entryType);
+      return mInput->begin_entry (name, contentType);
     else
-      return mOutput->begin_entry (name, entryType, hint);
+      return mOutput->begin_entry (name, contentType, hint);
   }
 
-  void Archive::end_entry (const char* name, EntryType entryType)
+  void Archive::end_entry (const char* name, ContentType contentType)
   {
     if (is_reading ())
-      mInput->end_entry (name, entryType);
+      mInput->end_entry (name, contentType);
     else
-      mOutput->end_entry (name, entryType);
+      mOutput->end_entry (name, contentType);
   }
 }// end of namespace moose

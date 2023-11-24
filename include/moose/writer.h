@@ -25,9 +25,11 @@
 
 #pragma once
 
-#include <string>
-#include <moose/type_traits.h>
+#include <moose/content_type.h>
+#include <moose/hint.h>
 #include <moose/version.h>
+
+#include <string>
 
 namespace moose
 {
@@ -41,8 +43,8 @@ namespace moose
 
     /** \brief Returns false if the specified entry was not found.
       If false was returned, no matching `end_entry` may be called.*/
-    virtual bool begin_entry (const char* name, EntryType entryType, Hint hint) = 0;
-    virtual void end_entry (const char* name, EntryType entryType) = 0;
+    virtual bool begin_entry (const char* name, ContentType type, Hint hint) = 0;
+    virtual void end_entry (const char* name, ContentType type) = 0;
 
     virtual void write_type_name (std::string const& typeName) = 0;
     virtual void write_type_version (Version const& version) = 0;

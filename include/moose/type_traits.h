@@ -25,17 +25,12 @@
 
 #pragma once
 
+#include <moose/hint.h>
+
 #include <string>
 
 namespace moose
 {
-  enum class Hint
-  {
-    None,
-    OneLine,
-    ChildrenOneLine
-  };
-
   enum class EntryType
   {
     Struct,

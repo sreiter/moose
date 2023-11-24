@@ -86,7 +86,7 @@ namespace moose
     return *this;
   }
 
-  bool JSONWriter::begin_entry (const char* name, EntryType entryType, Hint hint)
+  bool JSONWriter::begin_entry (const char* name, ContentType type, Hint hint)
   {
     prepare_content ();
 
@@ -102,45 +102,43 @@ namespace moose
     }
 
     ++m_currentDepth;
-    switch (entryType)
+    switch (type)
     {
-      case EntryType::Struct:
-        out () << "{";
-        optional_endl ();
-        break;
-
-      case EntryType::Vector:
-      case EntryType::Range:
+      case ContentType::Array:
         out () << "[";
         optional_endl ();
         break;
 
-      default:
+      case ContentType::Struct:
+        out () << "{";
+        optional_endl ();
+        break;
+
+      case ContentType::Value:
         break;
     }
 
     return true;
   }
 
-  void JSONWriter::end_entry (const char*, EntryType entryType)
+  void JSONWriter::end_entry (const char*, ContentType type)
   {
     --m_currentDepth;
     m_lastWrittenDepth = m_currentDepth;
 
-    switch (entryType)
+    switch (type)
     {
-      case EntryType::Struct:
-        optional_endl ();
-        out () << "}";
-        break;
-
-      case EntryType::Vector:
-      case EntryType::Range:
+      case ContentType::Array:
         optional_endl ();
         out () << "]";
         break;
 
-      default:
+      case ContentType::Struct:
+        optional_endl ();
+        out () << "}";
+        break;
+
+      case ContentType::Value:
         break;
     }
 

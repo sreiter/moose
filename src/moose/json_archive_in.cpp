@@ -176,7 +176,7 @@ namespace moose
     m_parseData->m_entries.push (JSONEntry (&d, "_root_"));
   }
 
-  bool JSONReader::begin_entry (const char* name, EntryType)
+  bool JSONReader::begin_entry (const char* name, ContentType)
   {
     auto& entries = m_parseData->m_entries;
     if (entries.empty())
@@ -200,7 +200,7 @@ namespace moose
     return true;
   }
 
-  void JSONReader::end_entry (const char* name, EntryType)
+  void JSONReader::end_entry (const char* name, ContentType)
   {
     auto& entries = m_parseData->m_entries;
     if (entries.empty())

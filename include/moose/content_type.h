@@ -1,7 +1,7 @@
 // This file is part of moose, a C++ serialization library
 //
 // Copyright (C) 2017 Sebastian Reiter, G-CSC Frankfurt <s.b.reiter@gmail.com>
-// Copyright (C) 2020 Sebastian Reiter <s.b.reiter@gmail.com>
+// Copyright (C) 2023 Sebastian Reiter <s.b.reiter@gmail.com>
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -25,50 +25,13 @@
 
 #pragma once
 
-#include <fstream>
-#include <stack>
-#include <memory>
-#include <moose/writer.h>
 
 namespace moose
 {
-
-class JSONWriter : public Writer
-{
-public:
-  static auto toFile (const char* filename) -> std::shared_ptr<JSONWriter>;
-
-  JSONWriter (const char* filename);
-  JSONWriter (std::shared_ptr <std::ostream> out);
-  JSONWriter (JSONWriter const&) = delete;
-  JSONWriter (JSONWriter&& other);
-
-  ~JSONWriter () override;
-
-  JSONWriter& operator = (JSONWriter const&) = delete;
-  JSONWriter& operator = (JSONWriter&& other);
-
-  bool begin_entry (const char* name, ContentType type, Hint hint) override;
-  void end_entry (const char* name, ContentType type) override;
-
-  void write_type_name (std::string const& typeName) override;
-  void write_type_version (Version const& version) override;
-  
-  void write (const char* name, bool val) override;
-  void write (const char* name, double val) override;
-  void write (const char* name, std::string const& val) override;
-
-private:
-  void prepare_content ();
-  void optional_endl ();
-  Hint hint () const;
-  auto out () -> std::ostream &;
-
-private:
-  std::shared_ptr <std::ostream> m_out;
-  size_t m_currentDepth {0};
-  size_t m_lastWrittenDepth {0};
-  std::stack <Hint> m_hints;
-};
-
-}// end of namespace moose
+  enum class ContentType
+  {
+    Array,
+    Struct,
+    Value
+  };
+}

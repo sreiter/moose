@@ -78,8 +78,8 @@ namespace moose
     bool is_writing () const;
 
   private:
-    bool begin_entry (const char* name, EntryType entryType, Hint hint);
-    void end_entry (const char* name, EntryType entryType);
+    bool begin_entry (const char* name, ContentType contentType, Hint hint);
+    void end_entry (const char* name, ContentType contentType);
 
     /// Used to allow for different overloads based on the entryType.
     template <EntryType entryType>
@@ -122,6 +122,24 @@ namespace moose
     template <class T>
     void archive (const char* name, T& value);
     
+    template <class TRAITS>
+    auto contentType (TRAITS const&, EntryTypeDummy<EntryType::Struct>) -> ContentType;
+
+    template <class TRAITS>
+    auto contentType (TRAITS const&, EntryTypeDummy<EntryType::Value>) -> ContentType;
+
+    template <class TRAITS>
+    auto contentType (TRAITS const&, EntryTypeDummy<EntryType::Range>) -> ContentType;
+
+    template <class TRAITS>
+    auto contentType (TRAITS const&, EntryTypeDummy<EntryType::Vector>) -> ContentType;
+
+    template <class TRAITS>
+    auto contentType (TRAITS const&, EntryTypeDummy<EntryType::ForwardValue>) -> ContentType;
+
+    template <class TRAITS>
+    auto contentType (TRAITS const&, EntryTypeDummy<EntryType::ForwardReference>) -> ContentType;
+
   private:
     std::shared_ptr<Reader> mInput;
     std::shared_ptr<Writer> mOutput;
