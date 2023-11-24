@@ -124,8 +124,7 @@ namespace moose
       return;
     }
 
-    T t = value;
-    (*this) (name, t, hint);
+    (*this) (name, const_cast<T&> (value), hint);
   }
 
   template <class T>
@@ -137,8 +136,7 @@ namespace moose
       return;
     }
 
-    T t = value;
-    (*this) (name, t, defVal, hint);
+    (*this) (name, const_cast<T&> (value), defVal, hint);
   }
 
   template <class T>
