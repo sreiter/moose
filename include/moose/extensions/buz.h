@@ -25,13 +25,24 @@
 #pragma once
 
 #include <buz/strongtype.h>
-#include <moose/archive.h>
+#include <moose/type_traits.h>
 
 namespace moose
 {
   template <class T, class TAG>
-  void Serialize (moose::Archive& ar, buz::StrongType <T, TAG>& value)
+  struct TypeTraits<buz::StrongType <T, TAG>>
   {
-    ar ("value", *value);
-  }
+    static constexpr EntryType entryType = EntryType::ForwardValue;
+    using ForwardedType = T;
+    
+    static ForwardedType getForwardedValue (buz::StrongType <T, TAG> const& from)
+    {
+      return ForwardedType {*from};
+    }
+
+    static void setForwardedValue (buz::StrongType <T, TAG>& to, ForwardedType&& value)
+    {
+      to = buz::StrongType<T, TAG> {std::move (value)};
+    }
+  };
 }//  end of namespace moose
