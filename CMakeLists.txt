@@ -25,6 +25,9 @@
 
 cmake_minimum_required (VERSION 3.1)
 
+option (MOOSE_BUILD_SAMPLE "Build the moose sample application")
+option (MOOSE_BUILD_TESTS "Build the moose tests")
+
 project (libmoose)
 
 set (mooseSrc   src/moose/archive.cpp
@@ -55,5 +58,10 @@ else()
   target_compile_options(moose PRIVATE -Wall -Wextra -Wpedantic -Werror)
 endif()
 
-add_subdirectory (sample)
-add_subdirectory (tests)
+if (MOOSE_BUILD_SAMPLE)
+  add_subdirectory (sample)
+endif ()
+
+if (MOOSE_BUILD_TESTS)
+  add_subdirectory (tests)
+endif ()
