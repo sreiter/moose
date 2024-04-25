@@ -38,10 +38,26 @@ Type& Types::get (std::string const& name)
   return *iter->second;
 }
 
+Type& Types::get (std::type_index const& typeIndex)
+{
+  auto iter = m_typeIndexMap.find (typeIndex);
+  if (iter == m_typeIndexMap.end ())
+    throw FactoryError () << "Trying to access unregistered type '" << typeIndex.name () << "'.";
+  return *iter->second;
+}
+
 Type* Types::get_if (std::string const& name)
 {
   auto iter = m_typeNameMap.find (name);
   if (iter == m_typeNameMap.end ())
+    return nullptr;
+  return iter->second.get ();
+}
+
+Type* Types::get_if (std::type_index const& typeIndex)
+{
+  auto iter = m_typeIndexMap.find (typeIndex);
+  if (iter == m_typeIndexMap.end ())
     return nullptr;
   return iter->second.get ();
 }

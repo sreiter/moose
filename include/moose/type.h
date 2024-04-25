@@ -27,6 +27,7 @@
 
 #include <memory>
 #include <string>
+#include <typeindex>
 #include <vector>
 
 #include <moose/export.h>
@@ -44,11 +45,14 @@ public:
 
   MOOSE_EXPORT Type (
       std::string name,
-      std::vector<std::shared_ptr<Type>> baseClasses,
+      std::type_index typeIndex,
+      std::vector<std::type_index> baseClassTypeIndices,
       make_raw_fnc_t makeRawFnc,
       serialize_fnc_t serializeFnc);
 
   MOOSE_EXPORT auto name () const -> std::string const&;
+
+  MOOSE_EXPORT auto hash () const -> size_t;
 
   /** If the method returns `true` the type is abstract, i.e.,
     no instances can be created through `make_raw/shared/unique`.
@@ -71,17 +75,18 @@ public:
   template <class Base>
   bool has_base_class () const;
 
-  MOOSE_EXPORT bool has_base_class (std::string const& name) const;
+  MOOSE_EXPORT bool has_base_class (std::type_index const& typeIndex) const;
 
 private:
   template <class TypeOrBase>
   void throw_on_bad_class_hierarchy (const char* what) const;
 
 private:
-  std::string         m_name;
-  std::vector <std::shared_ptr <Type>> m_baseClasses;
-  make_raw_fnc_t      m_makeRawFnc;
-  serialize_fnc_t     m_serializeFnc;
+  std::string m_name;
+  std::type_index m_typeIndex;
+  std::vector <std::type_index> m_baseClassTypeIndices;
+  make_raw_fnc_t m_makeRawFnc;
+  serialize_fnc_t m_serializeFnc;
 };
 
 }// end of namespace

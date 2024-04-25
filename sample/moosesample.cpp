@@ -73,9 +73,10 @@ int main (int, char**)
 
   try
   {
-    moose::types ().add_without_serialize <BaseClass> ("BaseClass");
     moose::types ().add <ClassA, BaseClass> ("ClassA");
     moose::types ().add <ClassB, BaseClass> ("ClassB");
+    // Order of class registration must not matter to allow for registration during static initialization.
+    moose::types ().add_without_serialize <BaseClass> ("BaseClass");
 
     moose::Archive archiveIn {moose::JSONReader::fromString (jsonInputData)};
 

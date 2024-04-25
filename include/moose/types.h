@@ -28,6 +28,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <typeindex>
 #include <vector>
 
 #include <moose/export.h>
@@ -60,8 +61,13 @@ public:
 
   MOOSE_EXPORT Type& get (std::string const& name);
 
-  /// Returns a pointer to the queried type or `nullptr` if no type was registered for the given `name`
+  MOOSE_EXPORT Type& get (std::type_index const& typeIndex);
+
+  /// Returns a pointer to the queried type or `nullptr` if no type was registered for the given `name`.
   MOOSE_EXPORT Type* get_if (std::string const& name);
+
+  /// Returns a pointer to the queried type or `nullptr` if no type was registered for the given `typeIndex`.
+  MOOSE_EXPORT Type* get_if (std::type_index const& typeIndex);
 
   template <class T>
   std::shared_ptr <Type> get_shared ();
@@ -74,9 +80,9 @@ private:
   using serialize_fnc_t = void (*)(Archive&, void*);
 
   using type_name_map_t = std::map <std::string, std::shared_ptr <Type>>;
-  using type_hash_map_t = std::map <std::size_t, std::shared_ptr <Type>>;
+  using type_index_map_t = std::map <std::type_index, std::shared_ptr <Type>>;
 
-  using types_t = std::vector <std::shared_ptr <Type>>;
+  using type_indices_t = std::vector <std::type_index>;
 
 private:
   template <class T>
@@ -94,13 +100,13 @@ private:
   template <class T>
   typename std::enable_if <std::is_default_constructible <T>::value, Type&>::type
   add (std::string name,
-       types_t baseClasses,
+       type_indices_t baseClasses,
        serialize_fnc_t serializeFnc);
 
   template <class T>
   typename std::enable_if <!std::is_default_constructible <T>::value, Type&>::type
   add (std::string name,
-       types_t baseClasses,
+       type_indices_t baseClasses,
        serialize_fnc_t serializeFnc);
 
   template <class T>
@@ -108,14 +114,14 @@ private:
   add (std::shared_ptr <Type> type);
 
   template <class T>
-  void collect_types (types_t& typesOut);
+  void collect_types_indices (type_indices_t& typesOut);
 
   template <class HEAD, class TBase2, class... TBaseOthers>
-  void collect_types (types_t& typesOut);
+  void collect_types_indices (type_indices_t& typesOut);
 
 private:
   type_name_map_t m_typeNameMap;
-  type_hash_map_t m_typeHashMap;
+  type_index_map_t m_typeIndexMap;
 };
 
 /// Returns the default `Types` instance.
