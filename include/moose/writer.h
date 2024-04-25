@@ -26,6 +26,7 @@
 #pragma once
 
 #include <moose/content_type.h>
+#include <moose/export.h>
 #include <moose/hint.h>
 #include <moose/version.h>
 
@@ -39,32 +40,32 @@ namespace moose
   class Writer
   {
   public:
-    virtual ~Writer ();
+    MOOSE_EXPORT virtual ~Writer ();
 
     /** \brief Returns false if the specified entry was not found.
       If false was returned, no matching `end_entry` may be called.*/
-    virtual bool begin_entry (const char* name, ContentType type, Hint hint) = 0;
-    virtual void end_entry (const char* name, ContentType type) = 0;
+    MOOSE_EXPORT virtual bool begin_entry (const char* name, ContentType type, Hint hint) = 0;
+    MOOSE_EXPORT virtual void end_entry (const char* name, ContentType type) = 0;
 
-    virtual void write_type_name (std::string const& typeName) = 0;
-    virtual void write_type_version (Version const& version) = 0;
+    MOOSE_EXPORT virtual void write_type_name (std::string const& typeName) = 0;
+    MOOSE_EXPORT virtual void write_type_version (Version const& version) = 0;
 
-    virtual void write (const char* name, bool val) = 0;
-    virtual void write (const char* name, double val) = 0;
-    virtual void write (const char* name, std::string const& val) = 0;
+    MOOSE_EXPORT virtual void write (const char* name, bool val) = 0;
+    MOOSE_EXPORT virtual void write (const char* name, double val) = 0;
+    MOOSE_EXPORT virtual void write (const char* name, std::string const& val) = 0;
 
   /** \brief writes a number value (int, float, ...).
     Default implementation redirects to 'write (const char*, double&)'
     \{ */
-    virtual void write (const char* name, char val);
-    virtual void write (const char* name, unsigned char val);
-    virtual void write (const char* name, int val);
-    virtual void write (const char* name, long int val);
-    virtual void write (const char* name, long long int val);
-    virtual void write (const char* name, unsigned int val);
-    virtual void write (const char* name, unsigned long int val);
-    virtual void write (const char* name, unsigned long long int val);
-    virtual void write (const char* name, float val);
+    MOOSE_EXPORT virtual void write (const char* name, char val);
+    MOOSE_EXPORT virtual void write (const char* name, unsigned char val);
+    MOOSE_EXPORT virtual void write (const char* name, int val);
+    MOOSE_EXPORT virtual void write (const char* name, long int val);
+    MOOSE_EXPORT virtual void write (const char* name, long long int val);
+    MOOSE_EXPORT virtual void write (const char* name, unsigned int val);
+    MOOSE_EXPORT virtual void write (const char* name, unsigned long int val);
+    MOOSE_EXPORT virtual void write (const char* name, unsigned long long int val);
+    MOOSE_EXPORT virtual void write (const char* name, float val);
   /** \} */
 
   private:
