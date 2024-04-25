@@ -56,6 +56,9 @@ public:
 
   static Type& get (std::string const& name);
 
+  /// Returns a pointer to the queried type or `nullptr` if no type was registered for the given `name`
+  static Type* get_if (std::string const& name);
+
   template <class T>
   static std::shared_ptr <Type> get_shared ();
 

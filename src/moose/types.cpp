@@ -23,9 +23,6 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <typeinfo>
-#include <type_traits>
-
 #include <moose/types.h>
 #include <moose/exceptions.h>
 #include <moose/serialize.h>
@@ -39,6 +36,14 @@ Type& Types::get (std::string const& name)
   if (iter == type_name_map ().end ())
     throw FactoryError () << "Trying to access unregistered type '" << name << "'.";
   return *iter->second;
+}
+
+Type* Types::get_if (std::string const& name)
+{
+  auto iter = type_name_map ().find (name);
+  if (iter == type_name_map ().end ())
+    return nullptr;
+  return iter->second.get ();
 }
 
 auto Types::inst () -> Types&
