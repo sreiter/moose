@@ -76,8 +76,8 @@ Type& Types::get ()
 template <class T>
 std::shared_ptr <Type> Types::get_shared ()
 {
-  auto iter = type_hash_map ().find (typeid (T).hash_code ());
-  if (iter == type_hash_map ().end ())
+  auto iter = m_typeHashMap.find (typeid (T).hash_code ());
+  if (iter == m_typeHashMap.end ())
     throw FactoryError () << "Trying to access unregistered type '" << typeid (T).name () << "'.";
   return iter->second;
 }
@@ -85,8 +85,8 @@ std::shared_ptr <Type> Types::get_shared ()
 template <class T>
 Type& Types::get_polymorphic (T& derived)
 {
-  auto iter = type_hash_map ().find (typeid (derived).hash_code ());
-  if (iter == type_hash_map ().end ())
+  auto iter = m_typeHashMap.find (typeid (derived).hash_code ());
+  if (iter == m_typeHashMap.end ())
     throw FactoryError () << "Trying to access unregistered type '" << typeid (T).name () << "'.";
   return *iter->second;
 }
@@ -136,11 +136,11 @@ auto Types::add (std::string name,
 template <class T>
 void Types::add (std::shared_ptr <Type> type)
 {
-  if (type_name_map ().count (type->name ()) > 0)
+  if (m_typeNameMap.count (type->name ()) > 0)
     throw FactoryError () << "Type '" << type->name () << "' has already been registered.";
 
-  type_name_map () [type->name ()] = type;
-  type_hash_map () [typeid (T).hash_code()] = std::move (type);
+  m_typeNameMap [type->name ()] = type;
+  m_typeHashMap [typeid (T).hash_code()] = std::move (type);
 }
 
 template <class T>

@@ -32,33 +32,24 @@ namespace moose
 
 Type& Types::get (std::string const& name)
 {
-  auto iter = type_name_map ().find (name);
-  if (iter == type_name_map ().end ())
+  auto iter = m_typeNameMap.find (name);
+  if (iter == m_typeNameMap.end ())
     throw FactoryError () << "Trying to access unregistered type '" << name << "'.";
   return *iter->second;
 }
 
 Type* Types::get_if (std::string const& name)
 {
-  auto iter = type_name_map ().find (name);
-  if (iter == type_name_map ().end ())
+  auto iter = m_typeNameMap.find (name);
+  if (iter == m_typeNameMap.end ())
     return nullptr;
   return iter->second.get ();
 }
 
-auto Types::inst () -> Types&
+auto types () -> Types&
 {
-  static Types of; return of;
-}
-
-auto Types::type_name_map () -> type_name_map_t&
-{
-  return inst().m_typeNameMap;
-}
-
-auto Types::type_hash_map () -> type_hash_map_t&
-{
-  return inst().m_typeHashMap;
+  static Types out;
+  return out;
 }
 
 }// end of namespace

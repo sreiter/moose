@@ -132,7 +132,7 @@ namespace moose
   {
     if (is_writing ())
     {
-      auto const& type = Types::get_polymorphic (instance);
+      auto const& type = types ().get_polymorphic (instance);
       mOutput->write_type_name (type.name ());
       return type;
     }
@@ -140,8 +140,8 @@ namespace moose
     {
       auto const& typeName = mInput->type_name ();
       if (typeName.empty ())
-        return Types::get <T> ();
-      return Types::get (typeName);
+        return types ().get <T> ();
+      return types ().get (typeName);
     }
   }
 

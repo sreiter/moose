@@ -73,9 +73,9 @@ int main (int, char**)
 
   try
   {
-    moose::Types::add_without_serialize <BaseClass> ("BaseClass");
-    moose::Types::add <ClassA, BaseClass> ("ClassA");
-    moose::Types::add <ClassB, BaseClass> ("ClassB");
+    moose::types ().add_without_serialize <BaseClass> ("BaseClass");
+    moose::types ().add <ClassA, BaseClass> ("ClassA");
+    moose::types ().add <ClassB, BaseClass> ("ClassB");
 
     moose::Archive archiveIn {moose::JSONReader::fromString (jsonInputData)};
 
