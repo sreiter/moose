@@ -27,6 +27,7 @@
 
 #include <memory>
 #include <string>
+#include <moose/export.h>
 #include <moose/range.h>
 #include <moose/type_traits.h>
 #include <moose/version.h>
@@ -42,8 +43,8 @@ namespace moose
   class Archive
   {
   public:
-    Archive (std::shared_ptr<Reader> archive);
-    Archive (std::shared_ptr<Writer> archive);
+    MOOSE_EXPORT Archive (std::shared_ptr<Reader> archive);
+    MOOSE_EXPORT Archive (std::shared_ptr<Writer> archive);
 
     /** For output archives, latestVersion is stored as version of the currently processed type
       and is also returned.
@@ -51,7 +52,7 @@ namespace moose
       For input archives, the type version stored in the underlying archive is returned.
       If no version was stored, {0,0,0} is returned.
     */
-    auto type_version (Version const& latestVersion) -> Version;
+    MOOSE_EXPORT auto type_version (Version const& latestVersion) -> Version;
 
     /** \brief Read/write without default value.
       If the archive is reading and the given name can not be found, an exception is thrown.
@@ -74,12 +75,12 @@ namespace moose
     template <class T>
     void operator () (const char* name, T const& value, const T& defVal, Hint hint = Hint::None);
 
-    bool is_reading () const;
-    bool is_writing () const;
+    MOOSE_EXPORT bool is_reading () const;
+    MOOSE_EXPORT bool is_writing () const;
 
   private:
-    bool begin_entry (const char* name, ContentType contentType, Hint hint);
-    void end_entry (const char* name, ContentType contentType);
+    MOOSE_EXPORT bool begin_entry (const char* name, ContentType contentType, Hint hint);
+    MOOSE_EXPORT void end_entry (const char* name, ContentType contentType);
 
     /// Used to allow for different overloads based on the entryType.
     template <EntryType entryType>

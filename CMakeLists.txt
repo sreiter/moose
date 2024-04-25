@@ -30,6 +30,8 @@ option (MOOSE_BUILD_TESTS "Build the moose tests")
 
 project (libmoose)
 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
 set (mooseSrc   src/moose/archive.cpp
                 src/moose/input_archive.cpp
                 src/moose/json_archive_in.cpp
@@ -39,7 +41,7 @@ set (mooseSrc   src/moose/archive.cpp
                 src/moose/types.cpp
                 src/moose/version.cpp)
 
-add_library(moose STATIC ${mooseSrc})
+add_library(moose SHARED ${mooseSrc})
 
 target_include_directories(moose
     PUBLIC 
@@ -57,6 +59,8 @@ if(MSVC)
 else()
   target_compile_options(moose PRIVATE -Wall -Wextra -Wpedantic -Werror)
 endif()
+
+target_compile_definitions (moose PRIVATE MOOSE_COMPILING_LIBRARY)
 
 if (MOOSE_BUILD_SAMPLE)
   add_subdirectory (sample)

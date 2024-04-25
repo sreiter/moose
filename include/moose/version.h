@@ -28,6 +28,8 @@
 #include <cstdint>
 #include <string>
 
+#include <moose/export.h>
+
 namespace moose
 {
   class Version
@@ -37,17 +39,17 @@ namespace moose
     using iterator = Values::iterator;
 
   public:
-    static auto fromString (std::string_view s) -> Version;
+    MOOSE_EXPORT static auto fromString (std::string_view s) -> Version;
 
-    Version ();
-    Version (uint32_t patch);
-    Version (uint32_t minor, uint32_t patch);
-    Version (uint32_t major, uint32_t minor, uint32_t patch);
+    MOOSE_EXPORT Version ();
+    MOOSE_EXPORT Version (uint32_t patch);
+    MOOSE_EXPORT Version (uint32_t minor, uint32_t patch);
+    MOOSE_EXPORT Version (uint32_t major, uint32_t minor, uint32_t patch);
     
-    bool operator == (Version const& other) const;
-    bool operator < (Version const& other) const;
+    MOOSE_EXPORT bool operator == (Version const& other) const;
+    MOOSE_EXPORT bool operator < (Version const& other) const;
 
-    auto toString () const -> std::string;
+    MOOSE_EXPORT auto toString () const -> std::string;
     
   private:
     Values mValues {0, 0, 0};

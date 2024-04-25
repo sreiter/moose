@@ -7,4 +7,4 @@ script:
     - cd build
     - cmake -DMOOSE_BUILD_SAMPLE=ON -DMOOSE_BUILD_TESTS=ON ..
     - make -j
-    - tests/moose_tests
+    - bin/moose_tests

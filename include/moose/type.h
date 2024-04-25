@@ -29,6 +29,8 @@
 #include <string>
 #include <vector>
 
+#include <moose/export.h>
+
 namespace moose
 {
 
@@ -40,18 +42,19 @@ public:
   using make_raw_fnc_t  = void* (*)();
   using serialize_fnc_t = void (*)(Archive&, void*);
 
-  Type (std::string name,
-        std::vector <std::shared_ptr <Type>> baseClasses,
-        make_raw_fnc_t makeRawFnc,
-        serialize_fnc_t serializeFnc);
+  MOOSE_EXPORT Type (
+      std::string name,
+      std::vector<std::shared_ptr<Type>> baseClasses,
+      make_raw_fnc_t makeRawFnc,
+      serialize_fnc_t serializeFnc);
 
-  auto name () const -> std::string const&;
+  MOOSE_EXPORT auto name () const -> std::string const&;
 
   /** If the method returns `true` the type is abstract, i.e.,
     no instances can be created through `make_raw/shared/unique`.
     Returns `false` if the type is not abstract, i.e., `make_raw/shared/unique`
     may be called to create instances of the type.*/
-  bool is_abstract () const;
+  MOOSE_EXPORT bool is_abstract () const;
 
   template <class Base>
   Base* make_raw () const;
@@ -68,7 +71,7 @@ public:
   template <class Base>
   bool has_base_class () const;
 
-  bool has_base_class (std::string const& name) const;
+  MOOSE_EXPORT bool has_base_class (std::string const& name) const;
 
 private:
   template <class TypeOrBase>

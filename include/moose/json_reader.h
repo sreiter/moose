@@ -26,24 +26,26 @@
 
 #include <stack>
 #include <memory>
+#include <moose/export.h>
 #include <moose/reader.h>
 
 namespace moose
 {
   class JSONReader : public Reader {
   public:
-    static auto fromFile (const char* filename) -> std::shared_ptr<JSONReader>;
-    static auto fromString (const char* str) -> std::shared_ptr<JSONReader>;
+    MOOSE_EXPORT static auto fromFile (const char* filename) -> std::shared_ptr<JSONReader>;
+    MOOSE_EXPORT static auto fromString (const char* str) -> std::shared_ptr<JSONReader>;
 
   public:
-    JSONReader ();
-    JSONReader (JSONReader const&) = delete;
-    JSONReader (JSONReader&& other);
+    MOOSE_EXPORT JSONReader ();
+    MOOSE_EXPORT JSONReader (JSONReader&& other);
 
-    virtual ~JSONReader () = default;
+    JSONReader (JSONReader const&) = delete;
+
+    MOOSE_EXPORT virtual ~JSONReader () = default;
 
     JSONReader& operator = (JSONReader const&) = delete;
-    JSONReader& operator = (JSONReader&& other);
+    MOOSE_EXPORT JSONReader& operator = (JSONReader&& other);
 
     void parse_file (const char* filename);
     void parse_stream (std::istream& in);

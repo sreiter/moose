@@ -28,6 +28,7 @@
 #include <fstream>
 #include <stack>
 #include <memory>
+#include <moose/export.h>
 #include <moose/writer.h>
 
 namespace moose
@@ -36,17 +37,18 @@ namespace moose
 class JSONWriter : public Writer
 {
 public:
-  static auto toFile (const char* filename) -> std::shared_ptr<JSONWriter>;
+  MOOSE_EXPORT static auto toFile (const char* filename) -> std::shared_ptr<JSONWriter>;
 
-  JSONWriter (const char* filename);
-  JSONWriter (std::shared_ptr <std::ostream> out);
+  MOOSE_EXPORT JSONWriter (const char* filename);
+  MOOSE_EXPORT JSONWriter (std::shared_ptr <std::ostream> out);
+  MOOSE_EXPORT JSONWriter (JSONWriter&& other);
+  
   JSONWriter (JSONWriter const&) = delete;
-  JSONWriter (JSONWriter&& other);
 
-  ~JSONWriter () override;
+  MOOSE_EXPORT ~JSONWriter () override;
 
   JSONWriter& operator = (JSONWriter const&) = delete;
-  JSONWriter& operator = (JSONWriter&& other);
+  MOOSE_EXPORT JSONWriter& operator = (JSONWriter&& other);
 
   bool begin_entry (const char* name, ContentType type, Hint hint) override;
   void end_entry (const char* name, ContentType type) override;

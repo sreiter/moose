@@ -30,6 +30,8 @@
 #include <string>
 #include <vector>
 
+#include <moose/export.h>
+
 namespace moose
 {
 
@@ -40,7 +42,7 @@ class Types
 {
 public:
   Types () = default;
-  
+
   template <class T>
   Type& add (std::string name);
 
@@ -56,10 +58,10 @@ public:
   template <class T>
   Type& get ();
 
-  Type& get (std::string const& name);
+  MOOSE_EXPORT Type& get (std::string const& name);
 
   /// Returns a pointer to the queried type or `nullptr` if no type was registered for the given `name`
-  Type* get_if (std::string const& name);
+  MOOSE_EXPORT Type* get_if (std::string const& name);
 
   template <class T>
   std::shared_ptr <Type> get_shared ();
@@ -117,7 +119,7 @@ private:
 };
 
 /// Returns the default `Types` instance.
-auto types () -> Types&;
+MOOSE_EXPORT auto types () -> Types&;
 
 }// end of namespace
 
