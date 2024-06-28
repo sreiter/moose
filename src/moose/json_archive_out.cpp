@@ -24,6 +24,7 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <cassert>
+#include <format>
 
 #include <moose/exceptions.h>
 #include <moose/json_writer.h>
@@ -169,7 +170,7 @@ namespace moose
 
   void JSONWriter::write (const char*, double val)
   {
-    out () << val;
+    out () << std::format ("{}", val);
   }
 
   void JSONWriter::write (const char*, std::string const& val)
