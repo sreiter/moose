@@ -34,8 +34,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 set (mooseSrc   src/moose/archive.cpp
                 src/moose/input_archive.cpp
-                src/moose/json_archive_in.cpp
-                src/moose/json_archive_out.cpp
+                src/moose/json_reader.cpp
+                src/moose/json_writer.cpp
                 src/moose/output_archive.cpp
                 src/moose/type.cpp
                 src/moose/types.cpp
