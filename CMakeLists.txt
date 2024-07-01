@@ -33,6 +33,7 @@ project (libmoose)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 set (mooseSrc   src/moose/archive.cpp
+                src/moose/binary_reader.cpp
                 src/moose/input_archive.cpp
                 src/moose/json_reader.cpp
                 src/moose/json_writer.cpp

@@ -1,7 +1,6 @@
 // This file is part of moose, a C++ serialization library
 //
-// Copyright (C) 2017 Sebastian Reiter, G-CSC Frankfurt <s.b.reiter@gmail.com>
-// Copyright (C) 2023 Sebastian Reiter <s.b.reiter@gmail.com>
+// Copyright (C) 2024 Volume Graphics
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -25,23 +24,19 @@
 
 #pragma once
 
-#include <moose/json_reader.h>
+#include <moose/binary_writer.h>
 #include <moose/archive.h>
+
+#include <sstream>
 
 namespace moose
 {
   template <class T>
-  T fromJson (const char* name, const char* jsonString)
+  auto toBinary (T const& t) -> std::shared_ptr<std::stringstream>
   {
-    T out;
-    fromJson (out, name, jsonString);
+    auto out = std::make_shared<std::stringstream> ();
+    moose::Archive archive {std::make_shared<moose::BinaryWriter<std::stringstream>> (out)};
+    archive ("", t);
     return out;
-  }
-
-  template <class T>
-  void fromJson (T& out, const char* name, const char* jsonString)
-  {
-    moose::Archive archive {moose::JSONReader::fromString (jsonString)};
-    archive (name, out);
   }
 }

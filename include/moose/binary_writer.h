@@ -1,7 +1,6 @@
 // This file is part of moose, a C++ serialization library
 //
-// Copyright (C) 2017 Sebastian Reiter, G-CSC Frankfurt <s.b.reiter@gmail.com>
-// Copyright (C) 2023 Sebastian Reiter <s.b.reiter@gmail.com>
+// Copyright (C) 2024 Volume Graphics
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -25,23 +24,52 @@
 
 #pragma once
 
-#include <moose/json_reader.h>
-#include <moose/archive.h>
+#include <fstream>
+#include <stack>
+#include <memory>
+#include <moose/writer.h>
 
 namespace moose
 {
-  template <class T>
-  T fromJson (const char* name, const char* jsonString)
-  {
-    T out;
-    fromJson (out, name, jsonString);
-    return out;
-  }
 
-  template <class T>
-  void fromJson (T& out, const char* name, const char* jsonString)
-  {
-    moose::Archive archive {moose::JSONReader::fromString (jsonString)};
-    archive (name, out);
-  }
-}
+/** Writes binary data to a given stream, using its
+  `write (const char_type* s, std::streamsize count)` method.
+*/
+template <class STREAM = std::ofstream>
+class BinaryWriter : public Writer
+{
+public:
+  static auto toFile (const char* filename) -> std::shared_ptr<BinaryWriter>;
+
+  BinaryWriter (std::shared_ptr<STREAM> out);
+  
+  BinaryWriter (BinaryWriter const&) = delete;
+  BinaryWriter (BinaryWriter&& other) = default;
+  
+
+  ~BinaryWriter () override = default;
+
+  BinaryWriter& operator = (BinaryWriter const&) = delete;
+  BinaryWriter& operator = (BinaryWriter&& other) = default;
+
+  bool begin_entry (const char* name, ContentType type, Hint hint) override;
+  void end_entry (const char* name, ContentType type) override;
+
+  void write_type_name (std::string const& typeName) override;
+  void write_type_version (Version const& version) override;
+  
+  void write (const char* name, bool value) override;
+  void write (const char* name, double value) override;
+  void write (const char* name, std::string const& value) override;
+
+private:
+  auto out () -> STREAM&;
+
+private:
+  std::shared_ptr<STREAM> mOut;
+  std::stack<ContentType> mContentStack;
+};
+
+}// end of namespace moose
+
+#include <moose/binary_writer.i>
