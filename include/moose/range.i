@@ -30,21 +30,21 @@ namespace moose
 {
 
 template <class Iterator>
-static auto make_range (Iterator begin, Iterator end)
+auto make_range (Iterator begin, Iterator end)
 -> Range <Iterator>
 {
   return Range <Iterator> {begin, end};
 }
 
 template <class Value>
-static auto make_range (Value* v, size_t size)
+auto make_range (Value* v, size_t size)
 -> Range <Value*>
 {
   return make_range (v, v + size);
 }
 
 template <class Container>
-static auto make_range (Container& container)
+auto make_range (Container& container)
 -> Range <decltype (container.begin ())>
 {
   return make_range (container.begin (), container.end ());

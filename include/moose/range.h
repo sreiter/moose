@@ -35,13 +35,13 @@ struct Range
 };
 
 template <class Value>
-static auto make_range (Value* v, size_t size) -> Range <Value*>;
+auto make_range (Value* v, size_t size) -> Range <Value*>;
 
 template <class Iterator>
-static auto make_range (Iterator begin, Iterator end) -> Range <Iterator>;
+auto make_range (Iterator begin, Iterator end) -> Range <Iterator>;
 
 template <class Container>
-static auto make_range (Container& container) -> Range<decltype (container.begin ())>;
+auto make_range (Container& container) -> Range<decltype (container.begin ())>;
 
 }//  end of namespace moose
 
