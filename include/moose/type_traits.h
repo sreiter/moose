@@ -25,7 +25,10 @@
 
 #pragma once
 
+#include <moose/exceptions.h>
 #include <moose/hint.h>
+
+#include <magic_enum.hpp>
 
 #include <string>
 
@@ -138,11 +141,11 @@ namespace moose
   /** Convenience class from which type traits for enum class types may derive, if they
     should be converted to `int` and back during serialization/deserialization.
 
-    \warning The integer constants of the enum class should not change, at least not for
+    \warning The integer constants of the enum class should never change, at least not for
              serialized constants.
   */
   template <class T>
-  struct EnumClassToIntTypeTraits
+  struct EnumToIntTraits
   {
     static constexpr EntryType entryType = EntryType::ForwardValue;
     using ForwardedType = int;
@@ -155,6 +158,38 @@ namespace moose
     static void setForwardedValue (T& to, int value)
     {
       to = static_cast<T> (value);
+    }
+  };
+
+  /** Converts enums to string and back, on the fly during serialization.
+    Internally, the `magic_enum` library is used. Through traits, the enum to string
+    conversion can be tuned to your needs. Please see the `magic_enum` documentation
+    for more information.
+
+    \warning By default, magic_enum only supports values between -128 and 127. This can be adjusted
+             through type traits.
+             See https://github.com/Neargye/magic_enum/blob/master/doc/limitations.md
+
+    \note If your enum class consists of flags, you may want to look into the is_flags specialization,
+          See https://github.com/Neargye/magic_enum/blob/master/doc/limitations.md
+  */
+  template <class T>
+  struct EnumToStringTraits
+  {
+    static constexpr EntryType entryType = EntryType::ForwardValue;
+    using ForwardedType = std::string;
+
+    static std::string getForwardedValue (T const& from)
+    {
+      return std::string {magic_enum::enum_name (from)};
+    }
+
+    static void setForwardedValue (T& to, std::string value)
+    {
+      if (auto const casted = magic_enum::enum_cast<T> (std::string_view {value}))
+        to = *casted;
+      else
+        throw TypeError {} << "Could not translate enum value.";
     }
   };
 }// end of namespace moose

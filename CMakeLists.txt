@@ -64,6 +64,16 @@ endif()
 
 target_compile_definitions (moose PRIVATE MOOSE_COMPILING_LIBRARY)
 
+include (FetchContent)
+FetchContent_Declare (
+    magic_enum
+    GIT_REPOSITORY https://github.com/Neargye/magic_enum
+    GIT_TAG v0.9.6
+    GIT_SHALLOW ON)
+FetchContent_MakeAvailable (magic_enum)
+
+target_link_libraries (moose PUBLIC magic_enum)
+
 if (MOOSE_BUILD_SAMPLE)
   add_subdirectory (sample)
 endif ()
