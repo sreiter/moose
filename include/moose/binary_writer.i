@@ -26,6 +26,7 @@
 
 #include <moose/binary_writer.h>
 #include <moose/exceptions.h>
+#include <moose/detail/forward_if_not_nullptr.h>
 
 namespace moose
 {
@@ -38,16 +39,24 @@ namespace moose
   }
 
   template <class STREAM>
-  BinaryWriter<STREAM>::BinaryWriter (std::shared_ptr<STREAM> out)
-    : mOut {std::move (out)}
+  BinaryWriter<STREAM>::BinaryWriter (STREAM& out)
+    : mOut {&out}
   {
-    if (mOut == nullptr)
-      throw ArchiveError () << "Invalid stream specified for writing.";
     mContentStack.push (ContentType::Struct);
+    mNameStack.push ("");
   }
 
   template <class STREAM>
-  bool BinaryWriter<STREAM>::begin_entry (const char*, ContentType type, Hint)
+  BinaryWriter<STREAM>::BinaryWriter (std::shared_ptr<STREAM> out)
+    : mStreamStorage {forwardIfNotNullptr<ArchiveError> (std::move (out), "Invalid stream provided")}
+    , mOut {mStreamStorage.get ()}
+  {
+    mContentStack.push (ContentType::Struct);
+    mNameStack.push ("");
+  }
+
+  template <class STREAM>
+  bool BinaryWriter<STREAM>::begin_entry (const char* name, ContentType type, Hint)
   {
     if (mContentStack.top () == ContentType::Array)
     {
@@ -55,6 +64,7 @@ namespace moose
       out ().write (&arrayElement, 1); // add marker that an array element follows
     }
     mContentStack.push (type);
+    mNameStack.push (name); // DEBUG CODE
     return true;
   }
 
@@ -67,6 +77,7 @@ namespace moose
       out ().write (&noArrayElement, 1); // add marker that the array is done
     }
     mContentStack.pop ();
+    mNameStack.pop ();
   }
 
   template <class STREAM>

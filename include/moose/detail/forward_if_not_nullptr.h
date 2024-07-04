@@ -24,55 +24,14 @@
 
 #pragma once
 
-#include <fstream>
-#include <stack>
-#include <memory>
-#include <moose/writer.h>
-
-namespace moose
+namespace moose::detail
 {
+  template <class EXCEPTION, class T>
+  auto forwardIfNotNullptr (T&& t, char const* errorMessage) -> T&&
+  {
+    if (t == nullptr)
+      throw EXCEPTION {} << errorMessage;
+    return std::forward<T> (t);
+  }
+}
 
-/** Writes binary data to a given stream, using its
-  `write (const char_type* s, std::streamsize count)` method.
-*/
-template <class STREAM = std::ofstream>
-class BinaryWriter : public Writer
-{
-public:
-  static auto toFile (const char* filename) -> std::shared_ptr<BinaryWriter>;
-
-  BinaryWriter (STREAM& out);
-  BinaryWriter (std::shared_ptr<STREAM> out);
-  
-  BinaryWriter (BinaryWriter const&) = delete;
-  BinaryWriter (BinaryWriter&& other) = default;
-  
-
-  ~BinaryWriter () override = default;
-
-  BinaryWriter& operator = (BinaryWriter const&) = delete;
-  BinaryWriter& operator = (BinaryWriter&& other) = default;
-
-  bool begin_entry (const char* name, ContentType type, Hint hint) override;
-  void end_entry (const char* name, ContentType type) override;
-
-  void write_type_name (std::string const& typeName) override;
-  void write_type_version (Version const& version) override;
-  
-  void write (const char* name, bool value) override;
-  void write (const char* name, double value) override;
-  void write (const char* name, std::string const& value) override;
-
-private:
-  auto out () -> STREAM&;
-
-private:
-  std::shared_ptr<STREAM> mStreamStorage;
-  STREAM* mOut;
-  std::stack<ContentType> mContentStack;
-  std::stack<std::string> mNameStack;
-};
-
-}// end of namespace moose
-
-#include <moose/binary_writer.i>

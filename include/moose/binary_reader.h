@@ -38,6 +38,7 @@ namespace moose
   public:
     BinaryReader () = delete;
     MOOSE_EXPORT BinaryReader (BinaryReader&& other) = default;
+    MOOSE_EXPORT BinaryReader (std::istream& in);
     MOOSE_EXPORT BinaryReader (std::shared_ptr<std::istream> in);
 
     BinaryReader (BinaryReader const&) = delete;
@@ -73,7 +74,8 @@ namespace moose
     auto in () const -> std::istream&;
 
   private:
-    std::shared_ptr<std::istream> mIn;
+    std::shared_ptr<std::istream> mStreamStorage;
+    std::istream* mIn;
     std::stack<Entry> mEntries;
   };
 }// end of namespace moose

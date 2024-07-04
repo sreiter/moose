@@ -23,6 +23,7 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <moose/binary_reader.h>
 #include <moose/exceptions.h>
+#include <moose/detail/forward_if_not_nullptr.h>
 
 #include <fstream>
 
@@ -36,11 +37,16 @@ namespace moose
     return std::make_shared<BinaryReader> (std::move (in));
   }
 
-  BinaryReader::BinaryReader (std::shared_ptr<std::istream> in)
-    : mIn {std::move (in)}
+  BinaryReader::BinaryReader (std::istream& in)
+    : mIn {&in}
   {
-    if (mIn == nullptr || (!(*mIn)))
-      throw ArchiveError () << "Invalid stream specified";
+    mEntries.emplace (ContentType::Struct, false);
+  }
+
+  BinaryReader::BinaryReader (std::shared_ptr<std::istream> in)
+    : mStreamStorage {detail::forwardIfNotNullptr<ArchiveError> (std::move (in), "Invalid stream provided")}
+    , mIn {mStreamStorage.get ()}
+  {
     mEntries.emplace (ContentType::Struct, false);
   }
 
