@@ -48,7 +48,7 @@ namespace moose
 
   template <class STREAM>
   BinaryWriter<STREAM>::BinaryWriter (std::shared_ptr<STREAM> out)
-    : mStreamStorage {forwardIfNotNullptr<ArchiveError> (std::move (out), "Invalid stream provided")}
+    : mStreamStorage {detail::forwardIfNotNullptr<ArchiveError> (std::move (out), "Invalid stream provided")}
     , mOut {mStreamStorage.get ()}
   {
     mContentStack.push (ContentType::Struct);

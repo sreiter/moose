@@ -31,17 +31,17 @@
 namespace moose
 {
   template <class T>
+  void fromJson (T& out, const char* name, const char* jsonString)
+  {
+    moose::Archive archive {moose::JSONReader::fromString (jsonString)};
+    archive (name, out);
+  }
+  
+  template <class T>
   T fromJson (const char* name, const char* jsonString)
   {
     T out;
     fromJson (out, name, jsonString);
     return out;
-  }
-
-  template <class T>
-  void fromJson (T& out, const char* name, const char* jsonString)
-  {
-    moose::Archive archive {moose::JSONReader::fromString (jsonString)};
-    archive (name, out);
   }
 }

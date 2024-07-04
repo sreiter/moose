@@ -53,10 +53,11 @@ target_include_directories(moose
         ${CMAKE_CURRENT_SOURCE_DIR}/deps/rapidjson-v1.1.0.s1/include
     )
 
-target_compile_features(moose PUBLIC cxx_std_17)
+target_compile_features(moose PUBLIC cxx_std_20)
 
 if(MSVC)
-  target_compile_options(moose PRIVATE /W4 /WX)
+  #/wd5054 is a warning from rapidjson.
+  target_compile_options(moose PRIVATE /W4 /WX /wd5054)
 else()
   target_compile_options(moose PRIVATE -Wall -Wextra -Wpedantic -Werror)
 endif()

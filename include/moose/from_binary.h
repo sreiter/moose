@@ -32,18 +32,18 @@
 namespace moose
 {
   template <class T>
+  void fromBinary (T& out, std::shared_ptr<std::stringstream> binaryData)
+  {
+    moose::Archive archive {std::make_shared<moose::BinaryReader> (binaryData)};
+    archive ("", out);
+  }
+
+  template <class T>
   T fromBinary (std::shared_ptr<std::stringstream> binaryData)
   {
     T out;
     fromBinary (out, binaryData);
     return out;
-  }
-
-  template <class T>
-  void fromBinary (T& out, std::shared_ptr<std::stringstream> binaryData)
-  {
-    moose::Archive archive {std::make_shared<moose::BinaryReader> (binaryData)};
-    archive ("", out);
   }
 }
 

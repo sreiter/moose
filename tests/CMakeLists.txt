@@ -6,6 +6,8 @@ add_executable (
     stl.t.cpp
     version.t.cpp)
 
+target_compile_features(moose_tests PUBLIC cxx_std_20)
+
 include (FetchContent)
 FetchContent_Declare (
     googletest

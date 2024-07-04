@@ -111,8 +111,7 @@ namespace moose
   {
     uint32_t size;
     in ().read (reinterpret_cast<char*> (&size), sizeof (uint32_t));
-    value.resize (size + 1);
-    value.back () = 0;
+    value.resize (size);
     in ().read (value.data (), size);
   }
 
