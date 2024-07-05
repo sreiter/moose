@@ -66,3 +66,11 @@ TEST (stl, variant)
   EXPECT_EQ (v3, toJsonAndBack (v3));
   EXPECT_EQ (v3, toBinaryAndBack (v3));
 }
+
+TEST (stl, nestedInlineArrays)
+{
+  auto const jsonArrays = R"""({ "pairs": [[0, 1], [2, 3], [4, 5]] })""";
+  auto const arrays = fromJson<std::vector<std::array<int, 2>>> ("pairs", jsonArrays);
+  auto const expectedArrays = std::vector<std::array<int, 2>> {{0, 1}, {2, 3}, {4, 5}};
+  EXPECT_EQ (arrays, expectedArrays);
+}
