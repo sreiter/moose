@@ -205,21 +205,57 @@ namespace moose
   template <class T>
   void Archive::archive (const char* name, T& value, EntryTypeDummy <EntryType::Vector>)
   {
+    using Traits = TypeTraits<T>;
+    using ValueType = typename Traits::ValueType;
+
+    constexpr bool unpack = wantsToUnpack<T> () && canBeUnpacked<ValueType> ();
+
     if (is_reading ())
     {
-      TypeTraits<T>::clear (value);
-      while(mInput->array_has_next (name))
+      Traits::clear (value);
+      if constexpr (unpack)
       {
-        using ValueType = typename TypeTraits<T>::ValueType;
-        ValueType tmpVal = detail::GetInitialValue <ValueType> ();
-        (*this) ("", tmpVal);
-        TypeTraits<T>::pushBack (value, tmpVal);
+        while(mInput->array_has_next (name))
+        {
+          ValueType childValue;
+          auto childRange = make_range (childValue);
+          for (auto i = childRange.begin; i != childRange.end; ++i)
+          {
+            if (!mInput->array_has_next (name))
+              throw ArchiveError () << "Too few entries while reading range '" << name << "'";
+
+            (*this) ("", *i);
+          }
+          Traits::pushBack (value, childValue);
+        }
+      }
+      else
+      {
+        while(mInput->array_has_next (name))
+        {
+          ValueType tmpVal = detail::GetInitialValue <ValueType> ();
+          (*this) ("", tmpVal);
+          Traits::pushBack (value, tmpVal);
+        }
       }
     }
     else
     {
-      // Writing a vector type is the same as writing a range
-      archive (name, value, EntryTypeDummy <EntryType::Range> ());
+      if constexpr (unpack)
+      {
+        auto range = make_range (value);
+        for (auto i = range.begin; i != range.end; ++i)
+        {
+          auto childRange = make_range (*i);
+          for (auto j = childRange.begin; j != childRange.end; ++j)
+            (*this) ("", *j);
+        }
+      }
+      else
+      {
+        // Writing a vector type is the same as writing a range
+        archive (name, value, EntryTypeDummy <EntryType::Range> ());
+      }
     }
   }
 

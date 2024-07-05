@@ -30,7 +30,6 @@
 #include <moose/stl/array.h>
 #include <moose/stl/optional.h>
 #include <moose/stl/variant.h>
-#include <array>
 #include <map>
 #include <set>
 #include <utility>
@@ -54,6 +53,8 @@ namespace moose
     using ValueType = typename Type::value_type;
 
     static constexpr EntryType entryType = EntryType::Vector;
+
+    static constexpr bool wantsToUnpack = true;
 
     static void pushBack (Type& vector, ValueType const& value)
     { vector.push_back (value); }

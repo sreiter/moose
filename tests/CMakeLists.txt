@@ -5,6 +5,7 @@ add_executable (
     enums.t.cpp
     json_archive_in.t.cpp
     stl.t.cpp
+    unpacking.t.cpp
     version.t.cpp)
 
 target_compile_features(moose_tests PUBLIC cxx_std_20)

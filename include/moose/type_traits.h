@@ -37,8 +37,24 @@ namespace moose
   enum class EntryType
   {
     Struct,
-    Value, ///< Built in values. Todo: Call this `BuiltIn`
+
+    Value, ///< Plain values. Those are directly supported by the archive.
+
+    /** A fixed size range of entries, featuring a `begin` and `end` accessor.
+      If no `begin` or `end` accessors are available, one may overload the `make_range` function
+      to create some pair of iterators.
+      If a range consists of `Values`, then the contents of that `range` can be unpacked into
+      its parent `vector`, if the traits specify the following constant:
+      \code
+        template <>
+        struct TypeTraits<YourChildRange>
+        {
+          static constexpr bool canBeUnpacked = true;
+        };
+      \endcode
+    */
     Range,
+
     /** A dynamic sequence of values. Think of a `std::vector`. The following typetraits has to
       be specified for it to be compatible with the archive.
       \code
@@ -52,8 +68,19 @@ namespace moose
           static void clear (Type& vector);
         };
       \endcode
+
+      Child ranges may be unpacked by a vector if the following constant is additionally specified:
+      \code
+        template <>
+        struct TypeTraits<YourParentRange>
+        {
+          ...
+          static constexpr bool wantsToUnpack = true;
+        };
+      \endcode
     */
     Vector,
+
     /** Types which just wrap a single value of a different type may not need a custom entry. Instead
       it may be convenient to just forward the wrapped value for serialization.
       For such type, the TypeTraits have to specify the following:
@@ -69,6 +96,7 @@ namespace moose
       \endcode
     */
     ForwardValue,
+
     /** Just like `ForwardValue`, but `getForwardedValue` returns a reference.*/
     ForwardReference,
   };
@@ -82,6 +110,62 @@ namespace moose
     */
     static constexpr EntryType entryType = EntryType::Struct;
   };
+
+  template <class T>
+  constexpr bool isValue ()
+  { return TypeTraits<T>::entryType == EntryType::Value; }
+
+  template <class T>
+  constexpr bool isStruct ()
+  { return TypeTraits<T>::entryType == EntryType::Struct; }
+
+  template <class T>
+  constexpr bool isRange ()
+  { return TypeTraits<T>::entryType == EntryType::Range; }
+
+  template <class T>
+  constexpr bool isVector ()
+  { return TypeTraits<T>::entryType == EntryType::Vector; }
+
+  template <class T>
+  constexpr bool isForwardValue ()
+  { return TypeTraits<T>::entryType == EntryType::ForwardValue; }
+
+  template <class T>
+  constexpr bool isForwardReference ()
+  { return TypeTraits<T>::entryType == EntryType::ForwardReference; }
+
+  template <class T>
+  concept TraitsHas_canBeUnpacked = requires ()
+  { {TypeTraits<T>::canBeUnpacked} -> std::convertible_to<bool>; };
+
+  template <TraitsHas_canBeUnpacked T>
+  constexpr bool canBeUnpacked ()
+  {
+    return isRange<T> () && TypeTraits<T>::canBeUnpacked;
+  }
+
+  template <class T>
+  constexpr bool canBeUnpacked ()
+  {
+    return false;
+  }
+
+  template <class T>
+  concept TraitsHas_wantsToUnpack = requires ()
+  { {TypeTraits<T>::wantsToUnpack} -> std::convertible_to<bool>; };
+
+  template <TraitsHas_wantsToUnpack T>
+  constexpr bool wantsToUnpack ()
+  {
+    return isVector<T> () && TypeTraits<T>::wantsToUnpack;
+  }
+
+  template <class T>
+  constexpr bool wantsToUnpack ()
+  {
+    return false;
+  }
 
   /** Overload this method for your types to specify a custom default hint which will be used
     during serialization, if a user didn't specify a hint in the archive call.
