@@ -218,7 +218,7 @@ namespace moose
         while(mInput->array_has_next (name))
         {
           ValueType childValue;
-          auto childRange = make_range (childValue);
+          auto childRange = TypeTraits<ValueType>::toRange (childValue);
           for (auto i = childRange.begin; i != childRange.end; ++i)
           {
             if (!mInput->array_has_next (name))
@@ -243,10 +243,10 @@ namespace moose
     {
       if constexpr (unpack)
       {
-        auto range = make_range (value);
+        auto range = Traits::toRange (value);
         for (auto i = range.begin; i != range.end; ++i)
         {
-          auto childRange = make_range (*i);
+          auto childRange = TypeTraits<ValueType>::toRange (*i);
           for (auto j = childRange.begin; j != childRange.end; ++j)
             (*this) ("", *j);
         }

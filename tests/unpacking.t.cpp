@@ -1,5 +1,6 @@
 #include <moose/stl_serialization.h>
 
+#include "moose/type_traits.h"
 #include "utils.h"
 
 #include <gtest/gtest.h>
@@ -17,9 +18,8 @@ struct UnpackMe
 };
 
 template <class T>
-struct TypeTraits<UnpackMe<T>>
+struct TypeTraits<UnpackMe<T>> : public DefaultRangeTraits<UnpackMe<T>>
 {
-  static constexpr EntryType entryType = EntryType::Range;
   static constexpr bool canBeUnpacked = true;
 };
 

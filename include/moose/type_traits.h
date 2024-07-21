@@ -128,6 +128,7 @@ namespace moose
     }
   };
   
+  template <class T>
   constexpr bool isValue ()
   { return TypeTraits<T>::entryType == EntryType::Value; }
 
