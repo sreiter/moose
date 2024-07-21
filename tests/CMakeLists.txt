@@ -20,3 +20,6 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable (googletest)
 
 target_link_libraries (moose_tests gtest_main moose)
+
+enable_testing()
+add_test(NAME moose_ctest COMMAND moose_tests)
