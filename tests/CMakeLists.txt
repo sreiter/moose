@@ -2,9 +2,13 @@ cmake_minimum_required (VERSION 3.15)
 
 add_executable (
     moose_tests
+    enums.t.cpp
     json_archive_in.t.cpp
     stl.t.cpp
+    unpacking.t.cpp
     version.t.cpp)
+
+target_compile_features(moose_tests PUBLIC cxx_std_20)
 
 include (FetchContent)
 FetchContent_Declare (

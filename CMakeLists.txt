@@ -30,16 +30,19 @@ option (MOOSE_BUILD_TESTS "Build the moose tests")
 
 project (libmoose)
 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
 set (mooseSrc   src/moose/archive.cpp
+                src/moose/binary_reader.cpp
                 src/moose/input_archive.cpp
-                src/moose/json_archive_in.cpp
-                src/moose/json_archive_out.cpp
+                src/moose/json_reader.cpp
+                src/moose/json_writer.cpp
                 src/moose/output_archive.cpp
                 src/moose/type.cpp
                 src/moose/types.cpp
                 src/moose/version.cpp)
 
-add_library(moose STATIC ${mooseSrc})
+add_library(moose SHARED ${mooseSrc})
 
 target_include_directories(moose
     PUBLIC 
@@ -50,13 +53,26 @@ target_include_directories(moose
         ${CMAKE_CURRENT_SOURCE_DIR}/deps/rapidjson-v1.1.0.s1/include
     )
 
-target_compile_features(moose PUBLIC cxx_std_17)
+target_compile_features(moose PUBLIC cxx_std_20)
 
 if(MSVC)
-  target_compile_options(moose PRIVATE /W4 /WX)
+  #/wd5054 is a warning from rapidjson.
+  target_compile_options(moose PRIVATE /W4 /WX /wd5054)
 else()
   target_compile_options(moose PRIVATE -Wall -Wextra -Wpedantic -Werror)
 endif()
+
+target_compile_definitions (moose PRIVATE MOOSE_COMPILING_LIBRARY)
+
+include (FetchContent)
+FetchContent_Declare (
+    magic_enum
+    GIT_REPOSITORY https://github.com/Neargye/magic_enum
+    GIT_TAG v0.9.6
+    GIT_SHALLOW ON)
+FetchContent_MakeAvailable (magic_enum)
+
+target_link_libraries (moose PUBLIC magic_enum)
 
 if (MOOSE_BUILD_SAMPLE)
   add_subdirectory (sample)

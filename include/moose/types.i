@@ -62,9 +62,9 @@ Type& Types::add_without_serialize (std::string name)
 template <class T, class TBase1, class... TBaseOthers>
 Type& Types::add (std::string name, serialize_fnc_t serializeFnc)
 {
-  types_t baseClasses;
-  collect_types <TBase1, TBaseOthers...> (baseClasses);
-  return add <T> (std::move (name), std::move (baseClasses), serializeFnc);
+  type_indices_t baseClasseIndices;
+  collect_types_indices <TBase1, TBaseOthers...> (baseClasseIndices);
+  return add <T> (std::move (name), std::move (baseClasseIndices), serializeFnc);
 }
 
 template <class T>
@@ -76,8 +76,8 @@ Type& Types::get ()
 template <class T>
 std::shared_ptr <Type> Types::get_shared ()
 {
-  auto iter = type_hash_map ().find (typeid (T).hash_code ());
-  if (iter == type_hash_map ().end ())
+  auto iter = m_typeIndexMap.find (typeid (T));
+  if (iter == m_typeIndexMap.end ())
     throw FactoryError () << "Trying to access unregistered type '" << typeid (T).name () << "'.";
   return iter->second;
 }
@@ -85,8 +85,8 @@ std::shared_ptr <Type> Types::get_shared ()
 template <class T>
 Type& Types::get_polymorphic (T& derived)
 {
-  auto iter = type_hash_map ().find (typeid (derived).hash_code ());
-  if (iter == type_hash_map ().end ())
+  auto iter = m_typeIndexMap.find (typeid (derived));
+  if (iter == m_typeIndexMap.end ())
     throw FactoryError () << "Trying to access unregistered type '" << typeid (T).name () << "'.";
   return *iter->second;
 }
@@ -105,12 +105,13 @@ void Types::CallSerialize (Archive& ar, void* val)
 
 template <class T>
 auto Types::add (std::string name,
-                 types_t baseClasses,
+                 type_indices_t baseClasseIndices,
                  serialize_fnc_t serializeFnc)
 -> typename std::enable_if <std::is_default_constructible <T>::value, Type&>::type
 {
   auto type = std::make_shared <Type> (std::move (name),
-                                       std::move (baseClasses),
+                                       typeid (T),
+                                       std::move (baseClasseIndices),
                                        &CreateFunc <T>,
                                        serializeFnc);
   auto& ref = *type;
@@ -120,12 +121,13 @@ auto Types::add (std::string name,
 
 template <class T>
 auto Types::add (std::string name,
-                 types_t baseClasses,
+                 type_indices_t baseClasseIndices,
                  serialize_fnc_t serializeFnc)
 -> typename std::enable_if <!std::is_default_constructible <T>::value, Type&>::type
 {
   auto type = std::make_shared <Type> (std::move (name),
-                                       std::move (baseClasses),
+                                       typeid (T),
+                                       std::move (baseClasseIndices),
                                        nullptr,
                                        serializeFnc);
   auto& ref = *type;
@@ -136,24 +138,24 @@ auto Types::add (std::string name,
 template <class T>
 void Types::add (std::shared_ptr <Type> type)
 {
-  if (type_name_map ().count (type->name ()) > 0)
+  if (m_typeNameMap.count (type->name ()) > 0)
     throw FactoryError () << "Type '" << type->name () << "' has already been registered.";
 
-  type_name_map () [type->name ()] = type;
-  type_hash_map () [typeid (T).hash_code()] = std::move (type);
+  m_typeNameMap [type->name ()] = type;
+  m_typeIndexMap [typeid (T)] = std::move (type);
 }
 
 template <class T>
-void Types::collect_types (types_t& typesOut)
+void Types::collect_types_indices (type_indices_t& typesOut)
 {
-  typesOut.push_back(get_shared <T> ());
+  typesOut.push_back(typeid (T));
 }
 
 template <class HEAD, class TBase2, class... TBaseOthers>
-void Types::collect_types (types_t& typesOut)
+void Types::collect_types_indices (type_indices_t& typesOut)
 {
-  collect_types <HEAD> (typesOut);
-  collect_types <TBase2, TBaseOthers...> (typesOut);
+  collect_types_indices <HEAD> (typesOut);
+  collect_types_indices <TBase2, TBaseOthers...> (typesOut);
 }
 
 }// end of namespace moose

@@ -23,9 +23,6 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <typeinfo>
-#include <type_traits>
-
 #include <moose/types.h>
 #include <moose/exceptions.h>
 #include <moose/serialize.h>
@@ -35,25 +32,40 @@ namespace moose
 
 Type& Types::get (std::string const& name)
 {
-  auto iter = type_name_map ().find (name);
-  if (iter == type_name_map ().end ())
+  auto iter = m_typeNameMap.find (name);
+  if (iter == m_typeNameMap.end ())
     throw FactoryError () << "Trying to access unregistered type '" << name << "'.";
   return *iter->second;
 }
 
-auto Types::inst () -> Types&
+Type& Types::get (std::type_index const& typeIndex)
 {
-  static Types of; return of;
+  auto iter = m_typeIndexMap.find (typeIndex);
+  if (iter == m_typeIndexMap.end ())
+    throw FactoryError () << "Trying to access unregistered type '" << typeIndex.name () << "'.";
+  return *iter->second;
 }
 
-auto Types::type_name_map () -> type_name_map_t&
+Type* Types::get_if (std::string const& name)
 {
-  return inst().m_typeNameMap;
+  auto iter = m_typeNameMap.find (name);
+  if (iter == m_typeNameMap.end ())
+    return nullptr;
+  return iter->second.get ();
 }
 
-auto Types::type_hash_map () -> type_hash_map_t&
+Type* Types::get_if (std::type_index const& typeIndex)
 {
-  return inst().m_typeHashMap;
+  auto iter = m_typeIndexMap.find (typeIndex);
+  if (iter == m_typeIndexMap.end ())
+    return nullptr;
+  return iter->second.get ();
+}
+
+auto types () -> Types&
+{
+  static Types out;
+  return out;
 }
 
 }// end of namespace

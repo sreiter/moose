@@ -25,8 +25,11 @@
 
 #pragma once
 
+#include <moose/exceptions.h>
 #include <moose/hint.h>
 #include <moose/range.h>
+
+#include <magic_enum.hpp>
 
 #include <string>
 
@@ -36,14 +39,18 @@ namespace moose
   {
     Struct,
 
-    Value, ///< Built in values.
+    Value, ///< Plain values. Those are directly supported by the archive.
 
-    /** A fixed range of values. Typetraits have to define the following members:
+    /** A fixed size range of entries. Implementing the method `toRange` is required to provide
+      a pair of begin/end iterators which are used to iterate over the members of the range.
+      If a range consists of entries with type `Value`, then the contents of that `range` can
+      be unpacked into its parent `vector`, if the traits specify the constant `canBeUnpacked`:
       \code
         template <>
-        struct TypeTraits <YourRangeType>
+        struct TypeTraits<YourChildRange>
         {
           static constexpr EntryType entryType = EntryType::Range;
+          static constexpr bool canBeUnpacked = true;
           static auto toRange (YourRangeType& v) -> Range <SomeIteratorType>;
         };
       \endcode
@@ -52,6 +59,8 @@ namespace moose
 
     /** A dynamic sequence of values. Think of a `std::vector`. The following typetraits has to
       be specified for it to be compatible with the archive.
+      Implementing the method `toRange` is required to provide a pair of begin/end iterators
+      which are used to iterate over the members of the range.
       \code
         template <>
         struct TypeTraits <YourVectorType>
@@ -64,9 +73,20 @@ namespace moose
           static void clear (Type& vector);
         };
       \endcode
+
+      Child ranges may be unpacked by a vector if the following constant is additionally specified:
+      \code
+        template <>
+        struct TypeTraits<YourParentRange>
+        {
+          ...
+          static constexpr bool wantsToUnpack = true;
+        };
+      \endcode
     */
 
     Vector,
+
     /** Types which just wrap a single value of a different type may not need a custom entry. Instead
       it may be convenient to just forward the wrapped value for serialization.
       For such type, the TypeTraits have to specify the following:
@@ -107,6 +127,62 @@ namespace moose
       return {container.begin (), container.end ()};
     }
   };
+  
+  template <class T>
+  constexpr bool isValue ()
+  { return TypeTraits<T>::entryType == EntryType::Value; }
+
+  template <class T>
+  constexpr bool isStruct ()
+  { return TypeTraits<T>::entryType == EntryType::Struct; }
+
+  template <class T>
+  constexpr bool isRange ()
+  { return TypeTraits<T>::entryType == EntryType::Range; }
+
+  template <class T>
+  constexpr bool isVector ()
+  { return TypeTraits<T>::entryType == EntryType::Vector; }
+
+  template <class T>
+  constexpr bool isForwardValue ()
+  { return TypeTraits<T>::entryType == EntryType::ForwardValue; }
+
+  template <class T>
+  constexpr bool isForwardReference ()
+  { return TypeTraits<T>::entryType == EntryType::ForwardReference; }
+
+  template <class T>
+  concept TraitsHas_canBeUnpacked = requires ()
+  { {TypeTraits<T>::canBeUnpacked} -> std::convertible_to<bool>; };
+
+  template <TraitsHas_canBeUnpacked T>
+  constexpr bool canBeUnpacked ()
+  {
+    return isRange<T> () && TypeTraits<T>::canBeUnpacked;
+  }
+
+  template <class T>
+  constexpr bool canBeUnpacked ()
+  {
+    return false;
+  }
+
+  template <class T>
+  concept TraitsHas_wantsToUnpack = requires ()
+  { {TypeTraits<T>::wantsToUnpack} -> std::convertible_to<bool>; };
+
+  template <TraitsHas_wantsToUnpack T>
+  constexpr bool wantsToUnpack ()
+  {
+    return isVector<T> () && TypeTraits<T>::wantsToUnpack;
+  }
+
+  template <class T>
+  constexpr bool wantsToUnpack ()
+  {
+    return false;
+  }
 
   /** Overload this method for your types to specify a custom default hint which will be used
     during serialization, if a user didn't specify a hint in the archive call.
@@ -166,11 +242,11 @@ namespace moose
   /** Convenience class from which type traits for enum class types may derive, if they
     should be converted to `int` and back during serialization/deserialization.
 
-    \warning The integer constants of the enum class should not change, at least not for
+    \warning The integer constants of the enum class should never change, at least not for
              serialized constants.
   */
   template <class T>
-  struct EnumClassToIntTypeTraits
+  struct EnumToIntTraits
   {
     static constexpr EntryType entryType = EntryType::ForwardValue;
     using ForwardedType = int;
@@ -183,6 +259,38 @@ namespace moose
     static void setForwardedValue (T& to, int value)
     {
       to = static_cast<T> (value);
+    }
+  };
+
+  /** Converts enums to string and back, on the fly during serialization.
+    Internally, the `magic_enum` library is used. Through traits, the enum to string
+    conversion can be tuned to your needs. Please see the `magic_enum` documentation
+    for more information.
+
+    \warning By default, magic_enum only supports values between -128 and 127. This can be adjusted
+             through type traits.
+             See https://github.com/Neargye/magic_enum/blob/master/doc/limitations.md
+
+    \note If your enum class consists of flags, you may want to look into the is_flags specialization,
+          See https://github.com/Neargye/magic_enum/blob/master/doc/limitations.md
+  */
+  template <class T>
+  struct EnumToStringTraits
+  {
+    static constexpr EntryType entryType = EntryType::ForwardValue;
+    using ForwardedType = std::string;
+
+    static std::string getForwardedValue (T const& from)
+    {
+      return std::string {magic_enum::enum_name (from)};
+    }
+
+    static void setForwardedValue (T& to, std::string value)
+    {
+      if (auto const casted = magic_enum::enum_cast<T> (std::string_view {value}))
+        to = *casted;
+      else
+        throw TypeError {} << "Could not translate enum value.";
     }
   };
 }// end of namespace moose

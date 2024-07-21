@@ -1,6 +1,6 @@
 // This file is part of moose, a C++ serialization library
 //
-// Copyright (C) 2022 Sebastian Reiter <s.b.reiter@gmail.com>
+// Copyright (C) 2024 Volume Graphics
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -24,34 +24,14 @@
 
 #pragma once
 
-#include <array>
-#include <cstdint>
-#include <string>
-
-#include <moose/export.h>
-
-namespace moose
+namespace moose::detail
 {
-  class Version
+  template <class EXCEPTION, class T>
+  auto forwardIfNotNullptr (T&& t, char const* errorMessage) -> T&&
   {
-  public:
-    using Values = std::array<uint32_t, 3>;
-    using iterator = Values::iterator;
+    if (t == nullptr)
+      throw EXCEPTION {} << errorMessage;
+    return std::forward<T> (t);
+  }
+}
 
-  public:
-    MOOSE_EXPORT static auto fromString (std::string_view s) -> Version;
-
-    MOOSE_EXPORT Version ();
-    MOOSE_EXPORT Version (uint32_t patch);
-    MOOSE_EXPORT Version (uint32_t minor, uint32_t patch);
-    MOOSE_EXPORT Version (uint32_t major, uint32_t minor, uint32_t patch);
-    
-    MOOSE_EXPORT bool operator == (Version const& other) const;
-    MOOSE_EXPORT bool operator < (Version const& other) const;
-
-    MOOSE_EXPORT auto toString () const -> std::string;
-    
-  private:
-    Values mValues {0, 0, 0};
-  };
-}//  end of namespace moose

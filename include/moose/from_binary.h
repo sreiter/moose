@@ -1,6 +1,6 @@
 // This file is part of moose, a C++ serialization library
 //
-// Copyright (C) 2022 Sebastian Reiter <s.b.reiter@gmail.com>
+// Copyright (C) 2024 Volume Graphics
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -24,34 +24,26 @@
 
 #pragma once
 
-#include <array>
-#include <cstdint>
-#include <string>
+#include <moose/binary_reader.h>
+#include <moose/archive.h>
 
-#include <moose/export.h>
+#include <sstream>
 
 namespace moose
 {
-  class Version
+  template <class T>
+  void fromBinary (T& out, std::shared_ptr<std::stringstream> binaryData)
   {
-  public:
-    using Values = std::array<uint32_t, 3>;
-    using iterator = Values::iterator;
+    moose::Archive archive {std::make_shared<moose::BinaryReader> (binaryData)};
+    archive ("", out);
+  }
 
-  public:
-    MOOSE_EXPORT static auto fromString (std::string_view s) -> Version;
+  template <class T>
+  T fromBinary (std::shared_ptr<std::stringstream> binaryData)
+  {
+    T out;
+    fromBinary (out, binaryData);
+    return out;
+  }
+}
 
-    MOOSE_EXPORT Version ();
-    MOOSE_EXPORT Version (uint32_t patch);
-    MOOSE_EXPORT Version (uint32_t minor, uint32_t patch);
-    MOOSE_EXPORT Version (uint32_t major, uint32_t minor, uint32_t patch);
-    
-    MOOSE_EXPORT bool operator == (Version const& other) const;
-    MOOSE_EXPORT bool operator < (Version const& other) const;
-
-    MOOSE_EXPORT auto toString () const -> std::string;
-    
-  private:
-    Values mValues {0, 0, 0};
-  };
-}//  end of namespace moose

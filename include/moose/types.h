@@ -28,7 +28,10 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <typeindex>
 #include <vector>
+
+#include <moose/export.h>
 
 namespace moose
 {
@@ -39,85 +42,90 @@ class Type;
 class Types
 {
 public:
+  Types () = default;
+
   template <class T>
-  static Type& add (std::string name);
+  Type& add (std::string name);
 
   template <class T, class TBase1, class... TBaseOthers>
-  static Type& add (std::string name);
+  Type& add (std::string name);
 
   template <class T>
-  static Type& add_without_serialize (std::string name);
+  Type& add_without_serialize (std::string name);
 
   template <class T, class TBase1, class... TBaseOthers>
-  static Type& add_without_serialize (std::string name);
+  Type& add_without_serialize (std::string name);
 
   template <class T>
-  static Type& get ();
+  Type& get ();
 
-  static Type& get (std::string const& name);
+  MOOSE_EXPORT Type& get (std::string const& name);
+
+  MOOSE_EXPORT Type& get (std::type_index const& typeIndex);
+
+  /// Returns a pointer to the queried type or `nullptr` if no type was registered for the given `name`.
+  MOOSE_EXPORT Type* get_if (std::string const& name);
+
+  /// Returns a pointer to the queried type or `nullptr` if no type was registered for the given `typeIndex`.
+  MOOSE_EXPORT Type* get_if (std::type_index const& typeIndex);
 
   template <class T>
-  static std::shared_ptr <Type> get_shared ();
+  std::shared_ptr <Type> get_shared ();
 
   template <class T>
-  static Type& get_polymorphic (T& derived);
+  Type& get_polymorphic (T& derived);
 
 private:
   using make_raw_fnc_t  = void* (*)();
   using serialize_fnc_t = void (*)(Archive&, void*);
 
   using type_name_map_t = std::map <std::string, std::shared_ptr <Type>>;
-  using type_hash_map_t = std::map <std::size_t, std::shared_ptr <Type>>;
+  using type_index_map_t = std::map <std::type_index, std::shared_ptr <Type>>;
 
-  using types_t = std::vector <std::shared_ptr <Type>>;
+  using type_indices_t = std::vector <std::type_index>;
 
 private:
-  Types () = default;
-
   template <class T>
   static void* CreateFunc ();
 
   template <class T>
   static void CallSerialize (Archive& ar, void* val);
 
-  static Types& inst ();
-
-  static type_name_map_t& type_name_map ();
-
-  static type_hash_map_t& type_hash_map ();
-
-  static bool is_base (Type& type, const std::string& baseName);
+  bool is_base (Type& type, const std::string& baseName);
 
   template <class T, class TBase1, class... TBaseOthers>
-  static Type&
+  Type&
   add (std::string name, serialize_fnc_t serializeFnc);
 
   template <class T>
-  static typename std::enable_if <std::is_default_constructible <T>::value, Type&>::type
+  typename std::enable_if <std::is_default_constructible <T>::value, Type&>::type
   add (std::string name,
-       types_t baseClasses,
+       type_indices_t baseClasses,
        serialize_fnc_t serializeFnc);
 
   template <class T>
-  static typename std::enable_if <!std::is_default_constructible <T>::value, Type&>::type
+  typename std::enable_if <!std::is_default_constructible <T>::value, Type&>::type
   add (std::string name,
-       types_t baseClasses,
+       type_indices_t baseClasses,
        serialize_fnc_t serializeFnc);
 
   template <class T>
-  static void
+  void
   add (std::shared_ptr <Type> type);
 
   template <class T>
-  static void collect_types (types_t& typesOut);
+  void collect_types_indices (type_indices_t& typesOut);
 
   template <class HEAD, class TBase2, class... TBaseOthers>
-  static void collect_types (types_t& typesOut);
+  void collect_types_indices (type_indices_t& typesOut);
 
 private:
   type_name_map_t m_typeNameMap;
-  type_hash_map_t m_typeHashMap;
+  type_index_map_t m_typeIndexMap;
 };
+
+/// Returns the default `Types` instance.
+MOOSE_EXPORT auto types () -> Types&;
 
 }// end of namespace
 

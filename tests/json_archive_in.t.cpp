@@ -1,5 +1,4 @@
 #include <array>
-#include <iostream>
 #include <moose/moose.h>
 
 #include <gtest/gtest.h>

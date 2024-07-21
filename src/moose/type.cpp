@@ -24,24 +24,27 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <moose/type.h>
+#include <moose/types.h>
 
 namespace moose
 {
 
-Type::Type (std::string name,
-            std::vector <std::shared_ptr <Type>> baseClasses,
-            make_raw_fnc_t makeRawFnc,
-            serialize_fnc_t serializeFnc)
-  : m_name (std::move (name))
-  , m_baseClasses (std::move (baseClasses))
-  , m_makeRawFnc (makeRawFnc)
-  , m_serializeFnc (serializeFnc)
-{
-}
+  Type::Type (
+      std::string name,
+      std::type_index typeIndex,
+      std::vector<std::type_index> baseClassTypeIndices,
+      make_raw_fnc_t makeRawFnc,
+      serialize_fnc_t serializeFnc)
+    : m_name (std::move (name))
+    , m_typeIndex (typeIndex)
+    , m_baseClassTypeIndices (std::move (baseClassTypeIndices))
+    , m_makeRawFnc (makeRawFnc)
+    , m_serializeFnc (serializeFnc)
+  {}
 
-auto Type::name () const -> std::string const&
-{
-  return m_name;
+  auto Type::name () const -> std::string const&
+  {
+    return m_name;
 }
 
 bool Type::is_abstract () const
@@ -49,17 +52,17 @@ bool Type::is_abstract () const
   return m_makeRawFnc != nullptr;
 }
 
-bool Type::has_base_class (std::string const& name) const
+bool Type::has_base_class (std::type_index const& baseClassIndex) const
 {
-  for(auto const& type : m_baseClasses)
+  for(auto const& typeIndex : m_baseClassTypeIndices)
   {
-    if(type->name () == name)
+    if(typeIndex == baseClassIndex)
       return true;
   }
 
-  for(auto const& type : m_baseClasses)
+  for(auto const& typeIndex : m_baseClassTypeIndices)
   {
-    if (type->has_base_class (name))
+    if (types ().get (typeIndex).has_base_class (baseClassIndex))
       return true;
   }
 

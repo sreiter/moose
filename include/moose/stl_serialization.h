@@ -30,7 +30,6 @@
 #include <moose/stl/array.h>
 #include <moose/stl/optional.h>
 #include <moose/stl/variant.h>
-#include <array>
 #include <map>
 #include <set>
 #include <utility>
@@ -55,6 +54,8 @@ namespace moose
 
     static constexpr EntryType entryType = EntryType::Vector;
 
+    static constexpr bool wantsToUnpack = true;
+    
     static auto toRange (Type& vector) -> Range <decltype (vector.begin ())>
     {
       return {vector.begin (), vector.end ()};

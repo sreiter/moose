@@ -70,17 +70,16 @@ void Type::serialize (Archive& ar, Base& b) const
 template <class Base>
 bool Type::has_base_class () const
 {
-  return has_base_class (Types::get <Base> ().name ());
+  return has_base_class (typeid (Base));
 }
 
 template <class TypeOrBase>
 void Type::throw_on_bad_class_hierarchy (const char* what) const
 {
-  if (Types::get <TypeOrBase> ().name () != name () &&
-      !has_base_class <TypeOrBase> ())
+  if (std::type_index {typeid (TypeOrBase)} != m_typeIndex && !has_base_class <TypeOrBase> ())
   {
     throw TypeError () << "Cannot cast instance of type '" << m_name << "' to type '"
-                       << Types::get <TypeOrBase> ().name () << "' " << what;
+                       << types ().get <TypeOrBase> ().name () << "' " << what;
   }
 }
 

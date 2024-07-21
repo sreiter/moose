@@ -26,6 +26,8 @@
 #pragma once
 
 #include <moose/archive.h>
+#include <moose/binary_reader.h>
+#include <moose/binary_writer.h>
 #include <moose/from_json.h>
 #include <moose/json_reader.h>
 #include <moose/json_writer.h>
