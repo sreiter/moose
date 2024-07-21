@@ -25,12 +25,12 @@
 
 cmake_minimum_required (VERSION 3.11)
 
-project (moosesample)
+project (moose_sample)
 
 set (src moosesample.cpp)
 
-add_executable(moosesample ${src})
+add_executable(moose_sample ${src})
 
-target_compile_features(moosesample PUBLIC cxx_std_20)
+target_compile_features(moose_sample PUBLIC cxx_std_20)
 
-target_link_libraries(moosesample moose)
+target_link_libraries(moose_sample moose)

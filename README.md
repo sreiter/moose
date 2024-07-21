@@ -18,7 +18,7 @@ function for a given ```Object``` type, or by providing a method
 
 one can add serialization support for custom types.
 
-The implementation of **moose** is kept simple on purpose to allow users of the library to easily create **custom archives**, which may be used to support more file formats.
+The implementation of **moose** is kept simple on purpose to allow users of the library to easily create **custom readers/writers**, which may be used to support more file formats.
 
 Another interesting application for **archives** is the generation and synchronization of **GUI** elements given a serializable object.
 
@@ -52,7 +52,7 @@ Please note that ```ClassA``` and ```ClassB``` derive from a common base class `
 
 In addition to the **moose** library, the following executable will be build:
 
-    sample/moosesample
+    sample/moose_sample
 
 ## Building moose as a part of your project
 To build **moose** as part of your project, simply add the line
