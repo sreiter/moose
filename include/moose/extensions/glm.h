@@ -35,15 +35,15 @@
 
 namespace moose
 {
-  template <glm::length_t n, class T>
-  struct TypeTraits <glm::vec <n, T>>
+  template <glm::length_t n, class T, glm::qualifier Q>
+  struct TypeTraits <glm::vec <n, T, Q>>
   {
     static constexpr EntryType entryType = EntryType::Range;
+    
+    static auto toRange (glm::vec <n, T, Q>& v) -> Range <float*>
+    {
+      auto* p = glm::value_ptr (v);
+      return {p, p + n};
+    }
   };
-
-  template <glm::length_t n, class T>
-  inline Range <float*> make_range (glm::vec <n, T>& v)
-  {
-    return make_range (glm::value_ptr (v), n);
-  }
 }// end of namespace moose

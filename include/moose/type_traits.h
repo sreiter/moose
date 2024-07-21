@@ -26,6 +26,7 @@
 #pragma once
 
 #include <moose/hint.h>
+#include <moose/range.h>
 
 #include <string>
 
@@ -34,8 +35,21 @@ namespace moose
   enum class EntryType
   {
     Struct,
-    Value, ///< Built in values. Todo: Call this `BuiltIn`
+
+    Value, ///< Built in values.
+
+    /** A fixed range of values. Typetraits have to define the following members:
+      \code
+        template <>
+        struct TypeTraits <YourRangeType>
+        {
+          static constexpr EntryType entryType = EntryType::Range;
+          static auto toRange (YourRangeType& v) -> Range <SomeIteratorType>;
+        };
+      \endcode
+    */
     Range,
+
     /** A dynamic sequence of values. Think of a `std::vector`. The following typetraits has to
       be specified for it to be compatible with the archive.
       \code
@@ -45,11 +59,13 @@ namespace moose
           static constexpr EntryType entryType = EntryType::Vector;
           using Type = YourVectorType;
           using ValueType = typename Type::value_type;
+          static auto toRange (YourVectorType& v) -> Range <SomeIteratorType>;
           static void pushBack (Type& vector, ValueType const& value);
           static void clear (Type& vector);
         };
       \endcode
     */
+
     Vector,
     /** Types which just wrap a single value of a different type may not need a custom entry. Instead
       it may be convenient to just forward the wrapped value for serialization.
@@ -65,7 +81,9 @@ namespace moose
         };
       \endcode
     */
+
     ForwardValue,
+
     /** Just like `ForwardValue`, but `getForwardedValue` returns a reference.*/
     ForwardReference,
   };
@@ -78,6 +96,16 @@ namespace moose
       or a global `Serialize` method for the given type is expected.
     */
     static constexpr EntryType entryType = EntryType::Struct;
+  };
+
+  template <class T>
+  struct DefaultRangeTraits
+  {
+    static constexpr EntryType entryType = EntryType::Range;
+    static auto toRange (T& container) -> Range <decltype (container.begin ())>
+    {
+      return {container.begin (), container.end ()};
+    }
   };
 
   /** Overload this method for your types to specify a custom default hint which will be used

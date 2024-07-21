@@ -226,7 +226,7 @@ namespace moose
   template <class T>
   void Archive::archive (const char* name, T& value, EntryTypeDummy <EntryType::Range>)
   {
-    auto range = make_range (value);
+    auto const range = TypeTraits<T>::toRange (value);
     if (is_reading ())
     {
       for (auto i = range.begin; i != range.end; ++i)
