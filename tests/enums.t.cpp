@@ -15,7 +15,7 @@ enum class Color
 };
 
 template <>
-struct TypeTraits<Color> : public EnumToStringTraits<Color> {};
+struct moose::TypeTraits<Color> : public EnumToStringTraits<Color> {};
 
 auto const jsonColors = R"""(
   {
