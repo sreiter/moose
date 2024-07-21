@@ -27,6 +27,7 @@
 
 #include <moose/exceptions.h>
 #include <moose/hint.h>
+#include <moose/range.h>
 
 #include <magic_enum.hpp>
 
@@ -40,16 +41,17 @@ namespace moose
 
     Value, ///< Plain values. Those are directly supported by the archive.
 
-    /** A fixed size range of entries, featuring a `begin` and `end` accessor.
-      If no `begin` or `end` accessors are available, one may overload the `make_range` function
-      to create some pair of iterators.
-      If a range consists of `Values`, then the contents of that `range` can be unpacked into
-      its parent `vector`, if the traits specify the following constant:
+    /** A fixed size range of entries. Implementing the method `toRange` is required to provide
+      a pair of begin/end iterators which are used to iterate over the members of the range.
+      If a range consists of entries with type `Value`, then the contents of that `range` can
+      be unpacked into its parent `vector`, if the traits specify the constant `canBeUnpacked`:
       \code
         template <>
         struct TypeTraits<YourChildRange>
         {
+          static constexpr EntryType entryType = EntryType::Range;
           static constexpr bool canBeUnpacked = true;
+          static auto toRange (YourRangeType& v) -> Range <SomeIteratorType>;
         };
       \endcode
     */
@@ -57,6 +59,8 @@ namespace moose
 
     /** A dynamic sequence of values. Think of a `std::vector`. The following typetraits has to
       be specified for it to be compatible with the archive.
+      Implementing the method `toRange` is required to provide a pair of begin/end iterators
+      which are used to iterate over the members of the range.
       \code
         template <>
         struct TypeTraits <YourVectorType>
@@ -64,6 +68,7 @@ namespace moose
           static constexpr EntryType entryType = EntryType::Vector;
           using Type = YourVectorType;
           using ValueType = typename Type::value_type;
+          static auto toRange (YourVectorType& v) -> Range <SomeIteratorType>;
           static void pushBack (Type& vector, ValueType const& value);
           static void clear (Type& vector);
         };
@@ -79,6 +84,7 @@ namespace moose
         };
       \endcode
     */
+
     Vector,
 
     /** Types which just wrap a single value of a different type may not need a custom entry. Instead
@@ -95,6 +101,7 @@ namespace moose
         };
       \endcode
     */
+
     ForwardValue,
 
     /** Just like `ForwardValue`, but `getForwardedValue` returns a reference.*/
@@ -112,6 +119,15 @@ namespace moose
   };
 
   template <class T>
+  struct DefaultRangeTraits
+  {
+    static constexpr EntryType entryType = EntryType::Range;
+    static auto toRange (T& container) -> Range <decltype (container.begin ())>
+    {
+      return {container.begin (), container.end ()};
+    }
+  };
+  
   constexpr bool isValue ()
   { return TypeTraits<T>::entryType == EntryType::Value; }
 

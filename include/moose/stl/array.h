@@ -32,6 +32,5 @@
 namespace moose
 {
   template <class T, size_t n>
-  struct TypeTraits <std::array <T, n>>
-  { static constexpr EntryType entryType = EntryType::Range; };
+  struct TypeTraits <std::array <T, n>> : public DefaultRangeTraits<std::array<T, n>> {};
 }

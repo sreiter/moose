@@ -55,6 +55,11 @@ namespace moose
     static constexpr EntryType entryType = EntryType::Vector;
 
     static constexpr bool wantsToUnpack = true;
+    
+    static auto toRange (Type& vector) -> Range <decltype (vector.begin ())>
+    {
+      return {vector.begin (), vector.end ()};
+    }
 
     static void pushBack (Type& vector, ValueType const& value)
     { vector.push_back (value); }
@@ -72,6 +77,11 @@ namespace moose
 
     static constexpr EntryType entryType = EntryType::Vector;
 
+    static auto toRange (Type& map) -> Range <decltype (map.begin ())>
+    {
+      return {map.begin (), map.end ()};
+    }
+
     static void pushBack (Type& map, ValueType const& value)
     { map.insert (value); }
 
@@ -86,6 +96,11 @@ namespace moose
     using ValueType = typename Type::value_type;
 
     static constexpr EntryType entryType = EntryType::Vector;
+
+    static auto toRange (Type& set) -> Range <decltype (set.begin ())>
+    {
+      return {set.begin (), set.end ()};
+    }
 
     static void pushBack (Type& set, ValueType const& value)
     { set.insert (value); }

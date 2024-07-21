@@ -26,23 +26,10 @@
 
 namespace moose
 {
-
-template <class Iterator>
-struct Range
-{
-  Iterator begin;
-  Iterator end;
-};
-
-template <class Value>
-auto make_range (Value* v, size_t size) -> Range <Value*>;
-
-template <class Iterator>
-auto make_range (Iterator begin, Iterator end) -> Range <Iterator>;
-
-template <class Container>
-auto make_range (Container& container) -> Range<decltype (container.begin ())>;
-
+  template <class Iterator>
+  struct Range
+  {
+    Iterator begin;
+    Iterator end;
+  };
 }//  end of namespace moose
-
-#include <moose/range.i>
