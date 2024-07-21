@@ -1,4 +1,4 @@
-# moose &nbsp;&nbsp;&nbsp;&nbsp; [![Build Status](https://travis-ci.com/sreiter/moose.svg?branch=master)](https://travis-ci.com/sreiter/moose)
+# moose
 ## Introduction
 **Moose** (**MO**ose **O**bject **SE**rialization) is a *BSD* licensed *C++* library for the serialization of complex data structures.
 
