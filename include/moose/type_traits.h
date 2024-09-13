@@ -122,9 +122,9 @@ namespace moose
   struct DefaultRangeTraits
   {
     static constexpr EntryType entryType = EntryType::Range;
-    static auto toRange (T& container) -> Range <decltype (container.begin ())>
+    static auto toRange (T& container)
     {
-      return {container.begin (), container.end ()};
+      return makeRange (container.begin (), container.end ());
     }
   };
   

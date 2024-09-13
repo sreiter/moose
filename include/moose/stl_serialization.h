@@ -56,9 +56,9 @@ namespace moose
 
     static constexpr bool wantsToUnpack = true;
     
-    static auto toRange (Type& vector) -> Range <decltype (vector.begin ())>
+    static auto toRange (Type& vector)
     {
-      return {vector.begin (), vector.end ()};
+      return makeRange (vector.begin (), vector.end ());
     }
 
     static void pushBack (Type& vector, ValueType const& value)
@@ -77,9 +77,9 @@ namespace moose
 
     static constexpr EntryType entryType = EntryType::Vector;
 
-    static auto toRange (Type& map) -> Range <decltype (map.begin ())>
+    static auto toRange (Type& map)
     {
-      return {map.begin (), map.end ()};
+      return makeRange (map.begin (), map.end ());
     }
 
     static void pushBack (Type& map, ValueType const& value)
@@ -97,9 +97,9 @@ namespace moose
 
     static constexpr EntryType entryType = EntryType::Vector;
 
-    static auto toRange (Type& set) -> Range <decltype (set.begin ())>
+    static auto toRange (Type& set)
     {
-      return {set.begin (), set.end ()};
+      return makeRange (set.begin (), set.end ());
     }
 
     static void pushBack (Type& set, ValueType const& value)

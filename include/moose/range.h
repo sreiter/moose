@@ -32,4 +32,10 @@ namespace moose
     Iterator begin;
     Iterator end;
   };
+
+  template <class Iterator>
+  auto makeRange (Iterator const& begin, Iterator const& end) -> Range<Iterator>
+  {
+    return {begin, end};
+  }
 }//  end of namespace moose
