@@ -40,7 +40,7 @@ namespace moose
   {
     static constexpr EntryType entryType = EntryType::Range;
     
-    static auto toRange (glm::vec <n, T, Q>& v) -> Range <float*>
+    static auto toRange (glm::vec <n, T, Q>& v) -> Range <T*>
     {
       auto* p = glm::value_ptr (v);
       return {p, p + n};
