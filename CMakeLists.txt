@@ -25,6 +25,7 @@
 
 cmake_minimum_required (VERSION 3.11)
 
+option (MOOSE_BUILD_STATIC "Build the moose library as static library")
 option (MOOSE_BUILD_SAMPLE "Build the moose sample application")
 option (MOOSE_BUILD_TESTS "Build the moose tests")
 
@@ -42,7 +43,11 @@ set (mooseSrc   src/moose/archive.cpp
                 src/moose/types.cpp
                 src/moose/version.cpp)
 
-add_library(moose SHARED ${mooseSrc})
+if (MOOSE_BUILD_STATIC)
+  add_library(moose STATIC ${mooseSrc})
+else ()
+  add_library(moose SHARED ${mooseSrc})
+endif ()
 
 target_include_directories(moose
     PUBLIC 
