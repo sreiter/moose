@@ -1,6 +1,6 @@
 #pragma once
 
-#ifdef _WIN32
+#if defined MOOSE_DYNAMIC_LIBRARY and defined _WIN32
   #ifdef MOOSE_COMPILING_LIBRARY
     #define MOOSE_EXPORT __declspec(dllexport)
   #else

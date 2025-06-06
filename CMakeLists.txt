@@ -47,6 +47,7 @@ if (MOOSE_BUILD_STATIC)
   add_library(moose STATIC ${mooseSrc})
 else ()
   add_library(moose SHARED ${mooseSrc})
+  target_compile_definitions (moose PRIVATE MOOSE_DYNAMIC_LIBRARY)
 endif ()
 
 target_include_directories(moose
