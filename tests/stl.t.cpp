@@ -74,3 +74,10 @@ TEST (stl, nestedArrays)
   auto const expectedArrays = std::vector<std::array<int, 2>> {{0, 1}, {2, 3}, {4, 5}};
   EXPECT_EQ (arrays, expectedArrays);
 }
+
+TEST (stl, filesystemPath)
+{
+  auto const v = std::filesystem::path {std::u8string_view {u8"C:/much_💩"}};
+  EXPECT_EQ (v, toJsonAndBack (v));
+  EXPECT_EQ (v, toBinaryAndBack (v));
+}

@@ -84,7 +84,6 @@ namespace moose
         };
       \endcode
     */
-
     Vector,
 
     /** Types which just wrap a single value of a different type may not need a custom entry. Instead
@@ -101,7 +100,6 @@ namespace moose
         };
       \endcode
     */
-
     ForwardValue,
 
     /** Just like `ForwardValue`, but `getForwardedValue` returns a reference.*/
