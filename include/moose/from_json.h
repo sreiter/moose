@@ -44,4 +44,19 @@ namespace moose
     fromJson (out, name, jsonString);
     return out;
   }
+
+  template <class T>
+  void fromJsonFile (T& out, const char* name, const char* fileName)
+  {
+    moose::Archive archive {moose::JSONReader::fromFile (fileName)};
+    archive (name, out);
+  }
+  
+  template <class T>
+  T fromJsonFile (const char* name, const char* fileName)
+  {
+    T out;
+    fromJsonFile (out, name, fileName);
+    return out;
+  }
 }
