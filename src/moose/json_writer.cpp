@@ -23,11 +23,12 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <cassert>
-#include <iomanip>
-
 #include <moose/exceptions.h>
 #include <moose/json_writer.h>
+
+#include <cassert>
+#include <iomanip>
+#include <fstream>
 
 namespace
 {

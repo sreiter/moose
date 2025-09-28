@@ -40,7 +40,7 @@ public:
   MOOSE_EXPORT static auto toFile (const char* filename) -> std::shared_ptr<JSONWriter>;
 
   MOOSE_EXPORT JSONWriter (const char* filename);
-  MOOSE_EXPORT JSONWriter (std::shared_ptr <std::ostream> out);
+  MOOSE_EXPORT JSONWriter (std::shared_ptr<std::ostream> out);
   MOOSE_EXPORT JSONWriter (JSONWriter&& other);
   
   JSONWriter (JSONWriter const&) = delete;

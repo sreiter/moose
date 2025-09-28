@@ -23,8 +23,6 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <stdexcept>
-#include <fstream>
 #include <moose/exceptions.h>
 #include <moose/json_reader.h>
 #include <moose/detail/dummynamegenerator.h>
@@ -32,6 +30,9 @@
 #include <rapidjson/error/error.h>
 #include <rapidjson/error/en.h>
 #include <rapidjson/istreamwrapper.h>
+#include <fstream>
+#include <stdexcept>
+#include <stack>
 
 namespace
 {
@@ -56,13 +57,15 @@ namespace
     bool is_array ()  {return m_type == Array;}
     bool is_value ()  {return m_type == Value;}
 
+    auto getNextDummyName () -> std::string {return mDummyNameGenerator.getNext ();}
+
   private:
     enum Type {Object, Array, Value};
 
     val_t* m_val;
     rapidjson::Value::MemberIterator m_icurMem;
     rapidjson::Value::ValueIterator m_icurVal;
-    const char* m_name;
+    [[maybe_unused]] const char* m_name;
     Type m_type;
     moose::detail::DummyNameGenerator mDummyNameGenerator;
   };
@@ -189,7 +192,7 @@ namespace moose
     std::string dummyName;
     if ((name == nullptr || *name == 0) && !entries.top().is_array())
     {
-      dummyName = entries.top().mDummyNameGenerator.getNext ();
+      dummyName = entries.top().getNextDummyName ();
       name = dummyName.c_str ();
     }
 
