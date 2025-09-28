@@ -25,11 +25,11 @@
 
 #pragma once
 
-#include <fstream>
 #include <stack>
 #include <memory>
 #include <moose/export.h>
 #include <moose/writer.h>
+#include <moose/detail/dummynamegenerator.h>
 
 namespace moose
 {
@@ -61,6 +61,14 @@ public:
   void write (const char* name, std::string const& val) override;
 
 private:
+  struct Entry
+  {
+    Entry (ContentType type) : mContentType {type} {}
+    ContentType mContentType;
+    detail::DummyNameGenerator mDummyNameGenerator;
+  };
+
+private:
   void prepare_content ();
   void optional_endl ();
   Hint hint () const;
@@ -71,6 +79,7 @@ private:
   size_t m_currentDepth {0};
   size_t m_lastWrittenDepth {0};
   std::stack <Hint> m_hints;
+  std::stack<Entry> mEntryStack;
 };
 
 }// end of namespace moose

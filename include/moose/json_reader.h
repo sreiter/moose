@@ -24,7 +24,6 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma once
 
-#include <stack>
 #include <memory>
 #include <moose/export.h>
 #include <moose/reader.h>

@@ -27,6 +27,7 @@
 #include <fstream>
 #include <moose/exceptions.h>
 #include <moose/json_reader.h>
+#include <moose/detail/dummynamegenerator.h>
 #include <rapidjson/document.h>
 #include <rapidjson/error/error.h>
 #include <rapidjson/error/en.h>
@@ -63,6 +64,7 @@ namespace
     rapidjson::Value::ValueIterator m_icurVal;
     const char* m_name;
     Type m_type;
+    moose::detail::DummyNameGenerator mDummyNameGenerator;
   };
 
   auto currentValue (std::stack <JSONEntry>& entries) -> rapidjson::Value&
@@ -183,6 +185,13 @@ namespace moose
       throw ArchiveError () << "End of file reached. Couldn't archive field '" << name << "'";
 
     auto& e = entries.top();
+
+    std::string dummyName;
+    if ((name == nullptr || *name == 0) && !entries.top().is_array())
+    {
+      dummyName = entries.top().mDummyNameGenerator.getNext ();
+      name = dummyName.c_str ();
+    }
 
   //  if we're currently iterating over elements with the given name, we don't
   //  have to initialize the iterators

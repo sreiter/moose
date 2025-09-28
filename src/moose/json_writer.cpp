@@ -96,13 +96,14 @@ namespace moose
 
     m_hints.push (hint == Hint::None ? this->hint () : hint);
 
-    if (name != nullptr &&
-        *name != 0)
-    {
+    if (name != nullptr && *name != 0)
       out () << "\"" << name << "\": ";
-    }
+    else if (mEntryStack.empty () || mEntryStack.top ().mContentType != ContentType::Array)
+      out () << "\"" << mEntryStack.top ().mDummyNameGenerator.getNext () << "\": ";
 
+    mEntryStack.emplace (type);
     ++m_currentDepth;
+
     switch (type)
     {
       case ContentType::Array:
@@ -144,9 +145,12 @@ namespace moose
     }
 
     assert (!m_hints.empty ());
-
     if (!m_hints.empty ())
       m_hints.pop ();
+
+    assert (!mEntryStack.empty ());
+    if (!mEntryStack.empty ())
+      mEntryStack.pop ();
   }
 
   void JSONWriter::write_type_name (std::string const& typeName)

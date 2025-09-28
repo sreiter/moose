@@ -66,14 +66,27 @@ namespace moose
     template <class T>
     void operator () (const char* name, T& value, const T& defVal, Hint hint = Hint::None);
 
-    // Const overloads for writing only.
     /// Write a const value
     template <class T>
     void operator () (const char* name, T const& value, Hint hint = Hint::None);
 
-    /// Read with default value
+    /** \brief Read/write without name and without default value.
+      A dummy name is generated on the fly for writing and reading archives. It is thus crucial that
+      the reading and writing order for unnamed values is consistent. Otherwise, an exception is thrown.
+    */
     template <class T>
-    void operator () (const char* name, T const& value, const T& defVal, Hint hint = Hint::None);
+    void operator () (T& value, Hint hint = Hint::None);
+
+    /** \brief Read/write without name but with default value.
+      A dummy name is generated on the fly for writing and reading archives. It is thus crucial that
+      the reading and writing order for unnamed values is consistent. Otherwise, an exception is thrown.
+    */
+    template <class T>
+    void operator () (T& value, const T& defVal, Hint hint = Hint::None);
+
+    /// Write an unnamed const value. See the non-const overload for more information.
+    template <class T>
+    void operator () (T const& value, Hint hint = Hint::None);
 
     MOOSE_EXPORT bool is_reading () const;
     MOOSE_EXPORT bool is_writing () const;

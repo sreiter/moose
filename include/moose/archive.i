@@ -116,15 +116,21 @@ namespace moose
   }
 
   template <class T>
-  void Archive::operator () (const char* name, T const& value, const T& defVal, Hint hint)
+  void Archive::operator () (T& value, Hint hint)
   {
-    if (!is_writing ())
-    {
-      assert (!"Const values may only be passed to writing archives.");
-      return;
-    }
+    (*this) ("", value, hint);
+  }
+  
+  template <class T>
+  void Archive::operator () (T& value, const T& defVal, Hint hint)
+  {
+    (*this) ("", value, defVal, hint);
+  }
 
-    (*this) (name, const_cast<T&> (value), defVal, hint);
+  template <class T>
+  void Archive::operator () (T const& value, Hint hint)
+  {
+    (*this) ("", value, hint);
   }
 
   template <class T>
