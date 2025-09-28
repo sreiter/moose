@@ -25,7 +25,6 @@
 
 #pragma once
 
-#include <cassert>
 #include <stdexcept>
 #include <string>
 #include <typeinfo>
@@ -41,9 +40,7 @@ public:
   Exception ()
     : std::runtime_error ("")
     , m_what (std::string (typeid (Derived).name ()).append (": "))
-  {
-    assert (!"A moose exception was raised");
-  }
+  {}
 
   const char* what () const noexcept override
   {
