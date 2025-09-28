@@ -4,6 +4,7 @@ add_executable (
     moose_tests
     enums.t.cpp
     json_archive_in.t.cpp
+    names.t.cpp
     stl.t.cpp
     unpacking.t.cpp
     version.t.cpp)
