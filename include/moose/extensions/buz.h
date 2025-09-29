@@ -24,6 +24,7 @@
 
 #pragma once
 
+#include <buz/flags.h>
 #include <buz/strongtype.h>
 #include <moose/type_traits.h>
 
@@ -43,6 +44,24 @@ namespace moose
     static void setForwardedValue (buz::StrongType <T, TAG>& to, ForwardedType&& value)
     {
       to = buz::StrongType<T, TAG> {std::move (value)};
+    }
+  };
+
+  template <class T, class STORAGE>
+  struct TypeTraits<buz::Flags <T, STORAGE>>
+  {
+    static constexpr EntryType entryType = EntryType::ForwardValue;
+    using Type = buz::Flags <T, STORAGE>;
+    using ForwardedType = STORAGE;
+    
+    static ForwardedType getForwardedValue (Type const& from)
+    {
+      return from.value ();
+    }
+
+    static void setForwardedValue (Type& to, ForwardedType&& value)
+    {
+      to = Type {static_cast<T> (value)};
     }
   };
 }//  end of namespace moose
