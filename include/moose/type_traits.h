@@ -114,6 +114,7 @@ namespace moose
       or a global `Serialize` method for the given type is expected.
     */
     static constexpr EntryType entryType = EntryType::Struct;
+    static constexpr Hint hint = Hint::None;
   };
 
   template <class T>
@@ -182,9 +183,14 @@ namespace moose
     return false;
   }
 
-  /** Overload this method for your types to specify a custom default hint which will be used
-    during serialization, if a user didn't specify a hint in the archive call.
-  */
+  template <class T>
+  concept TraitsHas_hint = requires ()
+  { {TypeTraits<T>::hint} -> std::convertible_to<Hint>; };
+
+  template <TraitsHas_hint T>
+  auto getDefaultHint (T const&) -> Hint
+  { return TypeTraits<T>::hint; }
+  
   template <class T>
   auto getDefaultHint (T const&) -> Hint
   { return Hint::None; }
@@ -247,14 +253,14 @@ namespace moose
   struct EnumToIntTraits
   {
     static constexpr EntryType entryType = EntryType::ForwardValue;
-    using ForwardedType = int;
+    using ForwardedType = std::underlying_type<T>;
 
-    static int getForwardedValue (T const& from)
+    static ForwardedType getForwardedValue (T const& from)
     {
-      return static_cast<int> (from);
+      return static_cast<ForwardedType> (from);
     }
 
-    static void setForwardedValue (T& to, int value)
+    static void setForwardedValue (T& to, ForwardedType value)
     {
       to = static_cast<T> (value);
     }
