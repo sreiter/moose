@@ -39,6 +39,7 @@ namespace moose
   struct TypeTraits <glm::vec <n, T, Q>>
   {
     static constexpr EntryType entryType = EntryType::Range;
+    static constexpr Hint hint = Hint::OneLine;
     
     static auto toRange (glm::vec <n, T, Q>& v) -> Range <T*>
     {
