@@ -136,19 +136,18 @@ namespace moose
   template <class T>
   Type const& Archive::archive_type (T& instance)
   {
-    if (is_writing ())
-    {
-      auto const& type = types ().get_polymorphic (instance);
-      mOutput->write_type_name (type.name ());
-      return type;
-    }
-    else
-    {
-      auto const& typeName = mInput->type_name ();
-      if (typeName.empty ())
-        return types ().get <T> ();
-      return types ().get (typeName);
-    }
+    auto const& type = types ().get_polymorphic (instance);
+    mOutput->write_type_name (type.name ());
+    return type;
+  }
+
+  template <class T>
+  Type const& Archive::archive_type ()
+  {
+    auto const& typeName = mInput->type_name ();
+    if (typeName.empty ())
+      return types ().get<T> ();
+    return types ().get (typeName);
   }
 
   template <class T>
@@ -166,46 +165,59 @@ namespace moose
   template <class T>
   void Archive::archive (const char* name, std::shared_ptr<T>& sp, EntryTypeDummy <EntryType::Struct>)
   {
-    Type const& type = archive_type <T> (*sp);
-    if(sp == nullptr)
+    if (is_reading ())
     {
-      if (is_reading ())
+      Type const& type = archive_type <T> ();
+      if(sp == nullptr)
         sp = type.make_shared <T> ();
-      else
-        throw ArchiveError () << "JSONArchive::write cannot serialize nullptr: '" << name << "'";
+      type.serialize (*this, *sp);
+    }
+    else
+    {
+      if(sp == nullptr)
+       throw ArchiveError () << "JSONArchive::write cannot serialize nullptr: '" << name << "'";
+      Type const& type = archive_type <T> (*sp);
+      type.serialize (*this, *sp);
     }
 
-    type.serialize (*this, *sp);
   }
 
   template <class T>
   void Archive::archive (const char* name, std::unique_ptr<T>& up, EntryTypeDummy <EntryType::Struct>)
   {
-    Type const& type = archive_type <T> (*up);
-    if(up == nullptr)
+    if (is_reading ())
     {
-      if (is_reading ())
+      Type const& type = archive_type <T> ();
+      if(up == nullptr)
         up = type.make_unique <T> ();
-      else
-        throw ArchiveError () << "JSONArchive::write cannot serialize nullptr: '" << name << "'";
+      type.serialize (*this, *up);
     }
-
-    type.serialize (*this, *up);
+    else
+    {
+      if (up == nullptr)
+        throw ArchiveError () << "JSONArchive::write cannot serialize nullptr: '" << name << "'";
+      Type const& type = archive_type <T> (*up);
+      type.serialize (*this, *up);
+    }
   }
 
   template <class T>
   void Archive::archive (const char* name, T*& p, EntryTypeDummy <EntryType::Struct>)
   {
-    Type const& type = archive_type <T> (*p );
-    if(p ==  nullptr)
+    if (is_reading ())
     {
-      if (is_reading ())
+      Type const& type = archive_type <T> ();
+      if(p == nullptr)
         p = type.make_raw <T> ();
-      else
-        throw ArchiveError () << "JSONArchive::write cannot serialize nullptr: '" << name << "'";
+      type.serialize (*this, *p);
     }
-
-    type.serialize (*this, *p);
+    else
+    {
+      if(p == nullptr)
+        throw ArchiveError () << "JSONArchive::write cannot serialize nullptr: '" << name << "'";
+      Type const& type = archive_type <T> (*p);
+      type.serialize (*this, *p);
+    }
   }
 
   template <class T>

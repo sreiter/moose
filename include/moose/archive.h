@@ -107,6 +107,9 @@ namespace moose
     Type const& archive_type (T& instance);
 
     template <class T>
+    Type const& archive_type ();
+
+    template <class T>
     void archive (const char* name, T& value, EntryTypeDummy <EntryType::Value>);
 
     template <class T>
