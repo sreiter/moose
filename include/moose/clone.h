@@ -32,8 +32,8 @@ namespace moose
 {
   /// Clones the given `source` object through serialization and deserialization.
   template <class T>
-  auto clone (T& source) -> T
+  auto clone (T& source) -> std::remove_const_t<T>
   {
-    return fromBinary<T> (toBinary (source));
+    return fromBinary<std::remove_const_t<T>> (toBinary (source));
   }
 }
