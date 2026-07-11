@@ -244,7 +244,7 @@ namespace moose
 
             (*this) ("", *i);
           }
-          Traits::pushBack (value, childValue);
+          Traits::pushBack (value, std::move (childValue));
         }
       }
       else
@@ -253,7 +253,7 @@ namespace moose
         {
           ValueType tmpVal = detail::GetInitialValue <ValueType> ();
           (*this) ("", tmpVal);
-          Traits::pushBack (value, tmpVal);
+          Traits::pushBack (value, std::move (tmpVal));
         }
       }
     }

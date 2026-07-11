@@ -62,8 +62,8 @@ namespace moose
       return makeRange (vector.begin (), vector.end ());
     }
 
-    static void pushBack (Type& vector, ValueType const& value)
-    { vector.push_back (value); }
+    static void pushBack (Type& vector, ValueType&& value)
+    { vector.push_back (std::move (value)); }
 
     static void clear (Type& vector)
     { vector.clear (); }
@@ -83,8 +83,8 @@ namespace moose
       return makeRange (map.begin (), map.end ());
     }
 
-    static void pushBack (Type& map, ValueType const& value)
-    { map.insert (value); }
+    static void pushBack (Type& map, ValueType&& value)
+    { map.insert (std::move (value)); }
 
     static void clear (Type& map)
     { map.clear (); }
@@ -103,8 +103,8 @@ namespace moose
       return makeRange (set.begin (), set.end ());
     }
 
-    static void pushBack (Type& set, ValueType const& value)
-    { set.insert (value); }
+    static void pushBack (Type& set, ValueType&& value)
+    { set.insert (std::move (value)); }
 
     static void clear (Type& set)
     { set.clear (); }

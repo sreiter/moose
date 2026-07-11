@@ -69,7 +69,7 @@ namespace moose
           using Type = YourVectorType;
           using ValueType = typename Type::value_type;
           static auto toRange (YourVectorType& v) -> Range <SomeIteratorType>;
-          static void pushBack (Type& vector, ValueType const& value);
+          static void pushBack (Type& vector, ValueType&& value);
           static void clear (Type& vector);
         };
       \endcode
