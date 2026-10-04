@@ -122,9 +122,6 @@ namespace moose
     void archive (const char* name, std::unique_ptr<T>& up, EntryTypeDummy <EntryType::Struct>);
 
     template <class T>
-    void archive (const char* name, T*& p, EntryTypeDummy <EntryType::Struct>);
-
-    template <class T>
     void archive (const char* name, T& value, EntryTypeDummy <EntryType::Vector>);
 
     template <class T>

@@ -202,25 +202,6 @@ namespace moose
   }
 
   template <class T>
-  void Archive::archive (const char* name, T*& p, EntryTypeDummy <EntryType::Struct>)
-  {
-    if (is_reading ())
-    {
-      Type const& type = archive_type <T> ();
-      if(p == nullptr)
-        p = type.make_raw <T> ();
-      type.serialize (*this, *p);
-    }
-    else
-    {
-      if(p == nullptr)
-        throw ArchiveError () << "JSONArchive::write cannot serialize nullptr: '" << name << "'";
-      Type const& type = archive_type <T> (*p);
-      type.serialize (*this, *p);
-    }
-  }
-
-  template <class T>
   void Archive::archive (const char* name, T& value, EntryTypeDummy <EntryType::Vector>)
   {
     using Traits = TypeTraits<T>;
