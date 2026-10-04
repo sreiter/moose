@@ -168,8 +168,7 @@ namespace moose
     if (is_reading ())
     {
       Type const& type = archive_type <T> ();
-      if(sp == nullptr)
-        sp = type.make_shared <T> ();
+      sp = type.make_shared <T> ();
       type.serialize (*this, *sp);
     }
     else
@@ -179,7 +178,6 @@ namespace moose
       Type const& type = archive_type <T> (*sp);
       type.serialize (*this, *sp);
     }
-
   }
 
   template <class T>
@@ -188,8 +186,7 @@ namespace moose
     if (is_reading ())
     {
       Type const& type = archive_type <T> ();
-      if(up == nullptr)
-        up = type.make_unique <T> ();
+      up = type.make_unique <T> ();
       type.serialize (*this, *up);
     }
     else
