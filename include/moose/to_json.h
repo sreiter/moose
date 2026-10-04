@@ -28,6 +28,7 @@
 #include <moose/json_writer.h>
 #include <moose/archive.h>
 
+#include <fstream>
 #include <sstream>
 
 namespace moose
@@ -42,5 +43,16 @@ namespace moose
       archive (name, t);
     }
     return std::move (out)->str ();
+  }
+
+  template <class T>
+  bool toJsonFile (const char* filename, const char* name, T const& t)
+  {
+    auto out = std::make_shared<std::ofstream> (filename);
+    if (!out)
+      return false;
+    moose::Archive archive {std::make_shared<moose::JSONWriter> (out)};
+    archive (name, t);
+    return true;
   }
 }
